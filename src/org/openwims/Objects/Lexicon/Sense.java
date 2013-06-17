@@ -16,15 +16,25 @@ public class Sense {
     private String id;
     private LinkedList<Structure> structures;
     private LinkedList<Meaning> meanings;
+    private String definition;
     
     public Sense(String id) {
         this.id = id;
         this.structures = new LinkedList();
         this.meanings = new LinkedList();
+        this.definition = "";
     }
 
     public String getId() {
         return id;
+    }
+
+    public void setDefinition(String definition) {
+        this.definition = definition;
+    }
+
+    public String getDefinition() {
+        return definition;
     }
     
     public Structure addStructure() {
@@ -36,6 +46,14 @@ public class Sense {
     public String concept() {
         if (this.id.contains(":")) {
             return this.id.split(":")[0].trim();
+        }
+        
+        return "unknown";
+    }
+    
+    public String pos() {
+        if (this.id.contains("-")) {
+            return this.id.split("-")[1].trim();
         }
         
         return "unknown";
@@ -58,6 +76,8 @@ public class Sense {
         StringBuilder out = new StringBuilder();
         
         out.append(this.id);
+        out.append("\n");
+        out.append(this.definition);
         
         out.append("\n Structures:\n");
         for (Structure structure : structures) {

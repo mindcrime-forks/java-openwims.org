@@ -8,10 +8,7 @@ import com.jesseenglish.swingftfy.ExamplesJFrame;
 import com.jesseenglish.swingftfy.extensions.FNode;
 import com.jesseenglish.swingftfy.extensions.FTree;
 import javax.swing.tree.DefaultTreeModel;
-import org.openwims.Objects.Lexicon.Dependency;
-import org.openwims.Objects.Lexicon.Meaning;
-import org.openwims.Objects.Lexicon.Sense;
-import org.openwims.Objects.Lexicon.Structure;
+import org.openwims.Objects.Lexicon.*;
 
 /**
  *
@@ -24,7 +21,7 @@ public class SenseJTree extends FTree {
     public SenseJTree(Sense sense) {
         this.sense = sense;
     
-        SenseNode root = new SenseNode(sense);
+        SenseJTree.SenseNode root = new SenseJTree.SenseNode(sense);
         
         DefaultTreeModel model = new DefaultTreeModel(root);
         this.setModel(model);
@@ -39,9 +36,9 @@ public class SenseJTree extends FTree {
             this.sense = sense;
             setIcon(ExamplesJFrame.ROOT);
             
-            this.add(new SenseMeaningNode(sense));
+            this.add(new SenseJTree.SenseMeaningNode(sense));
             for (Structure structure : sense.listStructures()) {
-                this.add(new SenseStructureNode(structure));
+                this.add(new SenseJTree.SenseStructureNode(structure));
             }
         }
         
@@ -57,7 +54,7 @@ public class SenseJTree extends FTree {
             setIcon(ExamplesJFrame.ROOT);
             
             for (Meaning meaning : sense.listMeanings()) {
-                this.add(new MeaningRelationNode(meaning));
+                this.add(new SenseJTree.MeaningRelationNode(meaning));
             }
         }
         
@@ -86,8 +83,24 @@ public class SenseJTree extends FTree {
             this.structure = structure;
             setIcon(ExamplesJFrame.ROOT);
             
-            for (Dependency dependency : structure.listDependencies()) {
-                this.add(new DependencyNode(dependency));
+            for (DependencySet set : structure.listDependencies()) {
+                this.add(new SenseJTree.DependencySetNode(set));
+            }
+        }
+        
+    }
+    
+    private class DependencySetNode extends FNode {
+        
+        private DependencySet set;
+
+        public DependencySetNode(DependencySet set) {
+            super(set.label);
+            this.set = set;
+            setIcon(ExamplesJFrame.ROOT);
+            
+            for (Dependency dependency : set.dependencies) {
+                this.add(new SenseJTree.DependencyNode(dependency));
             }
         }
         
@@ -103,7 +116,7 @@ public class SenseJTree extends FTree {
             setIcon(ExamplesJFrame.NODE);
             
             for (String specification : dependency.expectations.keySet()) {
-                this.add(new DepenendencyExpectationNode(specification, dependency.expectations.get(specification)));
+                this.add(new SenseJTree.DepenendencyExpectationNode(specification, dependency.expectations.get(specification)));
             }
         }
         

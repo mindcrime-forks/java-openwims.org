@@ -23,6 +23,9 @@ LS - List item marker
 
 MD - Modal
 
+N
+ NN
+
 NN - Noun, singular or mass
  NNS - Noun, plural
  NNP - Proper noun, singular
@@ -61,6 +64,9 @@ SYM - Symbol
 TO - to
 
 UH - Interjection
+
+V
+ VB
 
 VB - Verb, base form
  VBD - Verb, past tense

@@ -22,7 +22,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openwims.Objects.Lexicon.Sense;
-import org.openwims.Objects.Lexicon.Token;
+import org.openwims.Objects.Lexicon.Word;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Stanford.StanfordHelper;
 import org.openwims.WIMGlobals;
@@ -35,12 +35,16 @@ import org.openwims.WIMProcessor;
 public class MainJFrame extends javax.swing.JFrame {
     
     private Annotation annotation;
-
+    private OntologyJTree ontologyTree;
+    
     /**
      * Creates new form MainJFrame
      */
     public MainJFrame() {
         initComponents();
+        
+        this.ontologyTree = new OntologyJTree();
+        this.OntologyTreeContainerJPanel.add(this.ontologyTree);
         
         this.annotation = null;
         
@@ -54,6 +58,7 @@ public class MainJFrame extends javax.swing.JFrame {
         
         
         this.WIMsJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        this.OntologyJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
     }
 
     /**
@@ -66,13 +71,18 @@ public class MainJFrame extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        LeftJPanel = new javax.swing.JPanel();
+        LeftJTabbedPane = new javax.swing.JTabbedPane();
+        LexiconJPanel = new javax.swing.JPanel();
         LexiconContainerJPanel = new javax.swing.JPanel();
         SearchJTextField = new javax.swing.JTextField();
         NewSenseJButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         SensesJList = new javax.swing.JList();
         SenseContainerJPanel = new javax.swing.JPanel();
+        OntologyJPanel = new javax.swing.JPanel();
+        SearchOntologyJTextField = new javax.swing.JTextField();
+        OntologyJScrollPane = new javax.swing.JScrollPane();
+        OntologyTreeContainerJPanel = new javax.swing.JPanel();
         RightJPanel = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -94,7 +104,7 @@ public class MainJFrame extends javax.swing.JFrame {
         setTitle("WIMs Explorer");
         getContentPane().setLayout(new java.awt.GridLayout(1, 2, 5, 0));
 
-        LeftJPanel.setLayout(new java.awt.GridLayout(2, 1, 0, 5));
+        LexiconJPanel.setLayout(new java.awt.GridLayout(2, 1, 0, 5));
 
         LexiconContainerJPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -128,12 +138,39 @@ public class MainJFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         LexiconContainerJPanel.add(jScrollPane1, gridBagConstraints);
 
-        LeftJPanel.add(LexiconContainerJPanel);
+        LexiconJPanel.add(LexiconContainerJPanel);
 
         SenseContainerJPanel.setLayout(new java.awt.GridBagLayout());
-        LeftJPanel.add(SenseContainerJPanel);
+        LexiconJPanel.add(SenseContainerJPanel);
 
-        getContentPane().add(LeftJPanel);
+        LeftJTabbedPane.addTab("Lexicon", LexiconJPanel);
+
+        OntologyJPanel.setLayout(new java.awt.GridBagLayout());
+
+        SearchOntologyJTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                SearchOntologyJTextFieldKeyReleased(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
+        OntologyJPanel.add(SearchOntologyJTextField, gridBagConstraints);
+
+        OntologyTreeContainerJPanel.setLayout(new java.awt.GridLayout(1, 1));
+        OntologyJScrollPane.setViewportView(OntologyTreeContainerJPanel);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weighty = 0.1;
+        OntologyJPanel.add(OntologyJScrollPane, gridBagConstraints);
+
+        LeftJTabbedPane.addTab("Ontology", OntologyJPanel);
+
+        getContentPane().add(LeftJTabbedPane);
 
         RightJPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -238,9 +275,9 @@ public class MainJFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void SearchJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SearchJTextFieldKeyReleased
-        Token token = WIMGlobals.lexicon().token(this.SearchJTextField.getText());
+        Word word = WIMGlobals.lexicon().word(this.SearchJTextField.getText());
         
-        LinkedList<Sense> senses = token.listSenses();
+        LinkedList<Sense> senses = word.listSenses();
         Collections.sort(senses, new SenseComparator());
         
         DefaultListModel model = new DefaultListModel();
@@ -260,6 +297,13 @@ public class MainJFrame extends javax.swing.JFrame {
     private void FullProcessJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FullProcessJButtonActionPerformed
         fullProcess();
     }//GEN-LAST:event_FullProcessJButtonActionPerformed
+
+    private void SearchOntologyJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SearchOntologyJTextFieldKeyReleased
+        String concept = this.SearchOntologyJTextField.getText().trim();
+        this.ontologyTree.load(concept);
+        this.validate();
+        this.repaint();
+    }//GEN-LAST:event_SearchOntologyJTextFieldKeyReleased
 
     /**
      * @param args the command line arguments
@@ -306,12 +350,17 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JPanel DependenciesContainerJPanel;
     private javax.swing.JButton FullProcessJButton;
     private javax.swing.JTextArea InputJTextArea;
-    private javax.swing.JPanel LeftJPanel;
+    private javax.swing.JTabbedPane LeftJTabbedPane;
     private javax.swing.JPanel LexiconContainerJPanel;
+    private javax.swing.JPanel LexiconJPanel;
     private javax.swing.JTextArea LogJTextArea;
     private javax.swing.JButton NewSenseJButton;
+    private javax.swing.JPanel OntologyJPanel;
+    private javax.swing.JScrollPane OntologyJScrollPane;
+    private javax.swing.JPanel OntologyTreeContainerJPanel;
     private javax.swing.JPanel RightJPanel;
     private javax.swing.JTextField SearchJTextField;
+    private javax.swing.JTextField SearchOntologyJTextField;
     private javax.swing.JPanel SenseContainerJPanel;
     private javax.swing.JList SensesJList;
     private javax.swing.JButton WIMifyJButton;
@@ -465,7 +514,7 @@ public class MainJFrame extends javax.swing.JFrame {
             
             if (o instanceof Sense) {
                 Sense sense = (Sense) o;
-                label.setText(sense.getId() + "  " + WIMGlobals.lexicon().definition(sense));
+                label.setText(sense.getId() + "  " + sense.getDefinition());
             }
             
             return label;

@@ -24,16 +24,6 @@ public class Dependency {
         this.expectations = expectations;
     }
 
-//    public String getGovernorPOS() {
-//        String pattern = "-[0-9]*$";
-//        return this.governor.replaceAll(pattern, "");
-//    }
-//
-//    public String getDependentPOS() {
-//        String pattern = "-[0-9]*$";
-//        return this.dependent.replaceAll(pattern, "");
-//    }
-
     @Override
     public String toString() {
         return this.type + "(" + this.governor + ", " + this.dependent + ")";

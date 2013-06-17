@@ -1,0 +1,64 @@
++WITH-INSTRUMENT
+prep(SELF, with{token='with'})
+pobj(with, instrument{pos='NN', ont='@physical_entity'})
+[SELF.instrument=instrument]
+
++WITH-ASSOCIATE
+prep(SELF, with{token='with'})
+pobj(with, associate{pos='NN', ont='@living_thing'})
+[SELF.agent=associate]
+
++ON-DATE
+prep(SELF, on{token='on'})
+pobj(on, date{pos='NNP', micro='#date'})
+[SELF.date=date]
+
++ON-LOCATION
+prep(SELF, on{token='on'})
+pobj(on, location{pos='NN', ont='@physical_entity'})
+[SELF.location=location]
+
++AT-TIME
+prep(SELF, at{token='at'})
+pobj(at, time{pos='NN', micro='#time'})
+[SELF.time=time]
+
++AT-LOCATION
+prep(SELF, at{token='at'})
+pobj(at, location{pos='NN', ont='@physical_entity'})
+[SELF.location=location]
+
++IN-LOCATION
+prep(SELF, in{token='in'})
+pobj(in, location{pos='NN', ont='@physical_entity'})
+[SELF.location=location]
+
++TO-LOCATION
+prep(SELF, to{token='to'})
+pobj(to, location{pos='NN', ont='@physical_entity'})
+[SELF.location=location]
+
++TO-PURPOSE-INFINITIVE
+prep(SELF, to{token='to'})
+pobj(to, purpose{pos='VB', micro='#infinitive')
+[SELF.purpose=purpose]
+
++TO-PURPOSE-NOMINAL
+prep(SELF, to{token='to'})
+pobj(to, purpose{pos='NN')
+[SELF.purpose=purpose]
+
++FOR-DESTINATION
+prep(SELF, for{token='for'})
+pobj(for, destination{pos='NN', ont='@location'}
+[SELF.destination=destination]
+
++FOR-DURATION
+prep(SELF, for{token='for'})
+pobj(for, duration{micro='#duration'})
+[SELF.duration=duration]
+
++FOR-PURPOSE
+prep(SELF, for{token='for'})
+pobj(for, purpose{pos='NN'}
+[SELF.purpose=purpose]

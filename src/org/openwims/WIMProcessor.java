@@ -19,15 +19,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import org.openwims.Objects.Lexicon.Dependency;
-import org.openwims.Objects.Lexicon.Lexicon;
-import org.openwims.Objects.Lexicon.Sense;
-import org.openwims.Objects.Lexicon.Meaning;
-import org.openwims.Objects.Lexicon.Structure;
-import org.openwims.Objects.Lexicon.Token;
+import org.openwims.Objects.Lexicon.*;
 import org.openwims.Objects.WIMAttribute;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Objects.WIMRelation;
+import org.openwims.Stanford.StanfordHelper;
 
 /**
  *
@@ -36,6 +32,18 @@ import org.openwims.Objects.WIMRelation;
 public class WIMProcessor {
     
     private static HashMap<String, LinkedList<String>> tagmaps = null;
+    
+    public static void main(String[] args) throws Exception {
+        String testPath = "/Users/jesse/Desktop/test.stn";
+        
+        Annotation a = StanfordHelper.load(testPath);
+        LinkedList<WIMFrame> frames = WIMProcessor.WIMify(a);
+
+        System.out.println(a);
+        for (WIMFrame frame : frames) {
+            System.out.println(frame);
+        }
+    }
     
     public static HashMap<String, LinkedList<String>> tagmaps() {
         if (WIMProcessor.tagmaps == null) {
@@ -58,10 +66,10 @@ public class WIMProcessor {
                     
                     if (map == null) {
                         map = new LinkedList();
-                        WIMProcessor.tagmaps.put(tag, map);
+                        WIMProcessor.tagmaps.put(tag.toUpperCase(), map);
                     }
                     
-                    map.add(tag);
+                    map.add(tag.toUpperCase());
                 }
             } catch (Exception err) {
                 err.printStackTrace();
@@ -101,7 +109,7 @@ public class WIMProcessor {
         //1: initialize all of the WIM frames, anchored to the token
         HashMap<String, WIMFrame> framesByAnchor = new HashMap();
         HashMap<CoreLabel, WIMFrame> framesByCoreLabel = new HashMap();
-        HashMap<WIMFrame, StructureMatch> alignments = new HashMap();
+        HashMap<WIMFrame, WIMProcessor.StructureMatch> alignments = new HashMap();
         
         for (CoreLabel token : tokens) {
             WIMFrame frame = new WIMFrame(token.toString());
@@ -112,14 +120,18 @@ public class WIMProcessor {
         //2: disambiguate each WIM frame
         for (CoreLabel token : tokens) {
             WIMFrame frame = framesByCoreLabel.get(token);
-            Token t = WIMGlobals.lexicon().token(token.lemma());
+            Word w = WIMGlobals.lexicon().word(token.lemma());
             
             Sense selected = null;
-            StructureMatch best = null;
+            WIMProcessor.StructureMatch best = null;
             
             //assumption for now: list of senses is in "best" order
-            for (Sense sense : t.listSenses()) {
-                StructureMatch match = match(graph, frame.getAnchor(), sense);
+            for (Sense sense : w.listSenses()) {
+                if (!doTagsMatch(token.tag(), sense.pos())) {
+                    continue;
+                }
+                
+                WIMProcessor.StructureMatch match = match(graph, frame.getAnchor(), sense);
 
                 if (best == null && match != null) {
                     best = match;
@@ -139,44 +151,63 @@ public class WIMProcessor {
         
         //3: align dependency variables with frames and fill in relations
         for (WIMFrame frame : framesByAnchor.values()) {
-            HashMap<String, WIMFrame> variables = new HashMap();
-             
-            //a: align variables
-            StructureMatch alignment = alignments.get(frame);
+            
+            WIMProcessor.StructureMatch alignment = alignments.get(frame);
             if (alignment == null) {
                 continue;
             }
             
-            for (Dependency dependency : alignment.alignments.keySet()) {
-                if (dependency == null) {
+            for (DependencySet dependencySet : alignment.structure.listDependencies()) {
+                if (!alignment.isDependencySetComplete(dependencySet)) {
                     continue;
                 }
                 
-                SemanticGraphEdge stan = alignment.alignments.get(dependency);
-                if (stan == null) { //sanity check; shouldn't be possible
-                    continue;
+                HashMap<String, WIMFrame> variables = new HashMap();
+             
+                //a: align variables
+                for (Dependency dependency : dependencySet.dependencies) {
+                    if (dependency == null) {
+                        continue;
+                    }
+
+                    SemanticGraphEdge stan = alignment.alignments.get(dependency);
+                    if (stan == null) { //sanity check; shouldn't be possible
+                        continue;
+                    }
+
+                    variables.put(dependency.dependent, framesByAnchor.get(anchorNameForIndexWord(stan.getDependent())));
+                }
+
+
+                //b: fill in meaning
+                for (Meaning meaning : dependencySet.meanings) {
+                    if (variables.get(meaning.wim) == null) {
+                        continue;
+                    }
+
+                    WIMFrame target = frame;
+                    if (!meaning.target.equalsIgnoreCase("SELF")) {
+                        target = variables.get(meaning.target);
+                    }
+
+                    if (meaning.isAttribute()) {
+                        WIMAttribute attribute = new WIMAttribute(meaning.relation, meaning.wim);
+                        target.addAttribute(attribute);
+                    } else {
+                        WIMRelation relation = new WIMRelation(meaning.relation, variables.get(meaning.wim));
+                        target.addRelation(relation);
+                        variables.get(meaning.wim).addInverse(relation);
+                    }
                 }
                 
-                variables.put(dependency.dependent, framesByAnchor.get(anchorNameForIndexWord(stan.getDependent())));
-            }
-            
-            
-            //b: fill in meaning
-            for (Meaning meaning : frame.getSense().listMeanings()) {
-                WIMFrame target = frame;
-                if (!meaning.target.equalsIgnoreCase("SELF")) {
-                    target = variables.get(meaning.target);
-                }
-                
-                if (meaning.isAttribute()) {
+                //c: fill in generic meaning
+                for (Meaning meaning : frame.getSense().listMeanings()) {
+                    //currently assumed to ONLY be attributes on SELF
                     WIMAttribute attribute = new WIMAttribute(meaning.relation, meaning.wim);
-                    target.addAttribute(attribute);
-                } else {
-                    WIMRelation relation = new WIMRelation(meaning.relation, variables.get(meaning.wim));
-                    target.addRelation(relation);
-                    variables.get(meaning.wim).addInverse(relation);
+                    frame.addAttribute(attribute);
                 }
             }
+            
         }
         
         //4: prune frames with no links
@@ -199,36 +230,50 @@ public class WIMProcessor {
     // 1) a complete match
     // 2) highest structural complexity (read: count of deps) wins
     // 3) tie: take one closest to top (assume: ranked by frequency of occurrence)
-    private static StructureMatch match(SemanticGraph graph, String anchor, Sense sense) {
-        
+    private static WIMProcessor.StructureMatch match(SemanticGraph graph, String anchor, Sense sense) {
+                
         //Make all of the structures potential matches
-        LinkedList<StructureMatch> matchingStructures = new LinkedList();
+        LinkedList<WIMProcessor.StructureMatch> matchingStructures = new LinkedList();
         for (Structure structure : sense.listStructures()) {
-            matchingStructures.add(new StructureMatch(structure));
+            matchingStructures.add(new WIMProcessor.StructureMatch(structure));
         }
+        
         
         //Go through each structure and kick out those that fail to match
-        for (StructureMatch structureMatch : matchingStructures) {
+        for (WIMProcessor.StructureMatch structureMatch : matchingStructures) {
+            
             
             //Check each dependency for a match
-            for (Dependency dependency : structureMatch.structure.listDependencies()) {
+            for (DependencySet dependencySet : structureMatch.structure.listDependencies()) {
                 
-                STANDEPLOOP:
-                for (SemanticGraphEdge edge : graph.getEdgeSet()) {
-                    if (doDependenciesMatch(anchor, dependency, edge, structureMatch)) {
-                        structureMatch.alignments.put(dependency, edge);
-                        break STANDEPLOOP;
+                for (Dependency dependency : dependencySet.dependencies) {
+                    //long start = System.currentTimeMillis();
+                    STANDEPLOOP:
+                    for (SemanticGraphEdge edge : graph.getEdgeSet()) {
+                        
+                        if (doDependenciesMatch(anchor, dependency, edge, structureMatch)) {
+                            structureMatch.alignments.put(dependency, edge);
+                            break STANDEPLOOP;
+                        }
+                        
                     }
+                    
+                    //System.out.println(System.currentTimeMillis() - start);
                 }
+                
             }
+            
         }
         
-        //Now find the structure with the most dependencies and return it
-        // (assume the list is ranked)
-        StructureMatch match = null;
-        for (StructureMatch structure : matchingStructures) {
-            if (!structure.isComplete()) {
-                continue;
+                
+        //Now we find the best possible structure for this sense
+        WIMProcessor.StructureMatch match = null;
+        for (WIMProcessor.StructureMatch structure : matchingStructures) {
+            //Skip any structure that has a non-optional set that has no match
+            for (DependencySet set : structure.structure.listDependencies()) {
+                if (!set.optional && !structure.isDependencySetComplete(set)) {
+                    continue;
+                }
             }
             
             if (match == null) {
@@ -241,7 +286,8 @@ public class WIMProcessor {
         return match;
     }
     
-    private static boolean doDependenciesMatch(String anchor, Dependency wimDep, SemanticGraphEdge edge, StructureMatch structureMatch) {
+    private static boolean doDependenciesMatch(String anchor, Dependency wimDep, SemanticGraphEdge edge, WIMProcessor.StructureMatch structureMatch) {
+        
         
         //Check to see if the dependency type matches
         if (!wimDep.type.equalsIgnoreCase(edge.getRelation().getShortName())) {
@@ -261,6 +307,8 @@ public class WIMProcessor {
             return false;
         }
         
+        
+        
         //Check to see that the dependent matches any existing variable mappings and all expectations
         if (wimDep.dependent.equalsIgnoreCase("SELF")) {
             if (!anchor.equals(dependentAnchor)) {
@@ -279,13 +327,15 @@ public class WIMProcessor {
                              wimDep.expectations.get(specification).equalsIgnoreCase(edge.getDependent().originalText()))) {
                     return false;
                 } else if (specification.equalsIgnoreCase("ont")) {
-                    Token t = WIMGlobals.lexicon().token(edge.getDependent().lemma());
-                    if (!t.canBeConcept(wimDep.expectations.get(specification))) {
+                    Word w = WIMGlobals.lexicon().word(edge.getDependent().lemma());
+                    if (!w.canBeConcept(wimDep.expectations.get(specification))) {
                         return false;
                     }
                 }
             }
+            
         }
+        
         
         return true;
     }
@@ -299,6 +349,9 @@ public class WIMProcessor {
             return true;
         }
         
+        tag1 = tag1.toUpperCase();
+        tag2 = tag2.toUpperCase();
+        
         if (WIMProcessor.tagmaps().containsKey(tag1) && WIMProcessor.tagmaps().get(tag1).contains(tag2)) {
             return true;
         }
@@ -307,21 +360,50 @@ public class WIMProcessor {
             return true;
         }
         
+        for (String child : WIMProcessor.tagmaps().get(tag1)) {
+            if (child.equals(tag1)) {
+                continue;
+            }
+            
+            if (doTagsMatch(child, tag2)) {
+                return true;
+            }
+        }
+        
+        for (String child : WIMProcessor.tagmaps().get(tag2)) {
+            if (child.equals(tag2)) {
+                continue;
+            }
+            
+            if (doTagsMatch(child, tag1)) {
+                return true;
+            }
+        }
+        
         return false;
     }
     
     private static class StructureMatch {
         
         public Structure structure;
+        public HashMap<Dependency, DependencySet> sets;
         public HashMap<Dependency, SemanticGraphEdge> alignments;
         
         public StructureMatch(Structure structure) {
             this.structure = structure;
             this.alignments = new HashMap();
+            this.sets = new HashMap();
             
-            for (Dependency dependency : structure.listDependencies()) {
-                this.alignments.put(dependency, null);
+            for (DependencySet dependencySet : structure.listDependencies()) {
+                for (Dependency dependency : dependencySet.dependencies) {
+                    this.alignments.put(dependency, null);
+                    this.sets.put(dependency, dependencySet);
+                }
             }
+            
+//            for (Dependency dependency : structure.listDependencies()) {
+//                this.alignments.put(dependency, null);
+//            }
         }
         
         public String anchorForVariable(String variable) {
@@ -343,9 +425,19 @@ public class WIMProcessor {
             return null;
         }
         
-        public boolean isComplete() {
-            return !this.alignments.values().contains(null);
+        public boolean isDependencySetComplete(DependencySet set) {
+            for (Dependency dependency : set.dependencies) {
+                if (this.alignments.get(dependency) == null) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
+        
+//        public boolean isComplete() {
+//            return !this.alignments.values().contains(null);
+//        }
         
     }
     

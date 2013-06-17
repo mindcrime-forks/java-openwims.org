@@ -11,17 +11,20 @@ import java.util.LinkedList;
  * @author jesse
  */
 public class Structure {
-    private LinkedList<Dependency> dependencies;
+    private LinkedList<DependencySet> dependencies;
         
     public Structure() {
         this.dependencies = new LinkedList();
     }
 
-    public void addDependency(Dependency dependency) {
-        this.dependencies.add(dependency);
+    public DependencySet addDependencySet() {
+        DependencySet dependencySet = new DependencySet(new LinkedList(), new LinkedList(), true, "");
+        this.dependencies.add(dependencySet);
+        
+        return dependencySet;
     }
 
-    public LinkedList<Dependency> listDependencies() {
+    public LinkedList<DependencySet> listDependencies() {
         return new LinkedList(this.dependencies);
     }
 
@@ -29,11 +32,12 @@ public class Structure {
     public String toString() {
         StringBuilder out = new StringBuilder();
 
-        for (Dependency dependency : dependencies) {
-            out.append(dependency);
+        for (DependencySet dependencySet : dependencies) {
+            out.append(dependencySet);
             out.append(" ");
         }
 
         return out.toString();
     }
+    
 }
