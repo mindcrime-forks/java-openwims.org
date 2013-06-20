@@ -6,6 +6,7 @@ package org.openwims.Objects;
 
 import java.util.LinkedList;
 import org.openwims.Objects.Lexicon.Sense;
+import org.openwims.Objects.Preprocessor.PPToken;
 
 /**
  *
@@ -13,14 +14,14 @@ import org.openwims.Objects.Lexicon.Sense;
  */
 public class WIMFrame {
     
-    private String anchor;
+    private PPToken anchor;
     private Sense sense;
     private LinkedList<WIMRelation> relations;
     private LinkedList<WIMRelation> inverses;
     private LinkedList<WIMAttribute> attributes;
     private int instance;
     
-    public WIMFrame(String anchor) {
+    public WIMFrame(PPToken anchor) {
         this.anchor = anchor;
         this.sense = null;
         this.relations = new LinkedList();
@@ -29,14 +30,14 @@ public class WIMFrame {
         this.instance = 1;
     }
 
-    public String getAnchor() {
+    public PPToken getAnchor() {
         return anchor;
     }
     
-    public String getToken() {
-        String pattern = "-[0-9]*$";
-        return this.anchor.replaceAll(pattern, "");
-    }
+//    public String getToken() {
+//        String pattern = "-[0-9]*$";
+//        return this.anchor.replaceAll(pattern, "");
+//    }
 
     public int getInstance() {
         return instance;
@@ -135,7 +136,7 @@ public class WIMFrame {
         out.append(getName());
         out.append("\n  ");
         out.append("anchor: ");
-        out.append(this.anchor);
+        out.append(this.anchor.anchor());
         out.append("\n  ");
         out.append("sense: ");
         out.append(this.sense == null ? "unknown" : this.sense.getId());

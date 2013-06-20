@@ -23,6 +23,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Lexicon.Word;
+import org.openwims.Objects.Preprocessor.PPDocument;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Stanford.StanfordHelper;
 import org.openwims.WIMGlobals;
@@ -34,7 +35,7 @@ import org.openwims.WIMProcessor;
  */
 public class MainJFrame extends javax.swing.JFrame {
     
-    private Annotation annotation;
+    private PPDocument document;
     private OntologyJTree ontologyTree;
     
     /**
@@ -42,11 +43,12 @@ public class MainJFrame extends javax.swing.JFrame {
      */
     public MainJFrame() {
         initComponents();
+        this.setSize(800, 800);
         
         this.ontologyTree = new OntologyJTree();
         this.OntologyTreeContainerJPanel.add(this.ontologyTree);
         
-        this.annotation = null;
+        this.document = null;
         
         FileDropJPanel fileDropJPanel = new FileDropJPanel();
         fileDropJPanel.addFilesDraggedListener(new StanfordFilesDraggedEventListener());
@@ -56,7 +58,7 @@ public class MainJFrame extends javax.swing.JFrame {
         this.SensesJList.addListSelectionListener(new SensesListSelectionListener());
         this.SensesJList.setCellRenderer(new SensesListCellRenderer());
         
-        
+        this.DocumentJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         this.WIMsJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         this.OntologyJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
     }
@@ -92,8 +94,8 @@ public class MainJFrame extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel3 = new javax.swing.JPanel();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        DependenciesContainerJPanel = new javax.swing.JPanel();
+        DocumentJScrollPane = new javax.swing.JScrollPane();
+        DocumentContainerJPanel = new javax.swing.JPanel();
         WIMsJScrollPane = new javax.swing.JScrollPane();
         WIMsContainerJPanel = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -232,10 +234,10 @@ public class MainJFrame extends javax.swing.JFrame {
 
         jPanel3.setLayout(new java.awt.GridLayout(2, 1));
 
-        DependenciesContainerJPanel.setLayout(new java.awt.GridLayout(1, 1));
-        jScrollPane4.setViewportView(DependenciesContainerJPanel);
+        DocumentContainerJPanel.setLayout(new java.awt.GridLayout(1, 1));
+        DocumentJScrollPane.setViewportView(DocumentContainerJPanel);
 
-        jPanel3.add(jScrollPane4);
+        jPanel3.add(DocumentJScrollPane);
 
         WIMsContainerJPanel.setLayout(new java.awt.GridLayout(1, 1));
         WIMsJScrollPane.setViewportView(WIMsContainerJPanel);
@@ -347,7 +349,8 @@ public class MainJFrame extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel DependenciesContainerJPanel;
+    private javax.swing.JPanel DocumentContainerJPanel;
+    private javax.swing.JScrollPane DocumentJScrollPane;
     private javax.swing.JButton FullProcessJButton;
     private javax.swing.JTextArea InputJTextArea;
     private javax.swing.JTabbedPane LeftJTabbedPane;
@@ -373,7 +376,6 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
 
@@ -397,18 +399,6 @@ public class MainJFrame extends javax.swing.JFrame {
     private void load(LinkedList<WIMFrame> frames) {
         this.WIMsContainerJPanel.removeAll();
         
-//        String out = "";
-//        for (WIMFrame frame : frames) {
-//            out += frame + "\n";
-//        }
-//        out = out.trim();
-//        
-//        JTextArea t = new JTextArea();
-//        t.setText(out);
-//        t.setEditable(false);
-//        
-//        this.WIMsContainerJPanel.add(t);
-        
         WIMSJTree tree = new WIMSJTree(frames);
         tree.addSenseSelectionListener(new WIMSJTree.SenseSelectionListener() {
             @Override
@@ -423,35 +413,22 @@ public class MainJFrame extends javax.swing.JFrame {
         this.repaint();
     }
     
-    private void load(Annotation annotation) {
-        this.DependenciesContainerJPanel.removeAll();
+    private void load(PPDocument document) {
+        this.DocumentContainerJPanel.removeAll();
         
-        String out = "";
-        
-        List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-        for (CoreMap sentence : sentences) {
-            List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-            SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-            out += graph + "\n";
-        }
-        out = out.trim();
-        
-        JTextArea t = new JTextArea();
-        t.setText(out);
-        t.setEditable(false);
-        
-        this.DependenciesContainerJPanel.add(t);
+        PPDocumentJTree tree = new PPDocumentJTree(document);
+        this.DocumentContainerJPanel.add(tree);
         
         this.validate();
         this.repaint();
     }
     
-    public void setAnnotation(Annotation annotation) {
-        this.annotation = annotation;
-        this.InputJTextArea.setText(this.annotation.toString());
+    public void setDocument(PPDocument document) {
+        this.document = document;
+        this.InputJTextArea.setText(this.document.text());
         this.WIMifyJButton.setEnabled(true);
         
-        load(this.annotation);
+        load(this.document);
         
         this.validate();
         this.repaint();
@@ -463,16 +440,16 @@ public class MainJFrame extends javax.swing.JFrame {
             return;
         }
         
-        setAnnotation(StanfordHelper.annotate(input));
+        setDocument(StanfordHelper.convert(StanfordHelper.annotate(input)));
         wimify();
     }
     
     private void wimify() {
-        if (this.annotation == null) {
+        if (this.document == null) {
             return;
         }
         
-        LinkedList<WIMFrame> frames = WIMProcessor.WIMify(this.annotation);
+        LinkedList<WIMFrame> frames = WIMProcessor.WIMify(this.document);
         load(frames);
     }
     
@@ -482,7 +459,7 @@ public class MainJFrame extends javax.swing.JFrame {
         @Override
         public void filesDraggedEvent(List<File> files) {
             try {
-                setAnnotation(StanfordHelper.load(files.get(0).getAbsolutePath()));
+                setDocument(StanfordHelper.convert(StanfordHelper.load(files.get(0).getAbsolutePath())));
             } catch (Exception err) {
                 err.printStackTrace();
             }

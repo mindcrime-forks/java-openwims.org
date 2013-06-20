@@ -5,6 +5,7 @@
 package org.openwims;
 
 import org.openwims.Objects.Lexicon.Lexicon;
+import org.openwims.Objects.Lexicon.TagMaps;
 import org.openwims.Objects.Ontology.Ontology;
 
 /**
@@ -15,6 +16,15 @@ public class WIMGlobals {
     
     private static Lexicon lexicon = null;
     private static Ontology ontology = null;
+    private static TagMaps tagmaps = null;
+    
+    public static TagMaps tagmaps() {
+        if (WIMGlobals.tagmaps == null) {
+            WIMGlobals.tagmaps = new TagMaps();
+        }
+        
+        return WIMGlobals.tagmaps;
+    }
     
     public static Lexicon lexicon() {
         if (WIMGlobals.lexicon == null) {

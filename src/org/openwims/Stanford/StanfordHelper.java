@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Properties;
+import org.openwims.Objects.Preprocessor.PPDocument;
 
 /**
  *
@@ -26,6 +27,10 @@ public class StanfordHelper {
             StanfordHelper.parser = LexicalizedParser.getParserFromSerializedFile("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
         }
         return StanfordHelper.parser;
+    }
+    
+    public static PPDocument convert(Annotation document) {
+        return new StanfordPPDocument(document);
     }
 
     public static Annotation annotate(String text) {
