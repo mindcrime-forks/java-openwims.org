@@ -128,6 +128,40 @@ public class WIMFrame {
     public String getName() {
         return getConcept() + "-" + this.instance;
     }
+    
+    public String json() {
+        StringBuilder out = new StringBuilder();
+        
+        out.append("{");
+        out.append("\"frame\": \"");
+        out.append(getName());
+        out.append("\", \"anchor\":\"");
+        out.append(this.anchor.anchor());
+        out.append("\", \"sense\":\"");
+        out.append(this.sense == null ? "unknown" : this.sense.getId());
+        out.append("\", \"relations\":[");
+        
+        for (WIMRelation relation : relations) {
+            out.append(relation.json());
+            
+            if (relation != relations.getLast()) {
+                out.append(",");
+            }
+        }
+        
+        out.append("], \"attributes\":[");
+        for (WIMAttribute attribute : attributes) {
+            out.append(attribute.json());
+            
+            if (attribute != attributes.getLast()) {
+                out.append(",");
+            }
+        }
+        
+        out.append("]}");
+        
+        return out.toString();
+    }
 
     @Override
     public String toString() {

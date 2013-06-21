@@ -25,6 +25,18 @@ public class WIMAttribute {
     public String getValue() {
         return value;
     }
+    
+    public String json() {
+        StringBuilder builder = new StringBuilder();
+        
+        builder.append("{\"attribute\": \"");
+        builder.append(this.attribute);
+        builder.append("\", \"value\": \"");
+        builder.append(this.value);
+        builder.append("\"}");
+        
+        return builder.toString();
+    }
 
     @Override
     public String toString() {

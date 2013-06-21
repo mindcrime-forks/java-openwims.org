@@ -25,6 +25,18 @@ public class WIMRelation {
     public String getRelation() {
         return relation;
     }
+    
+    public String json() {
+        StringBuilder builder = new StringBuilder();
+        
+        builder.append("{\"relation\": \"");
+        builder.append(this.relation);
+        builder.append("\", \"frame\": \"");
+        builder.append(this.frame.getName());
+        builder.append("\"}");
+        
+        return builder.toString();
+    }
 
     @Override
     public String toString() {
