@@ -32,11 +32,15 @@ public class StanfordHelper {
     public static PPDocument convert(Annotation document) {
         return new StanfordPPDocument(document);
     }
-
+    
     public static Annotation annotate(String text) {
-
         Properties props = new Properties();
         props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+        
+        return annotate(text, props);
+    }
+
+    public static Annotation annotate(String text, Properties props) {
 
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         Annotation document = new Annotation(text);
