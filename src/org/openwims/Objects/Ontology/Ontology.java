@@ -18,7 +18,8 @@ import java.util.LinkedList;
 public class Ontology {
     
     private static Connection conn = null;
-    private HashMap<String, Ancestry> ancestry;
+    private HashMap<String, String> isa;
+    private HashMap<String, LinkedList<String>> subclasses;
     
     public static Connection conn() throws Exception {
         if (Ontology.conn == null) {
@@ -45,7 +46,8 @@ public class Ontology {
     }
     
     public Ontology() {
-        this.ancestry = new HashMap();
+        this.isa = new HashMap();
+        this.subclasses = new HashMap();
         
         try {
             String query = "SELECT concept, parent FROM ontology;";
@@ -54,43 +56,17 @@ public class Ontology {
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 String concept = rs.getString("concept");
-                String path = rs.getString("parent");
+                String parent = rs.getString("parent");
                 
-                Ancestry a = this.ancestry.get(concept);
-                if (a == null) {
-                    a = new Ancestry(concept);
-                    this.ancestry.put(concept, a);
+                this.isa.put(concept, parent);
+                
+                LinkedList<String> children = this.subclasses.get(parent);
+                if (children == null) {
+                    children = new LinkedList();
+                    this.subclasses.put(parent, children);
                 }
                 
-                //trim brackets
-                path = path.substring(1, path.length() - 1);
-                
-                //split on the concept - this will give x (usually 1) distinct path
-                String[] paths = path.split(concept);
-                for (String p : paths) {
-                    LinkedList<String> ancestors = new LinkedList();
-                    
-                    //split on commas
-                    String[] elements = p.split(", ");
-                    
-                    for (String e : elements) {
-                        e = e.trim();
-                        if (e.length() > 0) {
-                            ancestors.add(e);
-                        }
-                    }
-                    
-                    ancestors.add(concept);
-                    a.paths.add(ancestors);
-                }
-                
-//                LinkedList<String> parents = isa.get(rs.getString("concept"));
-//                if (parents == null) {
-//                    parents = new LinkedList();
-//                    isa.put(rs.getString("concept"), parents);
-//                }
-//                
-//                parents.add(rs.getString("parent"));
+                children.add(concept);
             }
             
             stmt.close();
@@ -102,11 +78,11 @@ public class Ontology {
     }
     
     public LinkedList<String> concepts() {
-        return new LinkedList(this.ancestry.keySet());
+        return new LinkedList(this.isa.keySet());
     }
     
-    public Ancestry ancestors(String concept) {
-        return this.ancestry.get(concept);
+    public LinkedList<String> children(String concept) {
+        return this.subclasses.get(concept);
     }
     
     public boolean isDescendant(String concept, String ancestor) {
@@ -117,41 +93,14 @@ public class Ontology {
         if (concept.equalsIgnoreCase(ancestor)) {
             return true;
         }
-        
-        Ancestry a = this.ancestry.get(concept);
-        if (a == null) {
-            return false;
-        }
-        
-        for (LinkedList<String> path : a.paths) {
-            if (path.contains(ancestor)) {
+
+        if (this.isa.get(concept) != null) {
+            if (isDescendant(this.isa.get(concept), ancestor)) {
                 return true;
             }
         }
         
-//        for (String parent : this.isa.get(concept)) {
-//            if (isDescendant(parent, ancestor)) {
-//                return true;
-//            }
-//        }
-        
         return false;
-    }
-    
-    
-    
-    
-    
-    public class Ancestry {
-        
-        public String concept;
-        public LinkedList<LinkedList<String>> paths;
-
-        public Ancestry(String concept) {
-            this.concept = concept;
-            this.paths = new LinkedList();
-        }
-        
     }
     
 }

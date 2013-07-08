@@ -4,7 +4,6 @@
  */
 package org.openwims.Objects.Lexicon;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -52,8 +51,12 @@ public class Sense {
     }
     
     public String pos() {
+        if (!this.id.contains(":")) {
+            return "unknown";
+        }
+        
         if (this.id.contains("-")) {
-            return this.id.split("-")[1].trim();
+            return this.id.split(":")[1].split("-")[1].trim();
         }
         
         return "unknown";

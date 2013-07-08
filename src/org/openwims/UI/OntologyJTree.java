@@ -6,7 +6,6 @@ package org.openwims.UI;
 
 import com.jesseenglish.swingftfy.extensions.FNode;
 import com.jesseenglish.swingftfy.extensions.FTree;
-import java.util.LinkedList;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import org.openwims.WIMGlobals;
@@ -21,7 +20,7 @@ public class OntologyJTree extends FTree {
     private static ImageIcon PATH = new ImageIcon(WIMSJTree.class.getResource("/images/node-blue.png"));
     
     public OntologyJTree() {
-        load("");
+        load("@all");
     }
     
     public void load(String concept) {
@@ -43,25 +42,13 @@ public class OntologyJTree extends FTree {
             this.concept = concept;
             setIcon(ROOT);
             
-            if (WIMGlobals.ontology().ancestors(concept) == null) {
+            if (WIMGlobals.ontology().children(concept) == null) {
                 return;
             }
             
-            for (LinkedList<String> path : WIMGlobals.ontology().ancestors(concept).paths) {
-                this.add(new OntologyPathNode(path));
+            for (String child : WIMGlobals.ontology().children(concept)) {
+                this.add(new OntologyConceptNode(child));
             }
-        }
-        
-    }
-    
-    private class OntologyPathNode extends FNode {
-        
-        private LinkedList<String> path;
-
-        public OntologyPathNode(LinkedList<String> path) {
-            super(path.toString());
-            this.path = path;
-            setIcon(PATH);
         }
         
     }
