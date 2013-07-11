@@ -30,6 +30,10 @@ public class Word {
         this.senses.put(sense.getId(), sense);
     }
     
+    public void removeSense(Sense sense) {
+        this.senses.remove(sense.getId());
+    }
+    
     public Sense getSense(String id) {
         return this.senses.get(id);
     }

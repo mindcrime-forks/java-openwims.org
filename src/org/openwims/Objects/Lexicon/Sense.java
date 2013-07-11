@@ -28,6 +28,10 @@ public class Sense {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public void setDefinition(String definition) {
         this.definition = definition;
     }
@@ -40,6 +44,14 @@ public class Sense {
         Structure s = new Structure();
         this.structures.add(s);
         return s;
+    }
+    
+    public void removeStructure(Structure structure) {
+        this.structures.remove(structure);
+    }
+    
+    public void removeMeaning(Meaning meaning) {
+        this.meanings.remove(meaning);
     }
     
     public String concept() {
@@ -62,8 +74,32 @@ public class Sense {
         return "unknown";
     }
     
-    public void addMeaning(String target, String relation, String wim) {
-        this.meanings.add(new Meaning(target, relation, wim));
+    public String word() {
+        if (!this.id.contains(":")) {
+            return "unknown";
+        }
+        
+        if (this.id.contains("-")) {
+            return this.id.split(":")[1].split("-")[0].trim();
+        }
+        
+        return "unknown";
+    }
+    
+    public int instance() {
+        if (!this.id.contains(":")) {
+            return -1;
+        }
+        
+        if (this.id.contains("-")) {
+            return Integer.parseInt(this.id.split(":")[1].split("-")[2].trim());
+        }
+        
+        return -1;
+    }
+    
+    public void addMeaning(Meaning meaning) {
+        this.meanings.add(meaning);
     }
     
     public LinkedList<Structure> listStructures() {

@@ -16,12 +16,13 @@ public class Structure {
     public Structure() {
         this.dependencies = new LinkedList();
     }
-
-    public DependencySet addDependencySet() {
-        DependencySet dependencySet = new DependencySet(new LinkedList(), new LinkedList(), true, "");
-        this.dependencies.add(dependencySet);
-        
-        return dependencySet;
+    
+    public void addDependencySet(DependencySet set) {
+        this.dependencies.add(set);
+    }
+    
+    public void removeDependencySet(DependencySet set) {
+        this.dependencies.remove(set);
     }
 
     public LinkedList<DependencySet> listDependencies() {

@@ -20,6 +20,7 @@ public class Ontology {
     private static Connection conn = null;
     private HashMap<String, String> isa;
     private HashMap<String, LinkedList<String>> subclasses;
+    private HashMap<String, String> definitions;
     
     public static Connection conn() throws Exception {
         if (Ontology.conn == null) {
@@ -48,17 +49,20 @@ public class Ontology {
     public Ontology() {
         this.isa = new HashMap();
         this.subclasses = new HashMap();
+        this.definitions = new HashMap();
         
         try {
-            String query = "SELECT concept, parent FROM ontology;";
+            String query = "SELECT concept, parent, definition FROM ontology;";
             Statement stmt = Ontology.conn().createStatement();
             
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 String concept = rs.getString("concept");
                 String parent = rs.getString("parent");
+                String definition = rs.getString("definition");
                 
                 this.isa.put(concept, parent);
+                this.definitions.put(concept, definition);
                 
                 LinkedList<String> children = this.subclasses.get(parent);
                 if (children == null) {
@@ -75,6 +79,10 @@ public class Ontology {
             err.printStackTrace();
         }
         
+    }
+    
+    public String definition(String concept) {
+        return this.definitions.get(concept);
     }
     
     public LinkedList<String> concepts() {

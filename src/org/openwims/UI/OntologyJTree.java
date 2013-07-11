@@ -6,6 +6,7 @@ package org.openwims.UI;
 
 import com.jesseenglish.swingftfy.extensions.FNode;
 import com.jesseenglish.swingftfy.extensions.FTree;
+import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import org.openwims.WIMGlobals;
@@ -49,6 +50,11 @@ public class OntologyJTree extends FTree {
             for (String child : WIMGlobals.ontology().children(concept)) {
                 this.add(new OntologyConceptNode(child));
             }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent me) {
+            WIMGlobals.frame.setOntologyDefinition(WIMGlobals.ontology().definition(this.concept));
         }
         
     }

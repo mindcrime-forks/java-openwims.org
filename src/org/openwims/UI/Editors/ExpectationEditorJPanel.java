@@ -2,7 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.openwims.UI;
+package org.openwims.UI.Editors;
+
+import org.openwims.Objects.Lexicon.Expectation;
 
 /**
  *
@@ -10,11 +12,18 @@ package org.openwims.UI;
  */
 public class ExpectationEditorJPanel extends javax.swing.JPanel {
 
+    private Expectation expectation;
+    
     /**
      * Creates new form ExpectationEditorJPanel
      */
-    public ExpectationEditorJPanel() {
+    public ExpectationEditorJPanel(Expectation expectation) {
         initComponents();
+        
+        this.expectation = expectation;
+        
+        this.SpecificationJTextField.setText(expectation.getSpecification());
+        this.ExpectationJTextField.setText(expectation.getExpectation());
     }
 
     /**
@@ -33,29 +42,40 @@ public class ExpectationEditorJPanel extends javax.swing.JPanel {
         setLayout(new java.awt.GridBagLayout());
 
         SpecificationJTextField.setHintText("specification");
+        SpecificationJTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                SpecificationJTextFieldKeyReleased(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         add(SpecificationJTextField, gridBagConstraints);
 
         ExpectationJTextField.setHintText("expectation");
+        ExpectationJTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                ExpectationJTextFieldKeyReleased(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(ExpectationJTextField, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void SpecificationJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SpecificationJTextFieldKeyReleased
+        this.expectation.setSpecification(this.SpecificationJTextField.getText().trim());
+    }//GEN-LAST:event_SpecificationJTextFieldKeyReleased
+
+    private void ExpectationJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ExpectationJTextFieldKeyReleased
+        this.expectation.setExpectation(this.ExpectationJTextField.getText().trim());
+    }//GEN-LAST:event_ExpectationJTextFieldKeyReleased
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.jesseenglish.swingftfy.extensions.FTextField ExpectationJTextField;
     private com.jesseenglish.swingftfy.extensions.FTextField SpecificationJTextField;
     // End of variables declaration//GEN-END:variables
-
-    public String getSpecification() {
-        return this.SpecificationJTextField.getText().trim();
-    }
-    
-    public String getExpectation() {
-        return this.ExpectationJTextField.getText().trim();
-    }
 
 }

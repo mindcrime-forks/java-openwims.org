@@ -11,6 +11,9 @@ FW - Foreign word
 
 IN - Preposition or subordinating conjunction
 
+J
+ JJ
+
 JJ - Adjective
  JJR - Adjective, comparative
  JJS - Adjective, superlative
@@ -47,6 +50,9 @@ POS - Possessive ending
 PRP - Personal pronoun
 
 PRP$ - Possessive pronoun (prolog version PRP-S)
+
+R
+ RB
 
 RB - Adverb
  RBR - Adverb, comparative

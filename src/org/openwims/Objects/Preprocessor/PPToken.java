@@ -4,6 +4,8 @@
  */
 package org.openwims.Objects.Preprocessor;
 
+import org.openwims.WIMGlobals;
+
 /**
  *
  * @author jesseenglish
@@ -36,6 +38,18 @@ public class PPToken implements Comparable<PPToken> {
     
     public String pos() {
         return this.pos;
+    }
+    
+    public String rootPOS() {
+        String[] roots = new String[] { "N", "V", "J", "R" };
+        
+        for (String root : roots) {
+            if (WIMGlobals.tagmaps().doTagsMatch(root, pos())) {
+                return root;
+            }
+        }
+        
+        return pos();
     }
 
     @Override

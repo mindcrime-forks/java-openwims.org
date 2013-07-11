@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.LinkedList;
+import org.openwims.Serialization.LexiconSerializer;
+import org.openwims.Serialization.PostgreSQLLexiconSerializer;
 
 /**
  *
@@ -19,6 +21,7 @@ public class Lexicon {
 
     private static Connection conn = null;
     private HashMap<String, Word> words;
+    private LexiconSerializer serializer;
     
     public static void main(String[] args) throws Exception {
         System.out.println(new Lexicon().word("hit"));
@@ -26,6 +29,11 @@ public class Lexicon {
 
     public Lexicon() {
         this.words = new HashMap();
+        this.serializer = new PostgreSQLLexiconSerializer();
+    }
+    
+    public LexiconSerializer serializer() {
+        return this.serializer;
     }
     
     public static Connection conn() throws Exception {
@@ -97,6 +105,20 @@ public class Lexicon {
         
         return verbs;
     }
+    
+    public LinkedList<String> nouns() throws Exception {
+        LinkedList<String> verbs = new LinkedList();
+        
+        Statement stmt = Lexicon.conn().createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT id FROM senses WHERE id LIKE '%-n-%' ORDER BY id ASC;");
+        while (rs.next()) {
+            verbs.add(rs.getString("id"));
+        }
+        
+        stmt.close();
+        
+        return verbs;
+    }
 
     public Word word(String representation) {
         
@@ -129,7 +151,7 @@ public class Lexicon {
                     int id = rs.getInt("id");
                     int series = rs.getInt("series");
                     String set = rs.getString("label");
-                    boolean optional = Boolean.parseBoolean(rs.getString("optional"));
+                    boolean optional = rs.getBoolean("optional");
                                         
                     Structure structure = structures.get(series);
                     if (structure == null) {
@@ -137,9 +159,8 @@ public class Lexicon {
                         structures.put(series, structure);
                     }
                     
-                    DependencySet dependencySet = structure.addDependencySet();
-                    dependencySet.label = set;
-                    dependencySet.optional = optional;
+                    DependencySet dependencySet = new DependencySet(new LinkedList(), new LinkedList(), optional, set);
+                    structure.addDependencySet(dependencySet);
                     
                     dependencySets.put(id, dependencySet);
                 }
@@ -156,7 +177,7 @@ public class Lexicon {
                         String governor = rs.getString("governor");
                         String dependent = rs.getString("dependent");
                         
-                        Dependency dep = new Dependency(dependency, governor, dependent, new HashMap());
+                        Dependency dep = new Dependency(dependency, governor, dependent, new LinkedList());
                         set.dependencies.add(dep);
                         dependencies.put(depid, dep);
                     }
@@ -172,7 +193,7 @@ public class Lexicon {
                         String specification = rs.getString("spec");
                         String expectation = rs.getString("expectation");
                         
-                        dep.expectations.put(specification, expectation);
+                        dep.expectations.add(new Expectation(specification, expectation));
                     }
                 }
                 
@@ -187,9 +208,13 @@ public class Lexicon {
                     
                     try {
                         int structID = Integer.parseInt(struct);
-                        dependencySets.get(structID).meanings.add(new Meaning(target, relation, wim));
+                        if (structID == -1) {
+                            sense.addMeaning(new Meaning(target, relation, wim));
+                        } else {
+                            dependencySets.get(structID).meanings.add(new Meaning(target, relation, wim));
+                        }
                     } catch (Exception err) {
-                        sense.addMeaning(target, relation, wim);
+                        sense.addMeaning(new Meaning(target, relation, wim));
                     }
                     
                 }
@@ -206,5 +231,32 @@ public class Lexicon {
         
         return word;
 
+    }
+    
+    public void addSense(Sense sense) {
+        Word w = word(sense.word());
+        w.addSense(sense);
+    }
+    
+    public void removeSense(Sense sense) {
+        Word w = word(sense.word());
+        w.removeSense(sense);
+    }
+    
+    public int nextInstanceNumber(String concept, String word, String pos) {
+        int max = 0;
+        
+        Word w = word(word);
+        for (Sense sense : w.listSenses()) {
+            if (sense.concept().equalsIgnoreCase(concept)) {
+                if (sense.pos().equalsIgnoreCase(pos)) {
+                    if (sense.instance() > max) {
+                        max = sense.instance();
+                    }
+                }
+            }
+        }
+        
+        return max + 1;
     }
 }

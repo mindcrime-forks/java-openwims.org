@@ -4,14 +4,12 @@
  */
 package org.openwims.UI;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.util.CoreMap;
+import com.jesseenglish.swingftfy.extensions.FLabel;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.io.File;
 import java.util.Collections;
@@ -19,6 +17,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openwims.Objects.Lexicon.Sense;
@@ -37,6 +36,7 @@ public class MainJFrame extends javax.swing.JFrame {
     
     private PPDocument document;
     private OntologyJTree ontologyTree;
+    private Sense selected;
     
     /**
      * Creates new form MainJFrame
@@ -44,6 +44,8 @@ public class MainJFrame extends javax.swing.JFrame {
     public MainJFrame() {
         initComponents();
         this.setSize(800, 800);
+        
+        WIMGlobals.frame = this;
         
         this.ontologyTree = new OntologyJTree();
         this.OntologyTreeContainerJPanel.add(this.ontologyTree);
@@ -53,7 +55,7 @@ public class MainJFrame extends javax.swing.JFrame {
         FileDropJPanel fileDropJPanel = new FileDropJPanel();
         fileDropJPanel.addFilesDraggedListener(new StanfordFilesDraggedEventListener());
         
-        this.jPanel1.add(fileDropJPanel);
+        this.StanfordIOJPanel.add(fileDropJPanel);
         
         this.SensesJList.addListSelectionListener(new SensesListSelectionListener());
         this.SensesJList.setCellRenderer(new SensesListCellRenderer());
@@ -80,13 +82,14 @@ public class MainJFrame extends javax.swing.JFrame {
         NewSenseJButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         SensesJList = new javax.swing.JList();
+        DeleteSenseJButton = new javax.swing.JButton();
         SenseContainerJPanel = new javax.swing.JPanel();
         OntologyJPanel = new javax.swing.JPanel();
-        SearchOntologyJTextField = new javax.swing.JTextField();
+        DefinitionJLabel = new javax.swing.JLabel();
         OntologyJScrollPane = new javax.swing.JScrollPane();
         OntologyTreeContainerJPanel = new javax.swing.JPanel();
         RightJPanel = new javax.swing.JPanel();
-        jPanel1 = new javax.swing.JPanel();
+        StanfordIOJPanel = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         InputJTextArea = new javax.swing.JTextArea();
         FullProcessJButton = new javax.swing.JButton();
@@ -122,7 +125,11 @@ public class MainJFrame extends javax.swing.JFrame {
         LexiconContainerJPanel.add(SearchJTextField, gridBagConstraints);
 
         NewSenseJButton.setText("New");
-        NewSenseJButton.setEnabled(false);
+        NewSenseJButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NewSenseJButtonActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
         LexiconContainerJPanel.add(NewSenseJButton, gridBagConstraints);
@@ -133,12 +140,23 @@ public class MainJFrame extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.weighty = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         LexiconContainerJPanel.add(jScrollPane1, gridBagConstraints);
+
+        DeleteSenseJButton.setText("Delete");
+        DeleteSenseJButton.setEnabled(false);
+        DeleteSenseJButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DeleteSenseJButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
+        LexiconContainerJPanel.add(DeleteSenseJButton, gridBagConstraints);
 
         LexiconJPanel.add(LexiconContainerJPanel);
 
@@ -149,15 +167,11 @@ public class MainJFrame extends javax.swing.JFrame {
 
         OntologyJPanel.setLayout(new java.awt.GridBagLayout());
 
-        SearchOntologyJTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                SearchOntologyJTextFieldKeyReleased(evt);
-            }
-        });
+        DefinitionJLabel.setText("Select a concept to see its definition");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
-        OntologyJPanel.add(SearchOntologyJTextField, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(3, 2, 3, 2);
+        OntologyJPanel.add(DefinitionJLabel, gridBagConstraints);
 
         OntologyTreeContainerJPanel.setLayout(new java.awt.GridLayout(1, 1));
         OntologyJScrollPane.setViewportView(OntologyTreeContainerJPanel);
@@ -176,8 +190,8 @@ public class MainJFrame extends javax.swing.JFrame {
 
         RightJPanel.setLayout(new java.awt.GridBagLayout());
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        jPanel1.setLayout(new java.awt.GridLayout(1, 1));
+        StanfordIOJPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        StanfordIOJPanel.setLayout(new java.awt.GridLayout(1, 1));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -186,7 +200,7 @@ public class MainJFrame extends javax.swing.JFrame {
         gridBagConstraints.ipady = 52;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 5);
-        RightJPanel.add(jPanel1, gridBagConstraints);
+        RightJPanel.add(StanfordIOJPanel, gridBagConstraints);
 
         InputJTextArea.setColumns(15);
         InputJTextArea.setLineWrap(true);
@@ -277,19 +291,7 @@ public class MainJFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void SearchJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SearchJTextFieldKeyReleased
-        Word word = WIMGlobals.lexicon().word(this.SearchJTextField.getText());
-        
-        LinkedList<Sense> senses = word.listSenses();
-        Collections.sort(senses, new SenseComparator());
-        
-        DefaultListModel model = new DefaultListModel();
-        for (Sense sense : senses) {
-            model.addElement(sense);
-        }
-        this.SensesJList.setModel(model);
-        
-        this.validate();
-        this.repaint();
+        search();
     }//GEN-LAST:event_SearchJTextFieldKeyReleased
 
     private void WIMifyJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WIMifyJButtonActionPerformed
@@ -300,12 +302,24 @@ public class MainJFrame extends javax.swing.JFrame {
         fullProcess();
     }//GEN-LAST:event_FullProcessJButtonActionPerformed
 
-    private void SearchOntologyJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SearchOntologyJTextFieldKeyReleased
-        String concept = this.SearchOntologyJTextField.getText().trim();
-        this.ontologyTree.load(concept);
+    private void NewSenseJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewSenseJButtonActionPerformed
+        NewSenseJDialog d = new NewSenseJDialog(this, true);
+        d.setVisible(true);
+        
+        if (d.isOk()) {
+            Sense sense = d.sense();
+            WIMGlobals.lexicon().addSense(sense);
+            search();
+        }
+    }//GEN-LAST:event_NewSenseJButtonActionPerformed
+
+    private void DeleteSenseJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteSenseJButtonActionPerformed
+        WIMGlobals.lexicon().removeSense(selected);
+        search();
+        this.SenseContainerJPanel.removeAll();
         this.validate();
         this.repaint();
-    }//GEN-LAST:event_SearchOntologyJTextFieldKeyReleased
+    }//GEN-LAST:event_DeleteSenseJButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -349,6 +363,8 @@ public class MainJFrame extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel DefinitionJLabel;
+    private javax.swing.JButton DeleteSenseJButton;
     private javax.swing.JPanel DocumentContainerJPanel;
     private javax.swing.JScrollPane DocumentJScrollPane;
     private javax.swing.JButton FullProcessJButton;
@@ -363,13 +379,12 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JPanel OntologyTreeContainerJPanel;
     private javax.swing.JPanel RightJPanel;
     private javax.swing.JTextField SearchJTextField;
-    private javax.swing.JTextField SearchOntologyJTextField;
     private javax.swing.JPanel SenseContainerJPanel;
     private javax.swing.JList SensesJList;
+    private javax.swing.JPanel StanfordIOJPanel;
     private javax.swing.JButton WIMifyJButton;
     private javax.swing.JPanel WIMsContainerJPanel;
     private javax.swing.JScrollPane WIMsJScrollPane;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -379,6 +394,22 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
 
+    private void search() {
+        Word word = WIMGlobals.lexicon().word(this.SearchJTextField.getText());
+        
+        LinkedList<Sense> senses = word.listSenses();
+        Collections.sort(senses, new SenseComparator());
+        
+        DefaultListModel model = new DefaultListModel();
+        for (Sense sense : senses) {
+            model.addElement(sense);
+        }
+        this.SensesJList.setModel(model);
+        
+        this.validate();
+        this.repaint();
+    }
+    
     private void load(Sense sense) {
         this.SenseContainerJPanel.removeAll();
         
@@ -419,6 +450,12 @@ public class MainJFrame extends javax.swing.JFrame {
         PPDocumentJTree tree = new PPDocumentJTree(document);
         this.DocumentContainerJPanel.add(tree);
         
+        this.validate();
+        this.repaint();
+    }
+    
+    public void setOntologyDefinition(String definition) {
+        this.DefinitionJLabel.setText(definition);
         this.validate();
         this.repaint();
     }
@@ -475,10 +512,13 @@ public class MainJFrame extends javax.swing.JFrame {
         public void valueChanged(ListSelectionEvent lse) {
             Sense sense = (Sense)SensesJList.getSelectedValue();
             if (sense == null) {
+                DeleteSenseJButton.setEnabled(false);
                 return;
             }
             
             load(sense);
+            selected = sense;
+            DeleteSenseJButton.setEnabled(true);
         }
         
     }
@@ -487,14 +527,37 @@ public class MainJFrame extends javax.swing.JFrame {
 
         @Override
         public Component getListCellRendererComponent(JList list, Object o, int i, boolean bln, boolean bln1) {
-            JLabel label = (JLabel)super.getListCellRendererComponent(list, o, i, bln, bln1);
+            
+            JPanel panel = new JPanel();
+            panel.setBackground(Color.WHITE);
+            panel.setBorder(new LineBorder(Color.WHITE, 2));
+            
+            if (i % 2 == 1) {
+                panel.setBackground(new Color(0.9f, 0.95f, 1.0f));
+                panel.setBorder(new LineBorder(Color.WHITE, 1));
+            }
+            
+            if (bln) {
+                panel.setBackground(new Color(0.8f, 0.85f, 1.0f));
+            }
+            
+            panel.setLayout(new GridLayout(2, 1));
             
             if (o instanceof Sense) {
                 Sense sense = (Sense) o;
-                label.setText(sense.getId() + "  " + sense.getDefinition());
+                
+                FLabel idLabel = new FLabel(sense.getId());
+                idLabel.setBold(true);
+                
+                FLabel defLabel = new FLabel(sense.getDefinition());
+                defLabel.setFont(defLabel.getFont().deriveFont(Font.ITALIC));
+                defLabel.setForeground(Color.DARK_GRAY);
+                
+                panel.add(idLabel);
+                panel.add(defLabel);
             }
             
-            return label;
+            return panel;
         }
         
     }

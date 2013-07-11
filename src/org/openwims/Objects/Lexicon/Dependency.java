@@ -5,6 +5,7 @@
 package org.openwims.Objects.Lexicon;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  *
@@ -15,9 +16,9 @@ public class Dependency {
     public String governor;
     public String dependent;
 
-    public HashMap<String, String> expectations;
+    public LinkedList<Expectation> expectations;
 
-    public Dependency(String type, String governor, String dependent, HashMap<String, String> expectations) {
+    public Dependency(String type, String governor, String dependent, LinkedList<Expectation> expectations) {
         this.type = type;
         this.governor = governor;
         this.dependent = dependent;

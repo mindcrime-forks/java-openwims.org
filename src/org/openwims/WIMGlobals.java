@@ -7,6 +7,7 @@ package org.openwims;
 import org.openwims.Objects.Lexicon.Lexicon;
 import org.openwims.Objects.Lexicon.TagMaps;
 import org.openwims.Objects.Ontology.Ontology;
+import org.openwims.UI.MainJFrame;
 
 /**
  *
@@ -14,6 +15,7 @@ import org.openwims.Objects.Ontology.Ontology;
  */
 public class WIMGlobals {
     
+    public static MainJFrame frame = null;
     private static Lexicon lexicon = null;
     private static Ontology ontology = null;
     private static TagMaps tagmaps = null;

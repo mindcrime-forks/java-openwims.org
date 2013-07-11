@@ -74,6 +74,19 @@ public class WIMProcessor {
             framesByToken.put(token, frame);
         }
         
+        //1.5: we rearrange all of the tokens so that we are processing in the
+        //order of V, N + R, J
+        String[] order = new String[] { "V", "N", "R", "J" };
+        LinkedList<PPToken> orderedTokens = new LinkedList();
+        
+        for (String pos : order) {
+            for (PPToken token : sentence.listTokens()) {
+                if (token.rootPOS().equalsIgnoreCase(pos)) {
+                    orderedTokens.add(token);
+                }
+            }
+        }
+        
         //2: disambiguate each WIM frame
         for (PPToken token : sentence.listTokens()) {
             WIMFrame frame = framesByToken.get(token);
@@ -221,11 +234,12 @@ public class WIMProcessor {
                 
         //Now we find the best possible structure for this sense
         WIMProcessor.StructureMatch match = null;
+        STRUCTURELOOP:
         for (WIMProcessor.StructureMatch structure : matchingStructures) {
             //Skip any structure that has a non-optional set that has no match
             for (DependencySet set : structure.structure.listDependencies()) {
                 if (!set.optional && !structure.isDependencySetComplete(set)) {
-                    continue;
+                    continue STRUCTURELOOP;
                 }
             }
             
@@ -266,23 +280,42 @@ public class WIMProcessor {
                    structureMatch.anchorForVariable(wimDep.dependent) != ppDep.getDependent()) {
             return false;
         } else {
-            for (String specification : wimDep.expectations.keySet()) {
-                if (specification.equalsIgnoreCase("pos") && 
-                    !WIMGlobals.tagmaps().doTagsMatch(wimDep.expectations.get(specification), ppDep.getDependent().pos())) {
+            
+            for (Expectation expectation : wimDep.expectations) {
+                if (expectation.getSpecification().equalsIgnoreCase("pos") && 
+                    !WIMGlobals.tagmaps().doTagsMatch(expectation.getExpectation(), ppDep.getDependent().pos())) {
                     return false;
-                } else if (specification.equalsIgnoreCase("token") &&
-                           !(wimDep.expectations.get(specification).equalsIgnoreCase(ppDep.getDependent().lemma()) ||
-                             wimDep.expectations.get(specification).equalsIgnoreCase(ppDep.getDependent().text()))) {
+                } else if (expectation.getSpecification().equalsIgnoreCase("token") &&
+                           !(expectation.getExpectation().equalsIgnoreCase(ppDep.getDependent().lemma()) ||
+                             expectation.getExpectation().equalsIgnoreCase(ppDep.getDependent().text()))) {
                     return false;
-                } else if (specification.equalsIgnoreCase("ont")) {
+                } else if (expectation.getSpecification().equalsIgnoreCase("ont")) {
                     Word w = WIMGlobals.lexicon().word(ppDep.getDependent().lemma());
-                    if (!w.canBeConcept(wimDep.expectations.get(specification))) {
+                    if (!w.canBeConcept(expectation.getExpectation())) {
                         return false;
                     }
-                } else if (specification.equalsIgnoreCase("micro")) {
-                    System.out.println("WARNING: testing for microtheories (" + wimDep.expectations.get(specification) + ") is not yet implemented!");
+                } else if (expectation.getSpecification().equalsIgnoreCase("micro")) {
+                    System.out.println("WARNING: testing for microtheories (" + expectation.getExpectation() + ") is not yet implemented!");
                 }
             }
+            
+//            for (String specification : wimDep.expectations.keySet()) {
+//                if (specification.equalsIgnoreCase("pos") && 
+//                    !WIMGlobals.tagmaps().doTagsMatch(wimDep.expectations.get(specification), ppDep.getDependent().pos())) {
+//                    return false;
+//                } else if (specification.equalsIgnoreCase("token") &&
+//                           !(wimDep.expectations.get(specification).equalsIgnoreCase(ppDep.getDependent().lemma()) ||
+//                             wimDep.expectations.get(specification).equalsIgnoreCase(ppDep.getDependent().text()))) {
+//                    return false;
+//                } else if (specification.equalsIgnoreCase("ont")) {
+//                    Word w = WIMGlobals.lexicon().word(ppDep.getDependent().lemma());
+//                    if (!w.canBeConcept(wimDep.expectations.get(specification))) {
+//                        return false;
+//                    }
+//                } else if (specification.equalsIgnoreCase("micro")) {
+//                    System.out.println("WARNING: testing for microtheories (" + wimDep.expectations.get(specification) + ") is not yet implemented!");
+//                }
+//            }
             
         }
         

@@ -65,24 +65,32 @@ public class TagMaps {
             return true;
         }
         
-        for (String child : this.maps.get(tag1)) {
-            if (child.equals(tag1)) {
-                continue;
+        if (this.maps.containsKey(tag1)) {
+            for (String child : this.maps.get(tag1)) {
+                if (child.equals(tag1)) {
+                    continue;
+                }
+
+                if (doTagsMatch(child, tag2)) {
+                    return true;
+                }
             }
-            
-            if (doTagsMatch(child, tag2)) {
-                return true;
-            }
+        } else {
+            System.out.println(tag1 + " not found in tagmaps");
         }
         
-        for (String child : this.maps.get(tag2)) {
-            if (child.equals(tag2)) {
-                continue;
+        if (this.maps.containsKey(tag2)) {
+            for (String child : this.maps.get(tag2)) {
+                if (child.equals(tag2)) {
+                    continue;
+                }
+
+                if (doTagsMatch(child, tag1)) {
+                    return true;
+                }
             }
-            
-            if (doTagsMatch(child, tag1)) {
-                return true;
-            }
+        } else {
+            System.out.println(tag2 + " not found in tagmaps");
         }
         
         return false;
