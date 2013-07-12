@@ -5,6 +5,7 @@
 package org.openwims.Objects.Preprocessor;
 
 import java.util.LinkedList;
+import org.openwims.WIMGlobals;
 
 /**
  *
@@ -28,6 +29,18 @@ public class PPSentence {
     
     public LinkedList<PPToken> listTokens() {
         return new LinkedList(this.tokens);
+    }
+    
+    public LinkedList<PPToken> listTokens(String pos) {
+        LinkedList<PPToken> tokensByPOS = new LinkedList();
+        
+        for (PPToken token : this.tokens) {
+            if (WIMGlobals.tagmaps().doTagsMatch(token.pos, pos)) {
+                tokensByPOS.add(token);
+            }
+        }
+        
+        return tokensByPOS;
     }
     
     public LinkedList<PPDependency> listDependencies() {
