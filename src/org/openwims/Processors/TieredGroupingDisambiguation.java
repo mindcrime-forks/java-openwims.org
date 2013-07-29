@@ -5,6 +5,7 @@
 package org.openwims.Processors;
 
 import edu.stanford.nlp.pipeline.Annotation;
+import java.util.HashMap;
 import java.util.LinkedList;
 import org.openwims.Objects.Disambiguation.InterpretationSet;
 import org.openwims.Objects.Lexicon.Dependency;
@@ -72,9 +73,56 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
                                 graph.map(verb, mapping);
                             }
                         }
-//                        if (mapping != null) {
-//                            graph.map(verb, mapping);
-//                        }
+                    }
+                }
+            }
+        }
+        
+        //Do the noun trimming here
+        for (PPSentence sentence : document.listSentences()) {
+            for (PPToken noun : sentence.listTokens("N")) {
+                HashMap<Sense, Integer> nounSenseCounts = new HashMap();
+                
+                for (Sense sense : WIMGlobals.lexicon().word(noun.lemma()).listSenses()) {
+                    if (!WIMGlobals.tagmaps().doTagsMatch(noun.pos(), sense.pos())) {
+                        continue;
+                    }
+                    
+                    nounSenseCounts.put(sense, 0);
+                    
+                    for (PPToken verb : graph.verbs.keySet()) {
+                        VERBLOOP:
+                        for (SenseMapping senseMapping : graph.verbs.get(verb)) {
+                            if (senseMapping.senses.get(noun) == sense) {
+                                nounSenseCounts.put(sense, nounSenseCounts.get(sense) + 1);
+                                break VERBLOOP;
+                            }
+                        }
+                    }
+                }
+                
+                int max = 0;
+                LinkedList<Sense> bestSenses = new LinkedList();
+                for (Sense sense : nounSenseCounts.keySet()) {
+                    if (nounSenseCounts.get(sense) > max) {
+                        max = nounSenseCounts.get(sense);
+                        bestSenses.clear();
+                        bestSenses.add(sense);
+                    } else if (nounSenseCounts.get(sense) == max) {
+                        bestSenses.add(sense);
+                    }
+                }
+                
+                for (PPToken verb : graph.verbs.keySet()) {
+                    LinkedList<SenseMapping> toRemove = new LinkedList();
+                    for (SenseMapping senseMapping : graph.verbs.get(verb)) {
+                        if (senseMapping.senses.get(noun) != null && !bestSenses.contains(senseMapping.senses.get(noun))) {
+                            toRemove.add(senseMapping);
+                        }
+                    }
+                    
+                    for (SenseMapping senseMapping : toRemove) {
+                        graph.verbs.get(verb).remove(senseMapping);
                     }
                 }
             }
