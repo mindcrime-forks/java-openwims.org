@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.LinkedList;
-import org.openwims.WIMProcessor;
+import org.openwims.Processors.NaiveDisambiguation;
 
 /**
  *
@@ -22,7 +22,7 @@ public class TagMaps {
     public TagMaps() {
         this.maps = new HashMap();
         
-        InputStream in = WIMProcessor.class.getResourceAsStream("/org/openwims/Assets/tagmaps");
+        InputStream in = NaiveDisambiguation.class.getResourceAsStream("/org/openwims/Assets/tagmaps");
         BufferedReader input = new BufferedReader(new InputStreamReader(in));
 
         String line = null;

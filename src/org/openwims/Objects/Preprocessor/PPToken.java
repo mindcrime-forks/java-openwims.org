@@ -56,5 +56,10 @@ public class PPToken implements Comparable<PPToken> {
     public int compareTo(PPToken t) {
         return this.index - t.index;
     }
+
+    @Override
+    public String toString() {
+        return this.anchor();
+    }
     
 }

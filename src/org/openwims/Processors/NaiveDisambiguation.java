@@ -2,14 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.openwims;
+package org.openwims.Processors;
 
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,18 +17,20 @@ import org.openwims.Objects.WIMAttribute;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Objects.WIMRelation;
 import org.openwims.Stanford.StanfordHelper;
+import org.openwims.WIMGlobals;
 
 /**
- *
+ * @deprecated 
+ * @todo REMOVE
  * @author jesse
  */
-public class WIMProcessor {
+public class NaiveDisambiguation {
         
     public static void main(String[] args) throws Exception {
         String testPath = "/Users/jesseenglish/Desktop/test.stn";
         
         Annotation a = StanfordHelper.load(testPath);
-        LinkedList<WIMFrame> frames = WIMProcessor.WIMify(StanfordHelper.convert(a));
+        LinkedList<WIMFrame> frames = NaiveDisambiguation.WIMify(StanfordHelper.convert(a));
 
         System.out.println(a);
         for (WIMFrame frame : frames) {
@@ -45,7 +42,7 @@ public class WIMProcessor {
         LinkedList<WIMFrame> frames = new LinkedList();
         
         for (PPSentence sentence : document.listSentences()) {
-            frames.addAll(WIMProcessor.WIMify(sentence));
+            frames.addAll(NaiveDisambiguation.WIMify(sentence));
         }
         
         //Now clean up all of the frame instance numbers
@@ -67,7 +64,7 @@ public class WIMProcessor {
     private static LinkedList<WIMFrame> WIMify(PPSentence sentence) { 
         //1: initialize all of the WIM frames, anchored to the token
         HashMap<PPToken, WIMFrame> framesByToken = new HashMap();
-        HashMap<WIMFrame, WIMProcessor.StructureMatch> alignments = new HashMap();
+        HashMap<WIMFrame, NaiveDisambiguation.StructureMatch> alignments = new HashMap();
         
         for (PPToken token : sentence.listTokens()) {
             WIMFrame frame = new WIMFrame(token);
@@ -93,7 +90,7 @@ public class WIMProcessor {
             Word w = WIMGlobals.lexicon().word(token.lemma());
             
             Sense selected = null;
-            WIMProcessor.StructureMatch best = null;
+            NaiveDisambiguation.StructureMatch best = null;
             
             //assumption for now: list of senses is in "best" order
             for (Sense sense : w.listSenses()) {
@@ -101,7 +98,7 @@ public class WIMProcessor {
                     continue;
                 }
                 
-                WIMProcessor.StructureMatch match = match(sentence, frame.getAnchor(), sense);
+                NaiveDisambiguation.StructureMatch match = match(sentence, frame.getAnchor(), sense);
 
                 if (best == null && match != null) {
                     best = match;
@@ -122,7 +119,7 @@ public class WIMProcessor {
         //3: align dependency variables with frames and fill in relations
         for (WIMFrame frame : framesByToken.values()) {
             
-            WIMProcessor.StructureMatch alignment = alignments.get(frame);
+            NaiveDisambiguation.StructureMatch alignment = alignments.get(frame);
             if (alignment == null) {
                 continue;
             }
@@ -200,17 +197,17 @@ public class WIMProcessor {
     // 1) a complete match
     // 2) highest structural complexity (read: count of deps) wins
     // 3) tie: take one closest to top (assume: ranked by frequency of occurrence)
-    private static WIMProcessor.StructureMatch match(PPSentence sentence, PPToken anchor, Sense sense) {
+    private static NaiveDisambiguation.StructureMatch match(PPSentence sentence, PPToken anchor, Sense sense) {
                 
         //Make all of the structures potential matches
-        LinkedList<WIMProcessor.StructureMatch> matchingStructures = new LinkedList();
+        LinkedList<NaiveDisambiguation.StructureMatch> matchingStructures = new LinkedList();
         for (Structure structure : sense.listStructures()) {
-            matchingStructures.add(new WIMProcessor.StructureMatch(structure));
+            matchingStructures.add(new NaiveDisambiguation.StructureMatch(structure));
         }
         
         
         //Go through each structure and kick out those that fail to match
-        for (WIMProcessor.StructureMatch structureMatch : matchingStructures) {
+        for (NaiveDisambiguation.StructureMatch structureMatch : matchingStructures) {
             
             
             //Check each dependency for a match
@@ -233,9 +230,9 @@ public class WIMProcessor {
         }
                 
         //Now we find the best possible structure for this sense
-        WIMProcessor.StructureMatch match = null;
+        NaiveDisambiguation.StructureMatch match = null;
         STRUCTURELOOP:
-        for (WIMProcessor.StructureMatch structure : matchingStructures) {
+        for (NaiveDisambiguation.StructureMatch structure : matchingStructures) {
             //Skip any structure that has a non-optional set that has no match
             for (DependencySet set : structure.structure.listDependencies()) {
                 if (!set.optional && !structure.isDependencySetComplete(set)) {
@@ -253,7 +250,7 @@ public class WIMProcessor {
         return match;
     }
     
-    private static boolean doDependenciesMatch(PPToken anchor, Dependency wimDep, PPDependency ppDep, WIMProcessor.StructureMatch structureMatch) {
+    private static boolean doDependenciesMatch(PPToken anchor, Dependency wimDep, PPDependency ppDep, NaiveDisambiguation.StructureMatch structureMatch) {
         
         
         //Check to see if the dependency type matches

@@ -11,6 +11,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,13 +22,17 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.openwims.Objects.Disambiguation.SenseGraph;
 import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Lexicon.Word;
 import org.openwims.Objects.Preprocessor.PPDocument;
-import org.openwims.Objects.WIMFrame;
+import org.openwims.Objects.WIM;
+import org.openwims.Processors.TieredGroupingDisambiguation;
+import org.openwims.Processors.WIMProcessor;
+import org.openwims.Processors.WIMProcessor.WSDProcessor;
+import org.openwims.Processors.WIMProcessor.WSEProcessor;
 import org.openwims.Stanford.StanfordHelper;
 import org.openwims.WIMGlobals;
-import org.openwims.WIMProcessor;
 
 /**
  *
@@ -37,6 +43,16 @@ public class MainJFrame extends javax.swing.JFrame {
     private PPDocument document;
     private OntologyJTree ontologyTree;
     private Sense selected;
+    
+    
+    
+    private WSDProcessor wsdProcessor;
+    private WSEProcessor wseProcessor;
+    private WIMProcessor wimProcessor;
+    
+    private ButtonGroup wsdProcessorGroup;
+    private ButtonGroup wseProcessorGroup;
+    private ButtonGroup wimProcessorGroup;
     
     /**
      * Creates new form MainJFrame
@@ -63,6 +79,21 @@ public class MainJFrame extends javax.swing.JFrame {
         this.DocumentJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         this.WIMsJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         this.OntologyJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        
+        
+        this.wsdProcessorGroup = new ButtonGroup();
+        this.wseProcessorGroup = new ButtonGroup();
+        this.wimProcessorGroup = new ButtonGroup();
+        
+        
+        this.wseProcessor = new TieredGroupingDisambiguation();
+        this.wsdProcessor = new TieredGroupingDisambiguation();
+        this.wimProcessor = new WIMProcessor() {};
+        
+        
+        this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping", this.wseProcessor));
+        this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping", this.wsdProcessor));
+        this.WIMJMenu.add(new WIMJMenuItem("Default Wimify", this.wimProcessor));
     }
 
     /**
@@ -104,6 +135,11 @@ public class MainJFrame extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         LogJTextArea = new javax.swing.JTextArea();
+        MainJMenuBar = new javax.swing.JMenuBar();
+        OptionsJMenu = new javax.swing.JMenu();
+        WSEJMenu = new javax.swing.JMenu();
+        WSDJMenu = new javax.swing.JMenu();
+        WIMJMenu = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("WIMs Explorer");
@@ -287,6 +323,21 @@ public class MainJFrame extends javax.swing.JFrame {
 
         getContentPane().add(RightJPanel);
 
+        OptionsJMenu.setText("Options");
+
+        WSEJMenu.setText("WSE Processor");
+        OptionsJMenu.add(WSEJMenu);
+
+        WSDJMenu.setText("WSD Processor");
+        OptionsJMenu.add(WSDJMenu);
+
+        WIMJMenu.setText("WIM Processor");
+        OptionsJMenu.add(WIMJMenu);
+
+        MainJMenuBar.add(OptionsJMenu);
+
+        setJMenuBar(MainJMenuBar);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -373,18 +424,23 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JPanel LexiconContainerJPanel;
     private javax.swing.JPanel LexiconJPanel;
     private javax.swing.JTextArea LogJTextArea;
+    private javax.swing.JMenuBar MainJMenuBar;
     private javax.swing.JButton NewSenseJButton;
     private javax.swing.JPanel OntologyJPanel;
     private javax.swing.JScrollPane OntologyJScrollPane;
     private javax.swing.JPanel OntologyTreeContainerJPanel;
+    private javax.swing.JMenu OptionsJMenu;
     private javax.swing.JPanel RightJPanel;
     private javax.swing.JTextField SearchJTextField;
     private javax.swing.JPanel SenseContainerJPanel;
     private javax.swing.JList SensesJList;
     private javax.swing.JPanel StanfordIOJPanel;
+    private javax.swing.JMenu WIMJMenu;
     private javax.swing.JButton WIMifyJButton;
     private javax.swing.JPanel WIMsContainerJPanel;
     private javax.swing.JScrollPane WIMsJScrollPane;
+    private javax.swing.JMenu WSDJMenu;
+    private javax.swing.JMenu WSEJMenu;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -427,10 +483,10 @@ public class MainJFrame extends javax.swing.JFrame {
         this.repaint();
     }
     
-    private void load(LinkedList<WIMFrame> frames) {
+    private void load(LinkedList<WIM> wims) {
         this.WIMsContainerJPanel.removeAll();
         
-        WIMSJTree tree = new WIMSJTree(frames);
+        WIMSJTree tree = new WIMSJTree(wims);
         tree.addSenseSelectionListener(new WIMSJTree.SenseSelectionListener() {
             @Override
             public void senseSelected(Sense sense) {
@@ -486,8 +542,9 @@ public class MainJFrame extends javax.swing.JFrame {
             return;
         }
         
-        LinkedList<WIMFrame> frames = WIMProcessor.WIMify(this.document);
-        load(frames);
+        SenseGraph wse = this.wseProcessor.wse(document);
+        LinkedList<WIM> wims = this.wimProcessor.wimify(wse);
+        load(wims);
     }
     
     
@@ -567,6 +624,78 @@ public class MainJFrame extends javax.swing.JFrame {
         @Override
         public int compare(Sense t, Sense t1) {
             return t.getId().compareTo(t1.getId());
+        }
+        
+    }
+    
+    private class WSEJMenuItem extends JRadioButtonMenuItem implements ActionListener {
+        
+        private WSEProcessor processor;
+
+        public WSEJMenuItem(String label, WSEProcessor processor) {
+            super(label);
+            this.processor = processor;
+            this.addActionListener(this);
+            
+            if (MainJFrame.this.wseProcessor == processor) {
+                this.setSelected(true);
+            }
+            
+            MainJFrame.this.wseProcessorGroup.add(this);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            MainJFrame.this.wseProcessor = processor;
+            this.setSelected(true);
+        }
+        
+    }
+    
+    private class WSDJMenuItem extends JRadioButtonMenuItem implements ActionListener {
+        
+        private WSDProcessor processor;
+
+        public WSDJMenuItem(String label, WSDProcessor processor) {
+            super(label);
+            this.processor = processor;
+            this.addActionListener(this);
+            
+            if (MainJFrame.this.wsdProcessor == processor) {
+                this.setSelected(true);
+            }
+            
+            MainJFrame.this.wsdProcessorGroup.add(this);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            MainJFrame.this.wsdProcessor = processor;
+            this.setSelected(true);
+        }
+        
+    }
+    
+    private class WIMJMenuItem extends JRadioButtonMenuItem implements ActionListener {
+        
+        private WIMProcessor processor;
+
+        public WIMJMenuItem(String label, WIMProcessor processor) {
+            super(label);
+            this.processor = processor;
+            this.addActionListener(this);
+            
+            if (MainJFrame.this.wimProcessor == processor) {
+                this.setSelected(true);
+            }
+            
+            MainJFrame.this.wimProcessorGroup.add(this);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            MainJFrame.this.wimProcessor = processor;
+            this.setSelected(true);
         }
         
     }

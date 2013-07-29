@@ -17,6 +17,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import org.openwims.Objects.Lexicon.Sense;
+import org.openwims.Objects.WIM;
 import org.openwims.Objects.WIMAttribute;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Objects.WIMRelation;
@@ -34,10 +35,10 @@ public class WIMSJTree extends FTree {
     private static ImageIcon ATTRIBUTE = new ImageIcon(WIMSJTree.class.getResource("/images/node-green.png"));
     private static ImageIcon ANNOTATION = new ImageIcon(WIMSJTree.class.getResource("/images/node-black.png"));
     
-    private LinkedList<WIMFrame> wims;
+    private LinkedList<WIM> wims;
     private LinkedList<SenseSelectionListener> listeners;
 
-    public WIMSJTree(LinkedList<WIMFrame> wims) {
+    public WIMSJTree(LinkedList<WIM> wims) {
         this.wims = wims;
         this.listeners = new LinkedList();
     
@@ -56,14 +57,35 @@ public class WIMSJTree extends FTree {
     
     private class WIMSNode extends FNode {
         
-        private LinkedList<WIMFrame> wims;
+        private LinkedList<WIM> wims;
 
-        public WIMSNode(LinkedList<WIMFrame> wims) {
-            super("WIMs");
+        public WIMSNode(LinkedList<WIM> wims) {
+            super("WIMs (" + wims.size() + " interpretations) - showing MAX 100");
             this.wims = wims;
             setIcon(FRAMES);
             
-            for (WIMFrame frame : wims) {
+            int max = 100;
+            if (wims.size() < 100) {
+                max = wims.size();
+            }
+            
+            for (int i = 0; i < max; i++) {
+                this.add(new WIMNode(wims.get(i)));
+            }
+            
+        }
+        
+    }
+    
+    private class WIMNode extends FNode {
+        
+        private WIM wim;
+
+        public WIMNode(WIM wim) {
+            super("WIM");
+            this.wim = wim;
+            setIcon(FRAMES);
+            for (WIMFrame frame : wim.listFrames()) {
                 this.add(new WIMFrameNode(frame));
             }
         }

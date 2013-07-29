@@ -25,7 +25,8 @@ import org.openwims.Stanford.StanfordHelper;
 import org.openwims.WIMGlobals;
 
 /**
- *
+ * @deprecated 
+ * @todo REMOVE
  * @author jesseenglish
  */
 public class TieredDisambiguation {
@@ -358,12 +359,13 @@ public class TieredDisambiguation {
                     WIMAttribute attribute = new WIMAttribute(meaning.relation, meaning.wim);
                     frame.addAttribute(attribute);
                 }
-            }
-            
+            } 
+           
             //If the frame has anything in it, add it to the output
-            if (frame.listRelations().size() > 0 || frame.listAttributes().size() > 0 || frame.listInverses().size() > 0) {
-                frames.add(frame);
-            }
+//            if (frame.listRelations().size() > 0 || frame.listAttributes().size() > 0 || frame.listInverses().size() > 0) {
+//                frames.add(frame);
+//            }
+            frames.add(frame);
         }
         
         return frames;

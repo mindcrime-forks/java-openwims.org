@@ -26,7 +26,7 @@ import org.openwims.Objects.Preprocessor.PPToken;
 public class StanfordPPDocument extends PPDocument {
     
 //    private HashMap<CoreLabel, PPToken> tokenMap;
-    private HashMap<IndexedWord, PPToken> tokenMap;
+    private HashMap<CoreMap, HashMap<IndexedWord, PPToken>> tokenMap;
 
     public StanfordPPDocument(Annotation document) {
         super();
@@ -39,13 +39,15 @@ public class StanfordPPDocument extends PPDocument {
 //                tokenMap.put(token, new StanfordPPToken(token));
 //            }
 //        }
-        for (CoreMap sentence : stanfordSentences) {            
+        for (CoreMap sentence : stanfordSentences) { 
+            HashMap<IndexedWord, PPToken> innerTokenMap = new HashMap();
+            tokenMap.put(sentence, innerTokenMap);
             for (SemanticGraphEdge edge : sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).getEdgeSet()) {
-                if (tokenMap.get(edge.getGovernor()) == null) {
-                    tokenMap.put(edge.getGovernor(), new StanfordPPToken(edge.getGovernor()));
+                if (innerTokenMap.get(edge.getGovernor()) == null) {
+                    innerTokenMap.put(edge.getGovernor(), new StanfordPPToken(edge.getGovernor()));
                 }
-                if (tokenMap.get(edge.getDependent()) == null) {
-                    tokenMap.put(edge.getDependent(), new StanfordPPToken(edge.getDependent()));
+                if (innerTokenMap.get(edge.getDependent()) == null) {
+                    innerTokenMap.put(edge.getDependent(), new StanfordPPToken(edge.getDependent()));
                 }
             }
         }
@@ -65,11 +67,16 @@ public class StanfordPPDocument extends PPDocument {
             
             SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
             for (SemanticGraphEdge edge : graph.getEdgeSet()) {
-                this.dependencies.add(new StanfordPPDependency(edge));
+                this.dependencies.add(new StanfordPPDependency(sentence, edge));
             }
             
             for (IndexedWord word : graph.topologicalSort()) {
-                this.tokens.add(StanfordPPDocument.this.tokenMap.get(word));
+                PPToken token = StanfordPPDocument.this.tokenMap.get(sentence).get(word);
+                if (token == null) {
+                    continue;
+                }
+                
+                this.tokens.add(token);
             }
             
             Collections.sort(this.tokens);
@@ -79,12 +86,12 @@ public class StanfordPPDocument extends PPDocument {
     
     private class StanfordPPDependency extends PPDependency {
 
-        public StanfordPPDependency(SemanticGraphEdge edge) {
+        public StanfordPPDependency(CoreMap sentence, SemanticGraphEdge edge) {
             super();
             
             this.type = edge.getRelation().getShortName();
-            this.governor = StanfordPPDocument.this.tokenMap.get(edge.getGovernor());
-            this.dependent = StanfordPPDocument.this.tokenMap.get(edge.getDependent());
+            this.governor = StanfordPPDocument.this.tokenMap.get(sentence).get(edge.getGovernor());
+            this.dependent = StanfordPPDocument.this.tokenMap.get(sentence).get(edge.getDependent());
         }
         
     }
