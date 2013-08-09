@@ -38,9 +38,6 @@ public class Lexicon {
     
     public static Connection conn() throws Exception {
         if (Lexicon.conn == null) {
-//            Class.forName("org.sqlite.JDBC");            
-//            Lexicon.conn = DriverManager.getConnection("jdbc:sqlite:wims.sql");
-            
             String url = "jdbc:postgresql://localhost/OpenWIMs";
             String user = "jesse";
             String pass = "";
@@ -121,7 +118,7 @@ public class Lexicon {
     }
 
     public Word word(String representation) {
-        
+                
         if (this.words.get(representation) != null) {
             return this.words.get(representation);
         }

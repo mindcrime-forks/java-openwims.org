@@ -7,6 +7,7 @@ package org.openwims;
 import org.openwims.Objects.Lexicon.Lexicon;
 import org.openwims.Objects.Lexicon.TagMaps;
 import org.openwims.Objects.Ontology.Ontology;
+import org.openwims.Processors.Microtheories.MicrotheoryManager;
 import org.openwims.UI.MainJFrame;
 
 /**
@@ -19,6 +20,15 @@ public class WIMGlobals {
     private static Lexicon lexicon = null;
     private static Ontology ontology = null;
     private static TagMaps tagmaps = null;
+    private static MicrotheoryManager microtheories = null;
+    
+    public static MicrotheoryManager microtheories() {
+        if (WIMGlobals.microtheories == null) {
+            WIMGlobals.microtheories = new MicrotheoryManager();
+        }
+        
+        return WIMGlobals.microtheories;
+    }
     
     public static TagMaps tagmaps() {
         if (WIMGlobals.tagmaps == null) {

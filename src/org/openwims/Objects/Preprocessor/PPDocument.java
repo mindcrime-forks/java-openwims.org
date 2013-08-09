@@ -30,4 +30,8 @@ public class PPDocument {
         return out.trim();
     }
     
+    public void addSentence(PPSentence sentence) {
+        this.sentences.add(sentence);
+    }
+    
 }

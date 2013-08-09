@@ -7,6 +7,7 @@ package org.openwims.UI;
 import com.jesseenglish.swingftfy.extensions.FLabel;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
@@ -18,6 +19,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -31,6 +34,7 @@ import org.openwims.Processors.TieredGroupingDisambiguation;
 import org.openwims.Processors.WIMProcessor;
 import org.openwims.Processors.WIMProcessor.WSDProcessor;
 import org.openwims.Processors.WIMProcessor.WSEProcessor;
+import org.openwims.Serialization.JSONPPDocumentSerializer;
 import org.openwims.Stanford.StanfordHelper;
 import org.openwims.WIMGlobals;
 
@@ -69,9 +73,9 @@ public class MainJFrame extends javax.swing.JFrame {
         this.document = null;
         
         FileDropJPanel fileDropJPanel = new FileDropJPanel();
-        fileDropJPanel.addFilesDraggedListener(new StanfordFilesDraggedEventListener());
+        fileDropJPanel.addFilesDraggedListener(new PPFilesDraggedEventListener());
         
-        this.StanfordIOJPanel.add(fileDropJPanel);
+        this.DocumentContainerJPanel.add(fileDropJPanel);
         
         this.SensesJList.addListSelectionListener(new SensesListSelectionListener());
         this.SensesJList.setCellRenderer(new SensesListCellRenderer());
@@ -120,11 +124,14 @@ public class MainJFrame extends javax.swing.JFrame {
         OntologyJScrollPane = new javax.swing.JScrollPane();
         OntologyTreeContainerJPanel = new javax.swing.JPanel();
         RightJPanel = new javax.swing.JPanel();
-        StanfordIOJPanel = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         InputJTextArea = new javax.swing.JTextArea();
+        jToolBar1 = new javax.swing.JToolBar();
         FullProcessJButton = new javax.swing.JButton();
         WIMifyJButton = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JToolBar.Separator();
+        SavePPJButton = new javax.swing.JButton();
+        LoadPPJButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel3 = new javax.swing.JPanel();
@@ -226,17 +233,7 @@ public class MainJFrame extends javax.swing.JFrame {
 
         RightJPanel.setLayout(new java.awt.GridBagLayout());
 
-        StanfordIOJPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        StanfordIOJPanel.setLayout(new java.awt.GridLayout(1, 1));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.ipadx = 52;
-        gridBagConstraints.ipady = 52;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 5);
-        RightJPanel.add(StanfordIOJPanel, gridBagConstraints);
+        jScrollPane2.setMinimumSize(new java.awt.Dimension(23, 52));
 
         InputJTextArea.setColumns(15);
         InputJTextArea.setLineWrap(true);
@@ -247,38 +244,66 @@ public class MainJFrame extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         RightJPanel.add(jScrollPane2, gridBagConstraints);
 
-        FullProcessJButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/process.png"))); // NOI18N
-        FullProcessJButton.setPreferredSize(new java.awt.Dimension(36, 36));
+        jToolBar1.setFloatable(false);
+        jToolBar1.setRollover(true);
+
+        FullProcessJButton.setText("Full Process");
+        FullProcessJButton.setFocusable(false);
+        FullProcessJButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        FullProcessJButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         FullProcessJButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 FullProcessJButtonActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
-        RightJPanel.add(FullProcessJButton, gridBagConstraints);
+        jToolBar1.add(FullProcessJButton);
 
-        WIMifyJButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/rerun.png"))); // NOI18N
-        WIMifyJButton.setEnabled(false);
-        WIMifyJButton.setPreferredSize(new java.awt.Dimension(36, 36));
+        WIMifyJButton.setText("WIMify");
+        WIMifyJButton.setFocusable(false);
+        WIMifyJButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        WIMifyJButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         WIMifyJButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 WIMifyJButtonActionPerformed(evt);
             }
         });
+        jToolBar1.add(WIMifyJButton);
+        jToolBar1.add(jSeparator1);
+
+        SavePPJButton.setText("Save PP");
+        SavePPJButton.setFocusable(false);
+        SavePPJButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        SavePPJButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        SavePPJButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SavePPJButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(SavePPJButton);
+
+        LoadPPJButton.setText("Load PP");
+        LoadPPJButton.setFocusable(false);
+        LoadPPJButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        LoadPPJButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        LoadPPJButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LoadPPJButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(LoadPPJButton);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
-        RightJPanel.add(WIMifyJButton, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        RightJPanel.add(jToolBar1, gridBagConstraints);
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 0));
 
@@ -314,7 +339,6 @@ public class MainJFrame extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.weighty = 0.1;
@@ -345,14 +369,6 @@ public class MainJFrame extends javax.swing.JFrame {
         search();
     }//GEN-LAST:event_SearchJTextFieldKeyReleased
 
-    private void WIMifyJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WIMifyJButtonActionPerformed
-        wimify();
-    }//GEN-LAST:event_WIMifyJButtonActionPerformed
-
-    private void FullProcessJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FullProcessJButtonActionPerformed
-        fullProcess();
-    }//GEN-LAST:event_FullProcessJButtonActionPerformed
-
     private void NewSenseJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewSenseJButtonActionPerformed
         NewSenseJDialog d = new NewSenseJDialog(this, true);
         d.setVisible(true);
@@ -371,6 +387,22 @@ public class MainJFrame extends javax.swing.JFrame {
         this.validate();
         this.repaint();
     }//GEN-LAST:event_DeleteSenseJButtonActionPerformed
+
+    private void FullProcessJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FullProcessJButtonActionPerformed
+        fullProcess();
+    }//GEN-LAST:event_FullProcessJButtonActionPerformed
+
+    private void WIMifyJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WIMifyJButtonActionPerformed
+        wimify();
+    }//GEN-LAST:event_WIMifyJButtonActionPerformed
+
+    private void SavePPJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SavePPJButtonActionPerformed
+        savePP();
+    }//GEN-LAST:event_SavePPJButtonActionPerformed
+
+    private void LoadPPJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoadPPJButtonActionPerformed
+        loadPP();
+    }//GEN-LAST:event_LoadPPJButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -423,6 +455,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JTabbedPane LeftJTabbedPane;
     private javax.swing.JPanel LexiconContainerJPanel;
     private javax.swing.JPanel LexiconJPanel;
+    private javax.swing.JButton LoadPPJButton;
     private javax.swing.JTextArea LogJTextArea;
     private javax.swing.JMenuBar MainJMenuBar;
     private javax.swing.JButton NewSenseJButton;
@@ -431,10 +464,10 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JPanel OntologyTreeContainerJPanel;
     private javax.swing.JMenu OptionsJMenu;
     private javax.swing.JPanel RightJPanel;
+    private javax.swing.JButton SavePPJButton;
     private javax.swing.JTextField SearchJTextField;
     private javax.swing.JPanel SenseContainerJPanel;
     private javax.swing.JList SensesJList;
-    private javax.swing.JPanel StanfordIOJPanel;
     private javax.swing.JMenu WIMJMenu;
     private javax.swing.JButton WIMifyJButton;
     private javax.swing.JPanel WIMsContainerJPanel;
@@ -447,9 +480,40 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JToolBar jToolBar1;
     // End of variables declaration//GEN-END:variables
 
+    private void loadPP() {
+        try {
+            FileDialog d = new FileDialog(this, "Load PP Document", FileDialog.LOAD);
+            d.setVisible(true);
+
+            if (d.getDirectory() != null && d.getFile() != null) {
+                String file = d.getDirectory() + "/" + d.getFile();
+                PPDocument document = JSONPPDocumentSerializer.deserialize(file);
+                setDocument(document);
+            } 
+        } catch (Exception ex) {
+            Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void savePP() {
+        try {
+            FileDialog d = new FileDialog(this, "Save PP Document", FileDialog.SAVE);
+            d.setVisible(true);
+            
+            if (d.getDirectory() != null && d.getFile() != null) {
+                String file = d.getDirectory() + "/" + d.getFile();
+                JSONPPDocumentSerializer.serialize(document, file);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     private void search() {
         Word word = WIMGlobals.lexicon().word(this.SearchJTextField.getText());
         
@@ -504,6 +568,7 @@ public class MainJFrame extends javax.swing.JFrame {
         this.DocumentContainerJPanel.removeAll();
         
         PPDocumentJTree tree = new PPDocumentJTree(document);
+        tree.addFilesDraggedListener(new PPFilesDraggedEventListener());
         this.DocumentContainerJPanel.add(tree);
         
         this.validate();
@@ -548,12 +613,12 @@ public class MainJFrame extends javax.swing.JFrame {
     }
     
     
-    private class StanfordFilesDraggedEventListener implements FileDropJPanel.FilesDraggedListener {
+    private class PPFilesDraggedEventListener implements FileDropJPanel.FilesDraggedListener {
 
         @Override
         public void filesDraggedEvent(List<File> files) {
             try {
-                setDocument(StanfordHelper.convert(StanfordHelper.load(files.get(0).getAbsolutePath())));
+                setDocument(JSONPPDocumentSerializer.deserialize(files.get(0).getAbsolutePath()));
             } catch (Exception err) {
                 err.printStackTrace();
             }

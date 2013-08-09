@@ -380,7 +380,7 @@ public class SenseJTree extends FTree {
                 JPopupMenu menu = new JPopupMenu();
                 menu.add(new EditExpectationJMenuItem(this.expectation));
                 menu.add(new DeleteExpectationJMenuItem(this.dependency, this.expectation));
-
+                
                 Rectangle r = SenseJTree.this.getPathBounds(SenseJTree.this.getPath(this));
                 menu.show(SenseJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
             }

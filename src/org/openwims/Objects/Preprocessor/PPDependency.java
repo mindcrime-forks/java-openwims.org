@@ -37,4 +37,16 @@ public class PPDependency {
         return this.type + "(" + this.governor.anchor() + ", " + this.dependent.anchor() + ")";
     }
     
+    public void setType(String type) {
+        this.type = type;
+    }
+    
+    public void setGovernor(PPToken governor) {
+        this.governor = governor;
+    }
+    
+    public void setDependent(PPToken dependent) {
+        this.dependent = dependent;
+    }
+    
 }

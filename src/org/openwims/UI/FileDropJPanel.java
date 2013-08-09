@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
+import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,12 +69,30 @@ public class FileDropJPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+    
         if (dragOver) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setColor(new Color(0, 255, 0, 64));
-            g2d.fill(new Rectangle(getWidth(), getHeight()));
-            g2d.dispose();
+            g2d.setColor(Color.DARK_GRAY);
+            g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {2.0f}, 0.0f));
+            g2d.draw(new RoundRectangle2D.Double(10, 10, getWidth() - 20, getHeight() - 20, 10, 10));
+            
+            String message = "Release to Load and WIMify";
+            float messageWidth = g2d.getFontMetrics().stringWidth(message);
+            g2d.drawString(message, (getWidth() / 2) - (messageWidth / 2), getHeight() / 2);
+        } else {
+            g2d.setColor(Color.LIGHT_GRAY);
+            g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {2.0f}, 0.0f));
+            g2d.draw(new RoundRectangle2D.Double(10, 10, getWidth() - 20, getHeight() - 20, 10, 10));
+            
+            String message = "Drag a PP File or Full Process above";
+            float messageWidth = g2d.getFontMetrics().stringWidth(message);
+            g2d.drawString(message, (getWidth() / 2) - (messageWidth / 2), getHeight() / 2);
         }
+        
+        g2d.dispose();
     }
 
     protected void importFiles(final List files) {

@@ -49,7 +49,7 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
 
     @Override
     public void saveSense(Sense sense) throws Exception {
-        
+                
         StringBuilder builder = new StringBuilder("");
         
         //BEGIN

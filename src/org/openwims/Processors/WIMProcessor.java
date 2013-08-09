@@ -90,7 +90,7 @@ public abstract class WIMProcessor {
         
         return satisfying;
     }
-    
+
     protected boolean doesSenseSatisfyExpectations(Sense sense, LinkedList<Expectation> expectations) {
         for (Expectation expectation : expectations) {
             if (expectation.getSpecification().equalsIgnoreCase("pos") && 
@@ -104,7 +104,7 @@ public abstract class WIMProcessor {
                     return false;
                 }
             } else if (expectation.getSpecification().equalsIgnoreCase("micro")) {
-                System.out.println("WARNING: testing for microtheories (" + expectation.getExpectation() + ") is not yet implemented!");
+                return WIMGlobals.microtheories().test(expectation.getExpectation(), sense);
             }
         }
         

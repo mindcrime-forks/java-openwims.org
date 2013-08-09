@@ -47,4 +47,30 @@ public class PPSentence {
         return new LinkedList(this.dependencies);
     }
     
+    public void setText(String text) {
+        this.text = text;
+    }
+    
+    public void addToken(PPToken token) {
+        this.tokens.add(token);
+    }
+    
+    public void addDependency(PPDependency dependency) {
+        this.dependencies.add(dependency);
+    }
+    
+    public PPToken tokenWithAnchor(String anchor) {
+        for (PPToken token : tokens) {
+            if (token.anchor().equals(anchor)) {
+                return token;
+            }
+        }
+        
+        return null;
+    }
+    
+    public void removeDependency(PPDependency dependency) {
+        this.dependencies.remove(dependency);
+    }
+    
 }

@@ -24,11 +24,11 @@ public class Structure {
     public void removeDependencySet(DependencySet set) {
         this.dependencies.remove(set);
     }
-
+    
     public LinkedList<DependencySet> listDependencies() {
         return new LinkedList(this.dependencies);
     }
-
+    
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder();

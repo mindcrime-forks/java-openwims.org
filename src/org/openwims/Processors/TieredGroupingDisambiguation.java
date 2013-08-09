@@ -72,9 +72,6 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
                                 graph.map(verb, mapping);
                             }
                         }
-//                        if (mapping != null) {
-//                            graph.map(verb, mapping);
-//                        }
                     }
                 }
             }

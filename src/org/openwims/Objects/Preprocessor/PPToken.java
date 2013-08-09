@@ -24,6 +24,20 @@ public class PPToken implements Comparable<PPToken> {
         this.pos = "";
     }
     
+    public void setAnchor(String anchor) {
+        String[] parts = anchor.split("-");
+        this.text = parts[0];
+        this.index = Integer.parseInt(parts[1]);
+    }
+    
+    public void setLemma(String lemma) {
+        this.lemma = lemma;
+    }
+    
+    public void setPOS(String pos) {
+        this.pos = pos;
+    }
+    
     public String anchor() {
         return this.text + "-" + this.index;
     }
