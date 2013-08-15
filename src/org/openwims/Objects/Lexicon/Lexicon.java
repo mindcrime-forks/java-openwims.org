@@ -152,7 +152,8 @@ public class Lexicon {
                                         
                     Structure structure = structures.get(series);
                     if (structure == null) {
-                        structure = sense.addStructure();
+                        structure = new Structure();
+                        sense.addStructure(structure);
                         structures.put(series, structure);
                     }
                     

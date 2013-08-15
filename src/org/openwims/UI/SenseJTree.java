@@ -711,7 +711,7 @@ public class SenseJTree extends FTree {
 
         @Override
         public void actionPerformed(ActionEvent ae) {
-            this.sense.addStructure();
+            this.sense.addStructure(new Structure());
             SenseJTree.this.refresh();
         }
         

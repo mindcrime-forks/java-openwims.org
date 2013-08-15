@@ -40,10 +40,8 @@ public class Sense {
         return definition;
     }
     
-    public Structure addStructure() {
-        Structure s = new Structure();
-        this.structures.add(s);
-        return s;
+    public void addStructure(Structure structure) {
+        this.structures.add(structure);
     }
     
     public void removeStructure(Structure structure) {

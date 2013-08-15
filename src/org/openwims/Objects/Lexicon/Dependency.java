@@ -4,7 +4,6 @@
  */
 package org.openwims.Objects.Lexicon;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
