@@ -64,7 +64,8 @@ public abstract class WIMProcessor {
                    mapping.anchorForVariable(wimDep.dependent) != ppDep.getDependent()) {
             return false;
         } else {
-            if (listSatisfyingSenses(ppDep.getDependent(), wimDep.expectations).size() == 0) {
+            if (listSatisfyingSenses(ppDep.getDependent(), wimDep.expectations).size() == 0 &&
+                !doesTokenSatisfyExpectations(ppDep.getDependent(), wimDep.expectations)) {
                 return false;
             }
         }
@@ -89,6 +90,25 @@ public abstract class WIMProcessor {
         }
         
         return satisfying;
+    }
+    
+    protected boolean doesTokenSatisfyExpectations(PPToken token, LinkedList<Expectation> expectations) {
+        for (Expectation expectation : expectations) {
+            if (expectation.getSpecification().equalsIgnoreCase("pos") && 
+                !WIMGlobals.tagmaps().doTagsMatch(expectation.getExpectation(), token.pos())) {
+                return false;
+            } else if (expectation.getSpecification().equalsIgnoreCase("token") &&
+                       !(expectation.getExpectation().equalsIgnoreCase(token.lemma()))) {
+                return false;
+            } else if (expectation.getSpecification().equalsIgnoreCase("ont")) {
+                //A token cannot satisfy ONT; this must be false
+                return false;
+            } else if (expectation.getSpecification().equalsIgnoreCase("micro")) {
+                //A token cannot satisfy MICRO; this must be false
+            }
+        }
+        
+        return true;
     }
 
     protected boolean doesSenseSatisfyExpectations(Sense sense, LinkedList<Expectation> expectations) {

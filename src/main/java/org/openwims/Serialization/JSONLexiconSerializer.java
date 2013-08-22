@@ -27,7 +27,7 @@ import org.openwims.Objects.Lexicon.Structure;
  * @author jesseenglish
  */
 public class JSONLexiconSerializer {
-    
+
     public static Sense deserialize(String file) throws Exception {
         String contents = read(file);
         JSONObject o = (JSONObject)JSONValue.parse(contents);
@@ -139,7 +139,7 @@ public class JSONLexiconSerializer {
     
     private static String json(Sense sense) {
         StringBuilder json = new StringBuilder();
-        
+
         json.append("{");
         
         json.append("\"id\": \"");

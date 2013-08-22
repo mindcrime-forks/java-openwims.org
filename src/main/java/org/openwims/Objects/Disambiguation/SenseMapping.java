@@ -53,6 +53,10 @@ public class SenseMapping {
     }
 
     public PPToken anchorForVariable(String variable) {
+        if (variable.equalsIgnoreCase("SELF")) {
+            return anchor;
+        }
+        
         for (Dependency dependency : this.mappings.keySet()) {
             PPDependency ppDependency = this.mappings.get(dependency);
             if (dependency.governor.equals(variable)) {

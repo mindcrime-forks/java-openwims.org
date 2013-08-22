@@ -37,4 +37,20 @@ public class InterpretationSet {
 
         return false;
     }
+    
+    public boolean doesMappingCoverTokens(LinkedList<PPToken> tokens) {
+        TOKENS:
+        for (PPToken token : tokens) {
+            for (SenseMapping mapping : this.mappings) {
+                if (mapping.anchor == token || mapping.senses.containsKey(token)) {
+                    continue TOKENS;
+                }
+            }
+            
+            //no match found
+            return false;
+        }
+        
+        return true;
+    }
 }

@@ -90,7 +90,11 @@ public class Sense {
         }
         
         if (this.id.contains("-")) {
-            return Integer.parseInt(this.id.split(":")[1].split("-")[2].trim());
+            String rhs = this.id.split(":")[1];
+            String[] parts = rhs.split("-");
+            String instance = parts[parts.length - 1].trim();
+            
+            return Integer.parseInt(instance);
         }
         
         return -1;

@@ -5,7 +5,10 @@
 package org.openwims.Processors;
 
 import edu.stanford.nlp.pipeline.Annotation;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import org.openwims.Objects.Disambiguation.InterpretationSet;
 import org.openwims.Objects.Lexicon.Dependency;
@@ -136,6 +139,19 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
             buildInterpretation_RECURSIVE(verbs, set, graph);
         }
         
+        //Trim all interpretations sets that don't cover at least all N and V
+        LinkedList<PPToken> nounsAndVerbs = new LinkedList();
+        for (PPSentence sentence : document.listSentences()) {
+            nounsAndVerbs.addAll(sentence.listTokens("V"));
+            nounsAndVerbs.addAll(sentence.listTokens("N"));
+        }
+        for (Iterator<InterpretationSet> it = graph.interpretations.iterator(); it.hasNext();) {
+            InterpretationSet interpretationSet = it.next();
+            if (!interpretationSet.doesMappingCoverTokens(nounsAndVerbs)) {
+                it.remove();
+            }
+        }
+
         return graph;
     }
     
@@ -196,6 +212,8 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
     
     private LinkedList<SenseMapping> buildMappings_RECURSIVE(LinkedList<SenseMapping> mappings, SenseMapping rootMapping, LinkedList<Dependency> remainingDependencies) {
         if (remainingDependencies.size() > 0) {
+            Collections.sort(remainingDependencies, new PreferMappedGovernorsComparator(mappings));
+            
             Dependency dependency = remainingDependencies.removeFirst();
             PPDependency ppDependency = rootMapping.mappings.get(dependency);
             
@@ -214,8 +232,14 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
                     }
                 }
             }
-            mappings.clear();
-            mappings.addAll(buildMappings_RECURSIVE(newMappings, rootMapping, remainingDependencies));
+            
+            if (newMappings.size() > 0) {
+                mappings.clear();
+            } else {
+                newMappings = new LinkedList(mappings);
+            }
+            
+            mappings.addAll(buildMappings_RECURSIVE(newMappings, rootMapping, new LinkedList(remainingDependencies)));
         }
         return mappings;
     }
@@ -227,5 +251,34 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
         senseGraph.interpretations.add(first);
         return senseGraph;
     }
+ 
     
+    
+    
+    
+    private class PreferMappedGovernorsComparator implements Comparator<Dependency> {
+        
+        private LinkedList<SenseMapping> mappings;
+
+        public PreferMappedGovernorsComparator(LinkedList<SenseMapping> mappings) {
+            this.mappings = mappings;
+        }
+
+        public int compare(Dependency t, Dependency t1) {
+            if (t.governor.equalsIgnoreCase("SELF")) {
+                return -1;
+            } else if (t1.governor.equalsIgnoreCase("SELF")) {
+                return 1;
+            } else if (mappings.size() > 0) {
+                if (mappings.getFirst().anchorForVariable(t.governor) != null) {
+                    return -1;
+                } else if (mappings.getFirst().anchorForVariable(t1.governor) != null) {
+                    return 1;
+                }
+            }
+            
+            return 0;
+        }
+        
+    }
 }
