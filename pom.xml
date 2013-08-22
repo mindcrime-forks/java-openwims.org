@@ -9,6 +9,25 @@
 
   <name>WIMs</name>
   <url>http://maven.apache.org</url>
+  
+  <organization>
+      <name>OpenWIMs</name>
+      <url>http://www.openwims.org</url>
+  </organization>
+  
+  <developers>
+      <developer>
+          <id>jesse</id>
+          <name>Jesse English</name>
+          <email>jesse@jesseenglish.com</email>
+          <url>http://www.jesseenglish.com</url>
+          <roles>
+              <role>architect</role>
+              <role>developer</role>
+              <role>researcher</role>
+          </roles>
+      </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
