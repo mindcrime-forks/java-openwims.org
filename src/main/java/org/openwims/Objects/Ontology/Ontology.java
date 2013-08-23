@@ -47,6 +47,10 @@ public class Ontology {
     }
     
     public Ontology() {
+        reload();
+    }
+    
+    public void reload() {
         this.isa = new HashMap();
         this.subclasses = new HashMap();
         this.definitions = new HashMap();
@@ -78,7 +82,6 @@ public class Ontology {
         } catch (Exception err) {
             err.printStackTrace();
         }
-        
     }
     
     public String definition(String concept) {

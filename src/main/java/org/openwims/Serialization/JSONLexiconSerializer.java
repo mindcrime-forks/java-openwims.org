@@ -58,6 +58,7 @@ public class JSONLexiconSerializer {
         Sense sense = new Sense((String)o.get("id"));
         
         sense.setDefinition((String)o.get("definition"));
+        sense.setExample((String)o.get("example"));
         
         JSONArray meanings = (JSONArray)o.get("meanings");
         for (Object meaning : meanings) {
@@ -164,6 +165,10 @@ public class JSONLexiconSerializer {
         
         json.append("\"definition\": \"");
         json.append(sense.getDefinition());
+        json.append("\", ");
+        
+        json.append("\"example\": \"");
+        json.append(sense.getExample());
         json.append("\", ");
         
         json.append("\"meanings\": [");

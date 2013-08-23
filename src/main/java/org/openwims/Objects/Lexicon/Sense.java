@@ -16,12 +16,14 @@ public class Sense {
     private LinkedList<Structure> structures;
     private LinkedList<Meaning> meanings;
     private String definition;
+    private String example;
     
     public Sense(String id) {
         this.id = id;
         this.structures = new LinkedList();
         this.meanings = new LinkedList();
         this.definition = "";
+        this.example = "";
     }
 
     public String getId() {
@@ -36,8 +38,16 @@ public class Sense {
         this.definition = definition;
     }
 
+    public void setExample(String example) {
+        this.example = example;
+    }
+
     public String getDefinition() {
         return definition;
+    }
+
+    public String getExample() {
+        return example;
     }
     
     public void addStructure(Structure structure) {

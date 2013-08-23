@@ -36,7 +36,7 @@
   <repositories>
       <repository>
           <id>com.jesseenglish</id>
-          <name>Jesse English Public Maven Distributions (DropBox hosting)</name>
+          <name>Jesse English Public Maven Distributions (Archiva hosting)</name>
           <url>http://www.jesseenglish.com:8081/archiva/repository/internal/</url>
       </repository>
   </repositories>

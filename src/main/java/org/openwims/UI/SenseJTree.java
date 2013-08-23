@@ -41,6 +41,7 @@ public class SenseJTree extends FTree {
     private static ImageIcon NODE = new ImageIcon(SenseJTree.class.getResource("/images/node-blue.png"));
     private static ImageIcon MEANING = new ImageIcon(SenseJTree.class.getResource("/images/node-black.png"));
     private static ImageIcon DEFINITION = new ImageIcon(SenseJTree.class.getResource("/images/definition.png"));
+    private static ImageIcon EXAMPLE = new ImageIcon(SenseJTree.class.getResource("/images/example.png"));
     private static ImageIcon MANDATORY = new ImageIcon(SenseJTree.class.getResource("/images/mandatory.png"));
     private static ImageIcon OPTIONAL = new ImageIcon(SenseJTree.class.getResource("/images/optional.png"));
     
@@ -115,6 +116,7 @@ public class SenseJTree extends FTree {
             setIcon(ROOT);
             
             this.add(new SenseJTree.DefinitionNode(this.sense));
+            this.add(new SenseJTree.ExampleNode(this.sense));
             
             for (Meaning meaning : sense.listMeanings()) {
                 this.add(new SenseJTree.MeaningRelationNode(this.sense, meaning));
@@ -177,6 +179,22 @@ public class SenseJTree extends FTree {
         @Override
         public Object recall() {
             return this.sense.getDefinition();
+        }
+    }
+    
+    private class ExampleNode extends ExpansionMemoryNode {
+        
+        private Sense sense;
+        
+        public ExampleNode(Sense sense) {
+            super(sense.getExample());
+            this.sense = sense;
+            setIcon(EXAMPLE);
+        }
+
+        @Override
+        public Object recall() {
+            return this.sense.getExample();
         }
     }
     

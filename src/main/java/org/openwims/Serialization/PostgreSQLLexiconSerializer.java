@@ -68,12 +68,14 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         builder.append("');\n");
         
         //INSERT SENSE
-        builder.append("INSERT INTO senses (id, word, definition) VALUES ('");
+        builder.append("INSERT INTO senses (id, word, definition, example) VALUES ('");
         builder.append(sense.getId().replaceAll("'", "''"));
         builder.append("', '");
         builder.append(sense.word().replaceAll("'", "''"));
         builder.append("', '");
         builder.append(sense.getDefinition().replaceAll("'", "''"));
+        builder.append("', '");
+        builder.append(sense.getExample().replaceAll("'", "''"));
         builder.append("');\n");
         
         //INSERT MEANINGS

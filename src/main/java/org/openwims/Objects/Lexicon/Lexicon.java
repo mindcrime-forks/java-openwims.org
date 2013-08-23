@@ -132,6 +132,7 @@ public class Lexicon {
             while (rs.next()) {
                 Sense sense = new Sense(rs.getString("id"));
                 sense.setDefinition(rs.getString("definition"));
+                sense.setExample(rs.getString("example"));
                 word.addSense(sense);
             }
             
