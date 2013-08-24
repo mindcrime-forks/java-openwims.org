@@ -32,10 +32,10 @@ public class PPDependency {
         return this.dependent;
     }
 
-    @Override
-    public String toString() {
-        return this.type + "(" + this.governor.anchor() + ", " + this.dependent.anchor() + ")";
-    }
+//    @Override
+//    public String toString() {
+//        return this.type + "(" + this.governor.anchor() + ", " + this.dependent.anchor() + ")";
+//    }
     
     public void setType(String type) {
         this.type = type;

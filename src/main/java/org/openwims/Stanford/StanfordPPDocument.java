@@ -12,10 +12,12 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPDocument;
+import org.openwims.Objects.Preprocessor.PPMention;
 import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
 
@@ -56,6 +58,16 @@ public class StanfordPPDocument extends PPDocument {
             this.sentences.add(new StanfordPPSentence(sentence));
         }
         
+        for (PPSentence sentence : this.sentences) {
+            for (PPToken pPToken : sentence.listTokens()) {
+                for (PPMention mention : pPToken.getMentions()) {
+                    mention.setSentence(sentence);
+                }
+            }
+        }
+        
+        //DO REF HEREs
+        
     }
     
     private class StanfordPPSentence extends PPSentence {
@@ -79,7 +91,13 @@ public class StanfordPPDocument extends PPDocument {
                 this.tokens.add(token);
             }
             
-            Collections.sort(this.tokens);
+            Collections.sort(this.tokens, new Comparator<PPToken>(){
+
+                public int compare(PPToken o1, PPToken o2) {
+                    return o1.getMentions().getFirst().getIndex() - o2.getMentions().getFirst().getIndex();
+                }
+                
+            });
         }
         
     }
@@ -97,8 +115,15 @@ public class StanfordPPDocument extends PPDocument {
     }
     
     private class StanfordPPToken extends PPToken {
+        public StanfordPPToken(IndexedWord token){
+            super();
+            this.mentions.add(new StanfordPPMention(token));
+        }
+    }
+    
+    private class StanfordPPMention extends PPMention {
         
-        public StanfordPPToken(IndexedWord token) {
+        public StanfordPPMention(IndexedWord token) {
             super();
             
             this.index = token.index();

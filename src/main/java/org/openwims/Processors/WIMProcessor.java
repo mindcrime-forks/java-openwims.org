@@ -17,6 +17,7 @@ import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Lexicon.Structure;
 import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPDocument;
+import org.openwims.Objects.Preprocessor.PPMention;
 import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
 import org.openwims.Objects.WIMFrame;
@@ -77,28 +78,39 @@ public abstract class WIMProcessor {
     protected LinkedList<Sense> listSatisfyingSenses(PPToken token, LinkedList<Expectation> expectations) {
         LinkedList<Sense> satisfying = new LinkedList();
         
-        //Add the token's POS to the expectations (as a copy, so as not to modify the knowledge)
-        //The senses that come out must match this; if the token pos is in contradiction with the
-        //expectation's pos, then no matches will occur (which is good)
-        LinkedList<Expectation> expectationsCopy = new LinkedList(expectations);
-        expectationsCopy.add(new Expectation("pos", token.pos()));
-        
-        for (Sense sense : WIMGlobals.lexicon().word(token.lemma()).listSenses()) {
-            if (doesSenseSatisfyExpectations(sense, expectationsCopy)) {
-                satisfying.add(sense);
+        for (PPMention mention : token.getMentions()) {
+            //Add the token's POS to the expectations (as a copy, so as not to modify the knowledge)
+            //The senses that come out must match this; if the token pos is in contradiction with the
+            //expectation's pos, then no matches will occur (which is good)
+            LinkedList<Expectation> expectationsCopy = new LinkedList(expectations);
+            expectationsCopy.add(new Expectation("pos", mention.pos()));
+
+            for (Sense sense : WIMGlobals.lexicon().word(mention.lemma()).listSenses()) {
+                if (doesSenseSatisfyExpectations(sense, expectationsCopy)) {
+                    satisfying.add(sense);
+                }
             }
         }
         
         return satisfying;
     }
     
-    protected boolean doesTokenSatisfyExpectations(PPToken token, LinkedList<Expectation> expectations) {
+    protected boolean doesTokenSatisfyExpectations(PPToken token, LinkedList<Expectation> expectations){
+        for (PPMention mention : token.getMentions()) {
+            if(doesMentionSatisfyExpectations(mention, expectations)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    protected boolean doesMentionSatisfyExpectations(PPMention mention, LinkedList<Expectation> expectations) {
         for (Expectation expectation : expectations) {
             if (expectation.getSpecification().equalsIgnoreCase("pos") && 
-                !WIMGlobals.tagmaps().doTagsMatch(expectation.getExpectation(), token.pos())) {
+                !WIMGlobals.tagmaps().doTagsMatch(expectation.getExpectation(), mention.pos())) {
                 return false;
             } else if (expectation.getSpecification().equalsIgnoreCase("token") &&
-                       !(expectation.getExpectation().equalsIgnoreCase(token.lemma()))) {
+                       !(expectation.getExpectation().equalsIgnoreCase(mention.lemma()))) {
                 return false;
             } else if (expectation.getSpecification().equalsIgnoreCase("ont")) {
                 //A token cannot satisfy ONT; this must be false

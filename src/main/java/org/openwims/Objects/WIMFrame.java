@@ -136,7 +136,7 @@ public class WIMFrame {
         out.append("\"frame\": \"");
         out.append(getName());
         out.append("\", \"anchor\":\"");
-        out.append(this.anchor.anchor());
+        out.append(this.anchor.anchors());
         out.append("\", \"sense\":\"");
         out.append(this.sense == null ? "unknown" : this.sense.getId());
         out.append("\", \"relations\":[");
@@ -170,7 +170,7 @@ public class WIMFrame {
         out.append(getName());
         out.append("\n  ");
         out.append("anchor: ");
-        out.append(this.anchor.anchor());
+        out.append(this.anchor.anchors());
         out.append("\n  ");
         out.append("sense: ");
         out.append(this.sense == null ? "unknown" : this.sense.getId());

@@ -201,8 +201,8 @@ public class PPDocumentJTree extends FTree {
             this.sentence = sentence;
             setIcon(NODE);
             
-            this.add(new PPGovernorNode(this.dependency.getGovernor()));
-            this.add(new PPDependentNode(this.dependency.getDependent()));
+            this.add(new PPGovernorNode(this.dependency.getGovernor(), sentence));
+            this.add(new PPDependentNode(this.dependency.getDependent(), sentence));
         }
         
         @Override
@@ -229,11 +229,13 @@ public class PPDocumentJTree extends FTree {
     
     private class PPGovernorNode extends ExpansionMemoryNode {
         
+        private PPSentence sentence;
         private PPToken governor;
 
-        public PPGovernorNode(PPToken governor) {
-            super("GOV: " + governor.anchor());
+        public PPGovernorNode(PPToken governor, PPSentence sentence) {
+            super("GOV: " + governor.anchor(sentence));
             this.governor = governor;
+            this.sentence = sentence;
             setIcon(NODE);
             
             this.add(new PPPOSNode(this.governor));
@@ -263,11 +265,13 @@ public class PPDocumentJTree extends FTree {
     
     private class PPDependentNode extends ExpansionMemoryNode {
         
+        private PPSentence sentence;
         private PPToken dependent;
 
-        public PPDependentNode(PPToken dependent) {
-            super("DEP: " + dependent.anchor());
+        public PPDependentNode(PPToken dependent, PPSentence sentence) {
+            super("DEP: " + dependent.anchor(sentence));
             this.dependent = dependent;
+            this.sentence = sentence;
             setIcon(NODE);
             
             this.add(new PPPOSNode(this.dependent));
@@ -300,7 +304,7 @@ public class PPDocumentJTree extends FTree {
         private PPToken token;
 
         public PPPOSNode(PPToken token) {
-            super(token.pos());
+            super("TBD");
             this.token = token;
             setIcon(LEAF);
         }
@@ -317,7 +321,7 @@ public class PPDocumentJTree extends FTree {
         private PPToken token;
 
         public PPLemmaNode(PPToken token) {
-            super(token.lemma());
+            super("TBD");
             this.token = token;
             setIcon(LEAF);
         }
@@ -366,7 +370,7 @@ public class PPDocumentJTree extends FTree {
 
         @Override
         public void actionPerformed(ActionEvent ae) {
-            PPDependencyEditorJPanel e = new PPDependencyEditorJPanel(this.dependency, this.sentence.listTokens());
+            PPDependencyEditorJPanel e = new PPDependencyEditorJPanel(this.sentence, this.dependency, this.sentence.listTokens());
             
             FDialog d =  new FDialog(WIMGlobals.frame);
             d.setModal(true);

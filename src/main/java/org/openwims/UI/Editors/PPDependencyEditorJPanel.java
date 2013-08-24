@@ -6,7 +6,6 @@ package org.openwims.UI.Editors;
 
 import java.awt.Component;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.LinkedList;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -14,6 +13,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import org.openwims.Objects.Preprocessor.PPDependency;
+import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
 
 /**
@@ -22,13 +22,15 @@ import org.openwims.Objects.Preprocessor.PPToken;
  */
 public class PPDependencyEditorJPanel extends javax.swing.JPanel {
 
+    private PPSentence sentence;
     private PPDependency dependency;
     private LinkedList<PPToken> tokens;
     
     /**
      * Creates new form PPDependencyEditorJPanel
      */
-    public PPDependencyEditorJPanel(PPDependency dependency, LinkedList<PPToken> tokens) {
+    public PPDependencyEditorJPanel(PPSentence sentence, PPDependency dependency, LinkedList<PPToken> tokens) {
+        this.sentence = sentence;
         this.dependency = dependency;
         this.tokens = tokens;
         
@@ -176,7 +178,7 @@ public class PPDependencyEditorJPanel extends javax.swing.JPanel {
         public Component getListCellRendererComponent(JList jlist, Object o, int i, boolean bln, boolean bln1) {
             PPToken token = (PPToken)o;
             JLabel label = (JLabel)super.getListCellRendererComponent(jlist, o, i, bln, bln1);
-            label.setText(token.anchor());
+            label.setText(token.anchor(sentence));
             
             return label;
         }

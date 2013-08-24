@@ -48,6 +48,15 @@ public class TagMaps {
         }
     }
     
+    public boolean doTagsMatch(String tag1, LinkedList<String> tags2) {
+        for (String tag2 : tags2) {
+            if(doTagsMatch(tag1, tag2)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public boolean doTagsMatch(String tag1, String tag2) {
         if (tag1.equalsIgnoreCase(tag2)) {
             return true;

@@ -16,6 +16,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPDocument;
+import org.openwims.Objects.Preprocessor.PPMention;
 import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
 
@@ -83,9 +84,9 @@ public class JSONPPDocumentSerializer {
     private static PPToken token(JSONObject o) {
         PPToken token = new PPToken();
         
-        token.setAnchor((String)o.get("anchor"));
-        token.setLemma((String)o.get("lemma"));
-        token.setPOS((String)o.get("pos"));
+//        token.setAnchor((String)o.get("anchor"));
+//        token.setLemma((String)o.get("lemma"));
+//        token.setPOS((String)o.get("pos"));
         
         return token;
     }
@@ -157,7 +158,7 @@ public class JSONPPDocumentSerializer {
         
         json.append("\"dependencies\": [");
         for (PPDependency dependency : sentence.listDependencies()) {
-            json.append(json(dependency));
+//            json.append(json(dependency));
             if (dependency != sentence.listDependencies().getLast()) {
                 json.append(",");
             }
@@ -174,16 +175,36 @@ public class JSONPPDocumentSerializer {
         
         json.append("{");
         
+        json.append("\"mentions\": [");
+        for (PPMention mention : token.getMentions()) {
+            json.append(json(mention));
+            if (mention != token.getMentions().getLast()) {
+                json.append(", ");
+            }
+        }
+        
+        json.append("]");
+        
+        json.append("}");
+        
+        return json.toString();
+    }
+    
+    private static String json(PPMention mention) {
+        StringBuilder json = new StringBuilder();
+        
+        json.append("{");
+        
         json.append("\"anchor\": \"");
-        json.append(token.anchor());
+        json.append(mention.anchor());
         json.append("\",");
         
         json.append("\"lemma\": \"");
-        json.append(token.lemma());
+        json.append(mention.lemma());
         json.append("\",");
         
         json.append("\"pos\": \"");
-        json.append(token.pos());
+        json.append(mention.pos());
         json.append("\"");
         
         json.append("}");
@@ -191,27 +212,27 @@ public class JSONPPDocumentSerializer {
         return json.toString();
     }
     
-    private static String json(PPDependency dependency) {
-        StringBuilder json = new StringBuilder();
-        
-        json.append("{");
-        
-        json.append("\"type\": \"");
-        json.append(dependency.getType());
-        json.append("\",");
-        
-        json.append("\"governor\": \"");
-        json.append(dependency.getGovernor().anchor());
-        json.append("\",");
-        
-        json.append("\"dependent\": \"");
-        json.append(dependency.getDependent().anchor());
-        json.append("\"");
-        
-        json.append("}");
-        
-        return json.toString();
-    }
+//    private static String json(PPDependency dependency) {
+//        StringBuilder json = new StringBuilder();
+//        
+//        json.append("{");
+//        
+//        json.append("\"type\": \"");
+//        json.append(dependency.getType());
+//        json.append("\",");
+//        
+//        json.append("\"governor\": \"");
+//        json.append(dependency.getGovernor().anchor());
+//        json.append("\",");
+//        
+//        json.append("\"dependent\": \"");
+//        json.append(dependency.getDependent().anchor());
+//        json.append("\"");
+//        
+//        json.append("}");
+//        
+//        return json.toString();
+//    }
     
     
 }

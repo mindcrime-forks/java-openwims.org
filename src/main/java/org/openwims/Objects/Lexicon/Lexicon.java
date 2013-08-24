@@ -39,8 +39,8 @@ public class Lexicon {
     public static Connection conn() throws Exception {
         if (Lexicon.conn == null) {
             String url = "jdbc:postgresql://localhost/OpenWIMs";
-            String user = "jesse";
-            String pass = "";
+            String user = "postgres";
+            String pass = "forest";
 
             Class.forName("org.postgresql.Driver");
             
@@ -116,7 +116,7 @@ public class Lexicon {
         
         return verbs;
     }
-
+    
     public Word word(String representation) {
                 
         if (this.words.get(representation) != null) {

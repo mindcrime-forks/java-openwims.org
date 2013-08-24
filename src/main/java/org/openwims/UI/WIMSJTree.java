@@ -105,7 +105,7 @@ public class WIMSJTree extends FTree {
                 setIcon(INFERRED);
             }
             
-            this.add(new WIMAnchorNode(frame.getAnchor().anchor()));
+            this.add(new WIMAnchorNode(frame.getAnchor().bestAnchor()));
             this.add(new WIMSenseNode(frame.getSense()));
             
             for (WIMAttribute attribute : frame.listAttributes()) {

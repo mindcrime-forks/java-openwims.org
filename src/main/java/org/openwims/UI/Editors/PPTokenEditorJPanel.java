@@ -21,8 +21,8 @@ public class PPTokenEditorJPanel extends javax.swing.JPanel {
         initComponents();
         this.token = token;
         
-        this.POSJTextField.setText(token.pos());
-        this.LemmaJTextField.setText(token.lemma());
+//        this.POSJTextField.setText(token.pos());
+//        this.LemmaJTextField.setText(token.lemma());
     }
 
     /**
@@ -65,11 +65,11 @@ public class PPTokenEditorJPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void POSJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_POSJTextFieldKeyReleased
-        this.token.setPOS(this.POSJTextField.getText().trim());
+//        this.token.setPOS(this.POSJTextField.getText().trim());
     }//GEN-LAST:event_POSJTextFieldKeyReleased
 
     private void LemmaJTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_LemmaJTextFieldKeyReleased
-        this.token.setLemma(this.LemmaJTextField.getText().trim());
+//        this.token.setLemma(this.LemmaJTextField.getText().trim());
     }//GEN-LAST:event_LemmaJTextFieldKeyReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
