@@ -20,6 +20,7 @@ import org.openwims.Stanford.StanfordHelper;
  * @author jesse
  */
 public class WIMs {
+    //jchange
     
     public static void main(String[] args) throws Exception {
         
