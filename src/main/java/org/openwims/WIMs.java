@@ -20,7 +20,7 @@ import org.openwims.Stanford.StanfordHelper;
  * @author jesse
  */
 public class WIMs {
-    
+    //ben change
     public static void main(String[] args) throws Exception {
         
         String testPath = "/Users/jesseenglish/Desktop/test.stn";
