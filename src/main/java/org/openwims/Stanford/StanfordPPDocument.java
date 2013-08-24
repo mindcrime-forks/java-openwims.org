@@ -72,45 +72,45 @@ public class StanfordPPDocument extends PPDocument {
         }
 
         //reference resolution
-//        Map<Integer, CorefChain> entities = document.get(CorefCoreAnnotations.CorefChainAnnotation.class);
-//        for (CorefChain chain : entities.values()) {
-//            PPToken entityToken = new PPToken();
-//            LinkedList<PPToken> toBeReplaced = new LinkedList();
-//            //for each entity, compile a list of all of the tokens that are mentions
-//            for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
-//                int wordNum = mention.headIndex;
-//                int sentenceNum = mention.sentNum;
-//                PPToken wordToReplace = sentences.get(sentenceNum - 1).listTokens().get(wordNum - 1);
-//                toBeReplaced.add(wordToReplace);
-//                entityToken.getMentions().addAll(wordToReplace.getMentions());
-//            }
-//
-//            //replace each mention with the entity token 
-//            for (PPSentence sentence : this.sentences) {
-//                for (PPToken token : toBeReplaced) {
-//                    if (sentence instanceof StanfordPPSentence) {
-//                        StanfordPPSentence stanfordPPSentence = (StanfordPPSentence) sentence;
-//                        //replace the mention with the entity in the sentence token list
-//                        if (sentence.listTokens().contains(token)) {
-//                            int index = stanfordPPSentence.getTokens().indexOf(token);
-//                            stanfordPPSentence.getTokens().remove(token);
-//                            stanfordPPSentence.getTokens().add(index, entityToken);
-//                        }
-//                        //replace the mention with the entity in the deps
-//                        for (PPDependency dep : stanfordPPSentence.getDependencies()) {
-//                            if(toBeReplaced.contains(dep.getDependent())){
-//                                dep.setDependent(entityToken);
-//                            }
-//                            if(toBeReplaced.contains(dep.getGovernor())){
-//                                dep.setGovernor(entityToken);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            //replace each mention with the entity token in the syntax
-//
-//        }
+        Map<Integer, CorefChain> entities = document.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+        for (CorefChain chain : entities.values()) {
+            PPToken entityToken = new PPToken();
+            LinkedList<PPToken> toBeReplaced = new LinkedList();
+            //for each entity, compile a list of all of the tokens that are mentions
+            for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
+                int wordNum = mention.headIndex;
+                int sentenceNum = mention.sentNum;
+                PPToken wordToReplace = sentences.get(sentenceNum - 1).listTokens().get(wordNum - 1);
+                toBeReplaced.add(wordToReplace);
+                entityToken.getMentions().addAll(wordToReplace.getMentions());
+            }
+
+            //replace each mention with the entity token 
+            for (PPSentence sentence : this.sentences) {
+                for (PPToken token : toBeReplaced) {
+                    if (sentence instanceof StanfordPPSentence) {
+                        StanfordPPSentence stanfordPPSentence = (StanfordPPSentence) sentence;
+                        //replace the mention with the entity in the sentence token list
+                        if (sentence.listTokens().contains(token)) {
+                            int index = stanfordPPSentence.getTokens().indexOf(token);
+                            stanfordPPSentence.getTokens().remove(token);
+                            stanfordPPSentence.getTokens().add(index, entityToken);
+                        }
+                        //replace the mention with the entity in the deps
+                        for (PPDependency dep : stanfordPPSentence.getDependencies()) {
+                            if(toBeReplaced.contains(dep.getDependent())){
+                                dep.setDependent(entityToken);
+                            }
+                            if(toBeReplaced.contains(dep.getGovernor())){
+                                dep.setGovernor(entityToken);
+                            }
+                        }
+                    }
+                }
+            }
+            //replace each mention with the entity token in the syntax
+
+        }
         //DO REF HEREs
 
     }
