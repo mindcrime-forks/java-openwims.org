@@ -6,6 +6,7 @@ package org.openwims.Objects.Disambiguation;
 
 import java.util.LinkedList;
 import org.openwims.Objects.Lexicon.Sense;
+import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
 
 /**
@@ -20,6 +21,14 @@ public class InterpretationSet {
         this.mappings = new LinkedList();
     }
 
+    public boolean isForSentence(PPSentence sentence){
+        for (SenseMapping mapping : mappings) {
+            return sentence.listTokens().contains(mapping.anchor);
+        }
+        return false;
+    }
+    
+    
     public InterpretationSet(InterpretationSet copy) {
         this.mappings = new LinkedList(copy.mappings);
     }

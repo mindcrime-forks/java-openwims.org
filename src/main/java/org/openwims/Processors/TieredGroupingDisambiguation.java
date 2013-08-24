@@ -143,7 +143,7 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
         for (PPSentence sentence : document.listSentences()) {
             ArraySet<PPToken> verbs = new ArraySet<PPToken>();
             for (PPToken verb : sentence.listTokens()) {
-                if(verb.listMentions("V", sentence).size() > 0) {
+                if (verb.listMentions("V", sentence).size() > 0) {
                     verbs.add(verb);
                 }
             }
@@ -152,20 +152,23 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
         }
 
         //Trim all interpretations sets that don't cover at least all N and V
-        LinkedList<PPToken> nounsAndVerbs = new LinkedList();
+        
         for (PPSentence sentence : document.listSentences()) {
+            LinkedList<PPToken> nounsAndVerbs = new LinkedList();
             for (PPToken token : sentence.listTokens()) {
-                if(token.listMentions("V", sentence).size() > 0 || token.listMentions("N", sentence).size() > 0) {
+                if (token.listMentions("V", sentence).size() > 0 || token.listMentions("N", sentence).size() > 0) {
                     nounsAndVerbs.add(token);
                 }
             }
-        }
-        for (Iterator<InterpretationSet> it = graph.interpretations.iterator(); it.hasNext();) {
-            InterpretationSet interpretationSet = it.next();
-            if (!interpretationSet.doesMappingCoverTokens(nounsAndVerbs)) {
-                it.remove();
+
+            for (Iterator<InterpretationSet> it = graph.interpretations.iterator(); it.hasNext();) {
+                InterpretationSet interpretationSet = it.next();
+                if (interpretationSet.isForSentence(sentence) && !interpretationSet.doesMappingCoverTokens(nounsAndVerbs)) {
+                    it.remove();
+                }
             }
         }
+
 
         return graph;
     }

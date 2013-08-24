@@ -6,6 +6,7 @@ package org.openwims.Objects.Disambiguation;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
 
 /**
