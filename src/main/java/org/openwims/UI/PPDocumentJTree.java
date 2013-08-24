@@ -41,6 +41,7 @@ import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultTreeModel;
 import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPDocument;
+import org.openwims.Objects.Preprocessor.PPMention;
 import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.UI.Editors.PPDependencyEditorJPanel;
@@ -196,7 +197,7 @@ public class PPDocumentJTree extends FTree {
         private PPDependency dependency;
 
         public PPDependencyNode(PPDependency dependency, PPSentence sentence) {
-            super(dependency);
+            super(dependency.getType());
             this.dependency = dependency;
             this.sentence = sentence;
             setIcon(NODE);
@@ -240,6 +241,10 @@ public class PPDocumentJTree extends FTree {
             
             this.add(new PPPOSNode(this.governor));
             this.add(new PPLemmaNode(this.governor));
+            
+            for (PPMention mention : governor.getMentions()) {
+                this.add(new PPMentionNode(mention));
+            }
         }
         
         @Override
@@ -312,6 +317,24 @@ public class PPDocumentJTree extends FTree {
         @Override
         public Object recall() {
             return null;
+        }
+        
+    }
+    
+    private class PPMentionNode extends ExpansionMemoryNode {
+        
+        private PPMention mention;
+
+        public PPMentionNode(PPMention mention) {
+            super(mention.anchor());
+            this.mention = mention;
+            
+            setIcon(LEAF);
+        }
+
+        @Override
+        public Object recall() {
+            return mention;
         }
         
     }

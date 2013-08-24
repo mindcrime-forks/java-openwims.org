@@ -25,8 +25,8 @@ public class Ontology {
     public static Connection conn() throws Exception {
         if (Ontology.conn == null) {
             String url = "jdbc:postgresql://localhost/OpenWIMs";
-            String user = "postgres";
-            String pass = "forest";
+            String user = "jesse";
+            String pass = "";
 
             Class.forName("org.postgresql.Driver");
             
