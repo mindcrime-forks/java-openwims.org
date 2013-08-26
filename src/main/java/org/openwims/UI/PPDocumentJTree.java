@@ -281,6 +281,10 @@ public class PPDocumentJTree extends FTree {
             
             this.add(new PPPOSNode(this.dependent));
             this.add(new PPLemmaNode(this.dependent));
+            
+            for (PPMention mention : dependent.getMentions()) {
+                this.add(new PPMentionNode(mention));
+            }
         }
         
         @Override
