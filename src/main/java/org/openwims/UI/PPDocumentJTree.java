@@ -45,7 +45,7 @@ import org.openwims.Objects.Preprocessor.PPMention;
 import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.UI.Editors.PPDependencyEditorJPanel;
-import org.openwims.UI.Editors.PPTokenEditorJPanel;
+import org.openwims.UI.Editors.PPMentionEditorJPanel;
 import org.openwims.UI.FileDropJPanel.FilesDraggedListener;
 import org.openwims.WIMGlobals;
 
@@ -58,6 +58,7 @@ public class PPDocumentJTree extends FTree {
     private static ImageIcon ROOT = new ImageIcon(PPDocumentJTree.class.getResource("/images/root.png"));
     private static ImageIcon NODE = new ImageIcon(PPDocumentJTree.class.getResource("/images/node-blue.png"));
     private static ImageIcon LEAF = new ImageIcon(PPDocumentJTree.class.getResource("/images/node-green.png"));
+    private static ImageIcon COLLECTION = new ImageIcon(PPDocumentJTree.class.getResource("/images/node-black.png"));
     
     private PPDocument document;
     
@@ -197,7 +198,7 @@ public class PPDocumentJTree extends FTree {
         private PPDependency dependency;
 
         public PPDependencyNode(PPDependency dependency, PPSentence sentence) {
-            super(dependency.getType());
+            super(dependency.getType() + "(" + dependency.getGovernor().anchor(sentence) + "," + dependency.getDependent().anchor(sentence) + ")");
             this.dependency = dependency;
             this.sentence = sentence;
             setIcon(NODE);
@@ -239,25 +240,8 @@ public class PPDocumentJTree extends FTree {
             this.sentence = sentence;
             setIcon(NODE);
             
-            this.add(new PPPOSNode(this.governor));
-            this.add(new PPLemmaNode(this.governor));
-            
             for (PPMention mention : governor.getMentions()) {
                 this.add(new PPMentionNode(mention));
-            }
-        }
-        
-        @Override
-        public void mouseReleased(MouseEvent me) {
-            super.mouseReleased(me);
-            
-            if (SwingUtilities.isRightMouseButton(me)) {
-            
-                JPopupMenu menu = new JPopupMenu();
-                menu.add(new EditTokenJMenuItem(this.governor));
-
-                Rectangle r = PPDocumentJTree.this.getPathBounds(PPDocumentJTree.this.getPath(this));
-                menu.show(PPDocumentJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
             }
         }
 
@@ -279,25 +263,8 @@ public class PPDocumentJTree extends FTree {
             this.sentence = sentence;
             setIcon(NODE);
             
-            this.add(new PPPOSNode(this.dependent));
-            this.add(new PPLemmaNode(this.dependent));
-            
             for (PPMention mention : dependent.getMentions()) {
                 this.add(new PPMentionNode(mention));
-            }
-        }
-        
-        @Override
-        public void mouseReleased(MouseEvent me) {
-            super.mouseReleased(me);
-            
-            if (SwingUtilities.isRightMouseButton(me)) {
-            
-                JPopupMenu menu = new JPopupMenu();
-                menu.add(new EditTokenJMenuItem(this.dependent));
-
-                Rectangle r = PPDocumentJTree.this.getPathBounds(PPDocumentJTree.this.getPath(this));
-                menu.show(PPDocumentJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
             }
         }
 
@@ -310,11 +277,11 @@ public class PPDocumentJTree extends FTree {
     
     private class PPPOSNode extends ExpansionMemoryNode {
         
-        private PPToken token;
+        private PPMention mention;
 
-        public PPPOSNode(PPToken token) {
-            super("TBD");
-            this.token = token;
+        public PPPOSNode(PPMention mention) {
+            super(mention.pos() + " (" + mention.rootPOS() + ")");
+            this.mention = mention;
             setIcon(LEAF);
         }
 
@@ -324,32 +291,49 @@ public class PPDocumentJTree extends FTree {
         }
         
     }
-    
+
     private class PPMentionNode extends ExpansionMemoryNode {
         
         private PPMention mention;
 
         public PPMentionNode(PPMention mention) {
-            super(mention.anchor());
+            super("Sentence " + (document.listSentences().indexOf(mention.getSentence()) + 1) + ": " + mention.anchor());
             this.mention = mention;
+
+            setIcon(COLLECTION);
             
-            setIcon(LEAF);
+            this.add(new PPPOSNode(mention));
+            this.add(new PPLemmaNode(mention));
         }
 
         @Override
         public Object recall() {
             return mention;
         }
+
+        @Override
+        public void mouseReleased(MouseEvent me) {
+            super.mouseReleased(me);
+            
+            if (SwingUtilities.isRightMouseButton(me)) {
+            
+                JPopupMenu menu = new JPopupMenu();
+                menu.add(new EditMentionJMenuItem(this.mention));
+
+                Rectangle r = PPDocumentJTree.this.getPathBounds(PPDocumentJTree.this.getPath(this));
+                menu.show(PPDocumentJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
+            }
+        }
         
     }
     
     private class PPLemmaNode extends ExpansionMemoryNode {
         
-        private PPToken token;
+        private PPMention mention;
 
-        public PPLemmaNode(PPToken token) {
-            super("TBD");
-            this.token = token;
+        public PPLemmaNode(PPMention mention) {
+            super(mention.lemma());
+            this.mention = mention;
             setIcon(LEAF);
         }
 
@@ -431,19 +415,19 @@ public class PPDocumentJTree extends FTree {
         
     }
     
-    private class EditTokenJMenuItem extends JMenuItem implements ActionListener {
+    private class EditMentionJMenuItem extends JMenuItem implements ActionListener {
         
-        private PPToken token;
+        private PPMention mention;
 
-        public EditTokenJMenuItem(PPToken token) {
-            super("Edit Token");
-            this.token = token;
+        public EditMentionJMenuItem(PPMention mention) {
+            super("Edit Mention");
+            this.mention = mention;
             this.addActionListener(this);
         }
 
         @Override
         public void actionPerformed(ActionEvent ae) {
-            PPTokenEditorJPanel e = new PPTokenEditorJPanel(this.token);
+            PPMentionEditorJPanel e = new PPMentionEditorJPanel(this.mention);
             
             FDialog d =  new FDialog(WIMGlobals.frame);
             d.setModal(true);

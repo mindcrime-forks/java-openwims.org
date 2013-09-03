@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Iterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -26,10 +28,16 @@ import org.openwims.Objects.Preprocessor.PPToken;
  */
 public class JSONPPDocumentSerializer {
     
+    private Serializer serializer = new Serializer();
+    private Deserializer deserializer = new Deserializer();
+    
+    
     public static PPDocument deserialize(String file) throws Exception {
+        JSONPPDocumentSerializer s = new JSONPPDocumentSerializer();
         String contents = read(file);
         JSONObject o = (JSONObject)JSONValue.parse(contents);
-        PPDocument document = document(o);
+        
+        PPDocument document = s.deserializer.document(o);
         
         return document;
     }
@@ -51,58 +59,11 @@ public class JSONPPDocumentSerializer {
         
         return builder.toString();
     }
-    
-    private static PPDocument document(JSONObject o) {
-        PPDocument document = new PPDocument();
+
+    public static void serialize(PPDocument document, String file) throws Exception {        
+        JSONPPDocumentSerializer s = new JSONPPDocumentSerializer();
         
-        JSONArray sentences = (JSONArray)o.get("sentences");
-        for (Object sentence : sentences) {
-            document.addSentence(sentence((JSONObject)sentence));
-        }
-        
-        return document;
-    }
-    
-    private static PPSentence sentence(JSONObject o) {
-        PPSentence sentence = new PPSentence();
-        
-        sentence.setText((String)o.get("text"));
-        
-        JSONArray tokens = (JSONArray)o.get("tokens");
-        for (Object token : tokens) {
-            sentence.addToken(token((JSONObject)token));
-        }
-        
-        JSONArray dependencies = (JSONArray)o.get("dependencies");
-        for (Object dependency : dependencies) {
-            sentence.addDependency(dependency((JSONObject)dependency, sentence));
-        }
-        
-        return sentence;
-    }
-    
-    private static PPToken token(JSONObject o) {
-        PPToken token = new PPToken();
-        
-//        token.setAnchor((String)o.get("anchor"));
-//        token.setLemma((String)o.get("lemma"));
-//        token.setPOS((String)o.get("pos"));
-        
-        return token;
-    }
-    
-    private static PPDependency dependency(JSONObject o, PPSentence sentence) {
-        PPDependency dependency = new PPDependency();
-        
-        dependency.setType((String)o.get("type"));
-        dependency.setGovernor(sentence.tokenWithAnchor((String)o.get("governor")));
-        dependency.setDependent(sentence.tokenWithAnchor((String)o.get("dependent")));
-        
-        return dependency;
-    }
-    
-    public static void serialize(PPDocument document, String file) throws Exception {
-        String json = json(document);
+        String json = s.serializer.json(document);
         write(json, file);
     }
     
@@ -118,121 +79,255 @@ public class JSONPPDocumentSerializer {
         bw.close();
     }
     
-    private static String json(PPDocument document) {
-        StringBuilder json = new StringBuilder();
+    private class Serializer {
         
-        json.append("{");
-        json.append("\"sentences\":[");
+        private HashMap<PPToken, Integer> tokenIDs = new HashMap();
+        private HashMap<PPSentence, Integer> sentenceIDs = new HashMap();
         
-        for (PPSentence sentence : document.listSentences()) {
-            json.append(json(sentence));
+        public String json(PPDocument document) {
+            //First, generate IDs for each sentence and token
+            int tokenID = 0;
+            int sentenceID = 0;
             
-            if (sentence != document.listSentences().getLast()) {
-                json.append(",");
+            for (PPSentence sentence : document.listSentences()) {
+                sentenceIDs.put(sentence, sentenceID);
+                sentenceID++;
+                
+                for (PPToken token : sentence.listTokens()) {
+                    if (!tokenIDs.containsKey(token)) {
+                        tokenIDs.put(token, tokenID);
+                        tokenID++;
+                    }
+                }
             }
+            
+            //Now we write out the tokens
+            StringBuilder json = new StringBuilder();
+        
+            json.append("{");
+            json.append("\"tokens\":[");
+            for (Iterator<PPToken> it = tokenIDs.keySet().iterator(); it.hasNext();) {
+                PPToken token = it.next();
+                json.append(json(token));
+                if (it.hasNext()) {
+                    json.append(",");
+                }
+            }
+            
+            json.append("],");
+            
+            //Now we write out the sentences
+            json.append("\"sentences\":[");
+            for (Iterator<PPSentence> it = sentenceIDs.keySet().iterator(); it.hasNext();) {
+                PPSentence sentence = it.next();
+                json.append(json(sentence));
+                if (it.hasNext()) {
+                    json.append(",");
+                }
+            }
+            
+            json.append("]");
+            
+            json.append("}");
+
+            return json.toString();
         }
         
-        json.append("]");
-        json.append("}");
-        
-        return json.toString();
-    }
-    
-    private static String json(PPSentence sentence) {
-        StringBuilder json = new StringBuilder();
-        
-        json.append("{");
-        
-        json.append("\"text\":\"");
-        json.append(sentence.text());
-        json.append("\",");
-        
-        json.append("\"tokens\": [");
-        for (PPToken token : sentence.listTokens()) {
-            json.append(json(token));
-            if (token != sentence.listTokens().getLast()) {
-                json.append(",");
+        private String json(PPSentence sentence) {
+            StringBuilder json = new StringBuilder();
+
+            json.append("{");
+            
+            json.append("\"id\": \"");
+            json.append(sentenceIDs.get(sentence));
+            json.append("\",");
+
+            json.append("\"text\":\"");
+            json.append(sentence.text());
+            json.append("\",");
+
+            json.append("\"dependencies\": [");
+            for (PPDependency dependency : sentence.listDependencies()) {
+                json.append(json(dependency));
+                if (dependency != sentence.listDependencies().getLast()) {
+                    json.append(",");
+                }
             }
-        }
-        json.append("],");
-        
-        json.append("\"dependencies\": [");
-        for (PPDependency dependency : sentence.listDependencies()) {
-//            json.append(json(dependency));
-            if (dependency != sentence.listDependencies().getLast()) {
-                json.append(",");
-            }
-        }
-        json.append("]");
-        
-        json.append("}");
-        
-        return json.toString();
-    }
-    
-    private static String json(PPToken token) {
-        StringBuilder json = new StringBuilder();
-        
-        json.append("{");
-        
-        json.append("\"mentions\": [");
-        for (PPMention mention : token.getMentions()) {
-            json.append(json(mention));
-            if (mention != token.getMentions().getLast()) {
-                json.append(", ");
-            }
+            json.append("]");
+
+            json.append("}");
+
+            return json.toString();
         }
         
-        json.append("]");
+        private String json(PPDependency dependency) {
+            StringBuilder json = new StringBuilder();
+
+            json.append("{");
+
+            json.append("\"type\": \"");
+            json.append(dependency.getType());
+            json.append("\",");
+
+            json.append("\"governor\": \"");
+            json.append(tokenIDs.get(dependency.getGovernor()));
+            json.append("\",");
+
+            json.append("\"dependent\": \"");
+            json.append(tokenIDs.get(dependency.getDependent()));
+            json.append("\"");
+
+            json.append("}");
+
+            return json.toString();
+        }
         
-        json.append("}");
+        private String json(PPToken token) {
+            StringBuilder json = new StringBuilder();
+
+            json.append("{");
+            
+            json.append("\"id\": \"");
+            json.append(tokenIDs.get(token));
+            json.append("\",");
+
+            json.append("\"mentions\": [");
+            for (PPMention mention : token.getMentions()) {
+                json.append(json(mention));
+                if (mention != token.getMentions().getLast()) {
+                    json.append(", ");
+                }
+            }
+
+            json.append("]");
+
+            json.append("}");
+
+            return json.toString();
+        }
         
-        return json.toString();
+        private String json(PPMention mention) {
+            StringBuilder json = new StringBuilder();
+
+            json.append("{");
+
+            json.append("\"anchor\": \"");
+            json.append(mention.anchor());
+            json.append("\",");
+
+            json.append("\"lemma\": \"");
+            json.append(mention.lemma());
+            json.append("\",");
+
+            json.append("\"pos\": \"");
+            json.append(mention.pos());
+            json.append("\",");
+            
+            json.append("\"sentence\": \"");
+            json.append(sentenceIDs.get(mention.getSentence()));
+            json.append("\"");
+
+            json.append("}");
+
+            return json.toString();
+        }
+        
     }
     
-    private static String json(PPMention mention) {
-        StringBuilder json = new StringBuilder();
+    private class Deserializer {
         
-        json.append("{");
+        private HashMap<Integer, PPToken> tokenIDs = new HashMap();
+        private HashMap<Integer, PPSentence> sentenceIDs = new HashMap();
         
-        json.append("\"anchor\": \"");
-        json.append(mention.anchor());
-        json.append("\",");
+        public PPDocument document(JSONObject o) {
+            PPDocument document = new PPDocument();
         
-        json.append("\"lemma\": \"");
-        json.append(mention.lemma());
-        json.append("\",");
+            JSONArray tokens = (JSONArray)o.get("tokens");
+            for (Object token : tokens) {
+                token((JSONObject)token);
+            }
+            
+            JSONArray sentences = (JSONArray)o.get("sentences");
+            for (Object sentence : sentences) {
+                document.addSentence(sentence((JSONObject)sentence));
+            }
+
+            return document;
+        }
         
-        json.append("\"pos\": \"");
-        json.append(mention.pos());
-        json.append("\"");
+        private PPToken token(JSONObject o) {
+            PPToken token = new PPToken();
+            
+            //First, pull out the id and associate the object with it
+            int id = Integer.parseInt((String)o.get("id"));
+            tokenIDs.put(id, token);
+            
+            //Now parse each mention
+            JSONArray mentions = (JSONArray)o.get("mentions");
+            for (Object mention : mentions) {
+                PPMention m = mention((JSONObject)mention);
+                token.getMentions().add(m);
+                
+                PPSentence sentence = m.getSentence();
+                if (!sentence.listTokens().contains(token)) {
+                    sentence.addToken(token);
+                }
+            }
+            
+            return token;
+        }
         
-        json.append("}");
+        private PPMention mention(JSONObject o) {
+            PPMention mention = new PPMention();
+            
+            mention.setAnchor((String)o.get("anchor"));
+            mention.setLemma((String)o.get("lemma"));
+            mention.setPOS((String)o.get("pos"));
+            
+            int sentenceID = Integer.parseInt((String)o.get("sentence"));
+            PPSentence sentence = getOrAddSentence(sentenceID);
+            mention.setSentence(sentence);
+            
+            return mention;
+        }
         
-        return json.toString();
+        private PPSentence sentence(JSONObject o) {
+            int id = Integer.parseInt((String)o.get("id"));
+            PPSentence sentence = getOrAddSentence(id);
+            
+            sentence.setText((String)o.get("text"));
+
+            JSONArray dependencies = (JSONArray)o.get("dependencies");
+            for (Object dependency : dependencies) {
+                sentence.addDependency(dependency((JSONObject)dependency));
+            }
+
+            return sentence;
+        }
+        
+        private PPDependency dependency(JSONObject o) {
+            PPDependency dependency = new PPDependency();
+        
+            dependency.setType((String)o.get("type"));
+            dependency.setGovernor(tokenIDs.get(Integer.parseInt((String)o.get("governor"))));
+            dependency.setDependent(tokenIDs.get(Integer.parseInt((String)o.get("dependent"))));
+
+            return dependency;
+        }
+        
+       
+        
+        
+        private PPSentence getOrAddSentence(int id) {
+            PPSentence sentence = sentenceIDs.get(id);
+            if (sentence == null) {
+                sentence = new PPSentence();
+                sentenceIDs.put(id, sentence);
+            }
+            
+            return sentence;
+        }
+        
     }
-    
-//    private static String json(PPDependency dependency) {
-//        StringBuilder json = new StringBuilder();
-//        
-//        json.append("{");
-//        
-//        json.append("\"type\": \"");
-//        json.append(dependency.getType());
-//        json.append("\",");
-//        
-//        json.append("\"governor\": \"");
-//        json.append(dependency.getGovernor().anchor());
-//        json.append("\",");
-//        
-//        json.append("\"dependent\": \"");
-//        json.append(dependency.getDependent().anchor());
-//        json.append("\"");
-//        
-//        json.append("}");
-//        
-//        return json.toString();
-//    }
-    
     
 }

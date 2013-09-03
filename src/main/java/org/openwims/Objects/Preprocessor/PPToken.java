@@ -50,6 +50,26 @@ public class PPToken {
         return null;
     }
     
+    public String pos(PPSentence sentence) {
+        for (PPMention mention : mentions) {
+            if (mention.getSentence() == sentence) {
+                return mention.pos();
+            }
+        }
+        
+        return null;
+    }
+    
+    public String lemma(PPSentence sentence) {
+        for (PPMention mention : mentions) {
+            if (mention.getSentence() == sentence) {
+                return mention.lemma();
+            }
+        }
+        
+        return null;
+    }
+    
     public LinkedList<String> anchors(){
         LinkedList<String> anchors = new LinkedList<String>();
         
