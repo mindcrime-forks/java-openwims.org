@@ -61,6 +61,18 @@ public class Lexicon {
         return Lexicon.conn;
     }
     
+    public Sense sense(String id) throws Exception {
+        Statement stmt = Lexicon.conn().createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT word FROM senses WHERE id='" + id.replaceAll("'", "''") + "';");
+        if (rs.next()) {
+            String word = rs.getString("word");
+            Word w = word(word);
+            return w.getSense(id);
+        }
+        
+        return null;
+    }
+    
     public LinkedList<String> roots() throws Exception {
         LinkedList<String> roots = new LinkedList();
         
@@ -133,6 +145,7 @@ public class Lexicon {
                 Sense sense = new Sense(rs.getString("id"));
                 sense.setDefinition(rs.getString("definition"));
                 sense.setExample(rs.getString("example"));
+                sense.setFrequency(rs.getDouble("frequency"));
                 word.addSense(sense);
             }
             

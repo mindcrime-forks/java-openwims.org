@@ -17,6 +17,7 @@ public class Sense {
     private LinkedList<Meaning> meanings;
     private String definition;
     private String example;
+    private double frequency;
     
     public Sense(String id) {
         this.id = id;
@@ -24,6 +25,7 @@ public class Sense {
         this.meanings = new LinkedList();
         this.definition = "";
         this.example = "";
+        this.frequency = 0.5;
     }
 
     public String getId() {
@@ -32,6 +34,14 @@ public class Sense {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public double getFrequency() {
+        return frequency;
+    }
+
+    public void setFrequency(double frequency) {
+        this.frequency = frequency;
     }
 
     public void setDefinition(String definition) {
