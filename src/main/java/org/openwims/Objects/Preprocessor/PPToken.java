@@ -23,6 +23,13 @@ public class PPToken {
         return mentions;
     }
 
+    @Override
+    public String toString() {
+        return this.bestAnchor();
+    }
+    
+    
+
     public LinkedList<PPMention> listMentions(String pos, PPSentence sentence) {
         LinkedList<PPMention> mentionsByPOS = new LinkedList();
         

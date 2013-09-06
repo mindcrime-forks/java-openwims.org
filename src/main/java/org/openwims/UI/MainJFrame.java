@@ -31,6 +31,7 @@ import org.openwims.Objects.Lexicon.Word;
 import org.openwims.Objects.Preprocessor.PPDocument;
 import org.openwims.Objects.WIM;
 import org.openwims.Processors.TieredGroupingDisambiguation;
+import org.openwims.Processors.TieredGroupingDisambiguationRefHack;
 import org.openwims.Processors.WIMProcessor;
 import org.openwims.Processors.WIMProcessor.WSDProcessor;
 import org.openwims.Processors.WIMProcessor.WSEProcessor;
@@ -96,7 +97,9 @@ public class MainJFrame extends javax.swing.JFrame {
         
         
         this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping", this.wseProcessor));
+        this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping (HACK)", new TieredGroupingDisambiguationRefHack()));
         this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping", this.wsdProcessor));
+        this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping (HACK)", new TieredGroupingDisambiguationRefHack()));
         this.WIMJMenu.add(new WIMJMenuItem("Default Wimify", this.wimProcessor));
     }
 
