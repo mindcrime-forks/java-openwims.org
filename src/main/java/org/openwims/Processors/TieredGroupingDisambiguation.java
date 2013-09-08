@@ -67,7 +67,7 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
         for (PPSentence sentence : document.listSentences()) {
             for (PPToken verb : sentence.listTokens()) {
                 for (PPMention mention : verb.listMentions("V", sentence)) {
-                    for (Sense sense : WIMGlobals.lexicon().word(mention.lemma()).listSenses()) {
+                    for (Sense sense : WIMGlobals.lexicon().getSenses(mention)) {
                         if (!WIMGlobals.tagmaps().doTagsMatch(mention.pos(), sense.pos())) {
                             continue;
                         }
@@ -92,7 +92,7 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
                 for (PPMention mention : noun.listMentions("N", sentence)) {
                     HashMap<Sense, Integer> nounSenseCounts = new HashMap();
 
-                    for (Sense sense : WIMGlobals.lexicon().word(mention.lemma()).listSenses()) {
+                    for (Sense sense : WIMGlobals.lexicon().getSenses(mention)) {
                         if (!WIMGlobals.tagmaps().doTagsMatch(mention.pos(), sense.pos())) {
                             continue;
                         }

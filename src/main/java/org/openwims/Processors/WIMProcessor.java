@@ -85,7 +85,7 @@ public abstract class WIMProcessor {
             LinkedList<Expectation> expectationsCopy = new LinkedList(expectations);
             expectationsCopy.add(new Expectation("pos", mention.pos()));
 
-            for (Sense sense : WIMGlobals.lexicon().word(mention.lemma()).listSenses()) {
+            for (Sense sense : WIMGlobals.lexicon().getSenses(mention)) {
                 if (doesSenseSatisfyExpectations(sense, expectationsCopy)) {
                     satisfying.add(sense);
                 }

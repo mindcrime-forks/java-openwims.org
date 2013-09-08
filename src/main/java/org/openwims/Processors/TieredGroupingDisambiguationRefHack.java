@@ -61,8 +61,9 @@ public class TieredGroupingDisambiguationRefHack extends WIMProcessor implements
     //and their mappings (to particular senses)
     public SenseGraph wse(PPDocument document) {
 
+        document.transform();
+        
         SenseGraph graph = new SenseGraph();
-
 
         //THIS IS WHERE THE HACK LIVES!
         PPSentence documentSentence = new PPSentence();
@@ -82,7 +83,7 @@ public class TieredGroupingDisambiguationRefHack extends WIMProcessor implements
 
         for (PPToken verb : documentSentence.listTokens()) {
             for (PPMention mention : verb.listMentions("V", documentSentence)) {
-                for (Sense sense : WIMGlobals.lexicon().word(mention.lemma()).listSenses()) {
+                for (Sense sense : WIMGlobals.lexicon().getSenses(mention)) {
                     if (!WIMGlobals.tagmaps().doTagsMatch(mention.pos(), sense.pos())) {
                         continue;
                     }
@@ -105,7 +106,7 @@ public class TieredGroupingDisambiguationRefHack extends WIMProcessor implements
             for (PPMention mention : noun.listMentions("N", documentSentence)) {
                 HashMap<Sense, Integer> nounSenseCounts = new HashMap();
 
-                for (Sense sense : WIMGlobals.lexicon().word(mention.lemma()).listSenses()) {
+                for (Sense sense : WIMGlobals.lexicon().getSenses(mention)) {
                     if (!WIMGlobals.tagmaps().doTagsMatch(mention.pos(), sense.pos())) {
                         continue;
                     }
@@ -162,12 +163,34 @@ public class TieredGroupingDisambiguationRefHack extends WIMProcessor implements
             }
         }
         InterpretationSet set = new InterpretationSet();
-        buildInterpretation_RECURSIVE(new LinkedList(verbs), set, graph);
+        buildInterpretation_GREEDY(new LinkedList(verbs), set, graph, documentSentence);
 
 
         //Trim all interpretations sets that don't cover at least all N and V
 
 
+//        LinkedList<PPToken> nounsAndVerbs = new LinkedList();
+//        for (PPToken token : documentSentence.listTokens()) {
+//            if (token.listMentions("V", documentSentence).size() > 0 || token.listMentions("N", documentSentence).size() > 0) {
+//                if(!isTokenNonheadOfNN(token, documentSentence)){ //stop gap until we have robust NN processing - ignore nouns that are not heads of NNs
+//                    nounsAndVerbs.add(token);
+//                }
+//            }
+//        }
+//
+//        for (Iterator<InterpretationSet> it = graph.interpretations.iterator(); it.hasNext();) {
+//            InterpretationSet interpretationSet = it.next();
+//            if (interpretationSet.isForSentence(documentSentence) && !interpretationSet.doesMappingCoverTokens(nounsAndVerbs)) {
+//                it.remove();
+//            }
+//        }
+
+
+        return graph;
+    }
+    
+    private boolean doesProvideCoverage(PPSentence documentSentence, SenseGraph graph){
+        
         LinkedList<PPToken> nounsAndVerbs = new LinkedList();
         for (PPToken token : documentSentence.listTokens()) {
             if (token.listMentions("V", documentSentence).size() > 0 || token.listMentions("N", documentSentence).size() > 0) {
@@ -183,9 +206,44 @@ public class TieredGroupingDisambiguationRefHack extends WIMProcessor implements
                 it.remove();
             }
         }
+        if(graph.interpretations.size() > 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private boolean buildInterpretation_GREEDY(LinkedList<PPToken> remainingVerbs, InterpretationSet set, SenseGraph graph, PPSentence sentence) {
+        //Copy the list so as not to impact higher iterations of the recursion
+        remainingVerbs = new LinkedList(remainingVerbs);
 
+        //Continue to build on to the valid sets
+        if (remainingVerbs.size() > 0) {
+            PPToken first = remainingVerbs.removeFirst();
+            if (graph.verbs.get(first) == null) {
+                graph.interpretations.add(set);
+                return false;  //there was no mapping for the verb
+            }
 
-        return graph;
+            for (SenseMapping mapping : graph.verbs.get(first)) {
+                if (!set.doesMappingViolateSet(mapping)) {
+                    InterpretationSet innerSet = new InterpretationSet(set);
+                    innerSet.mappings.add(mapping);
+                    if(buildInterpretation_GREEDY(remainingVerbs, innerSet, graph, sentence)){
+                        return true;
+                    }
+                }
+            }
+        } else {
+            //Only valid sets will have made it this far, and the recursion is complete
+            graph.interpretations.add(set);
+            if(doesProvideCoverage(sentence, graph)){
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
     }
 
     private void buildInterpretation_RECURSIVE(LinkedList<PPToken> remainingVerbs, InterpretationSet set, SenseGraph graph) {

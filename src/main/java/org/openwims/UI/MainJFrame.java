@@ -91,15 +91,15 @@ public class MainJFrame extends javax.swing.JFrame {
         this.wimProcessorGroup = new ButtonGroup();
         
         
-        this.wseProcessor = new TieredGroupingDisambiguation();
-        this.wsdProcessor = new TieredGroupingDisambiguation();
+        this.wseProcessor = new TieredGroupingDisambiguationRefHack();
+        this.wsdProcessor = new TieredGroupingDisambiguationRefHack();
         this.wimProcessor = new WIMProcessor() {};
         
         
-        this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping", this.wseProcessor));
-        this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping (HACK)", new TieredGroupingDisambiguationRefHack()));
-        this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping", this.wsdProcessor));
-        this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping (HACK)", new TieredGroupingDisambiguationRefHack()));
+        this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping (HACK)", this.wseProcessor));
+        this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping", new TieredGroupingDisambiguation()));
+        this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping (HACK)", this.wsdProcessor));
+        this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping", new TieredGroupingDisambiguation()));
         this.WIMJMenu.add(new WIMJMenuItem("Default Wimify", this.wimProcessor));
     }
 
@@ -603,6 +603,7 @@ public class MainJFrame extends javax.swing.JFrame {
         
         setDocument(StanfordHelper.convert(StanfordHelper.annotate(input)));
         wimify();
+        //load(this.document);
     }
     
     private void wimify() {

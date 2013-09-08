@@ -25,8 +25,8 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
     public static Connection conn() throws Exception {
         if (PostgreSQLLexiconSerializer.conn == null) {
             String url = "jdbc:postgresql://localhost/OpenWIMs";
-            String user = "jesse";
-            String pass = "";
+            String user = "postgres";
+            String pass = "forest";
 
             Class.forName("org.postgresql.Driver");
             

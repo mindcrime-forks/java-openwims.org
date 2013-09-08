@@ -4,6 +4,7 @@
  */
 package org.openwims.Objects.Preprocessor;
 
+import java.util.LinkedList;
 import org.openwims.WIMGlobals;
 
 /**
@@ -16,6 +17,7 @@ public class PPMention {
     protected String lemma;
     protected String pos;
     protected PPSentence sentence;
+    protected String NERtype;
 
     public PPMention() {
         this.index = -1;
@@ -23,12 +25,17 @@ public class PPMention {
         this.lemma = "";
         this.pos = "";
         this.sentence = null;
+        this.NERtype = "";
     }
     
     public void setAnchor(String anchor) {
         String[] parts = anchor.split("-");
         this.text = parts[0];
         this.index = Integer.parseInt(parts[1]);
+    }
+
+    public String getNERtype() {
+        return NERtype;
     }
 
     public void setSentence(PPSentence sentence) {

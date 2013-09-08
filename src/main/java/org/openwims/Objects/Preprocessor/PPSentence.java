@@ -74,4 +74,34 @@ public class PPSentence {
     public void removeDependency(PPDependency dependency) {
         this.dependencies.remove(dependency);
     }
+
+    void transform() {
+        LinkedList<PPDependency> toAdd = new LinkedList<PPDependency>();
+        for (PPDependency dep : dependencies) {
+            //reambiguate PREP attachment
+            if(dep.getType().equalsIgnoreCase("prep")){
+                if(WIMGlobals.tagmaps().doTagsMatch(dep.getGovernor().pos(this), "N")){
+                    PPToken selector = null;
+                    for (PPDependency selDep : dependencies) {
+                        if(selDep.getDependent() == dep.getGovernor()){
+                            selector = selDep.getGovernor();
+                        }
+                    }
+                    if(selector != null){
+                        PPDependency newDep = new PPDependency();
+                        newDep.setType("prep");
+                        newDep.setGovernor(selector);
+                        newDep.setDependent(dep.getDependent());
+                        toAdd.add(newDep);
+                    }
+                }
+            }
+            
+            //NSUBJPASS adds DOBJ
+        }
+        this.dependencies.addAll(toAdd);
+        for (PPDependency dep : dependencies) {
+            System.out.println(dep.getType() + "(" + dep.getGovernor().anchor(this)+ "," + dep.getDependent().anchor(this)+ ")");
+        }
+    }
 }

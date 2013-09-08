@@ -33,5 +33,13 @@ public class PPDocument {
     public void addSentence(PPSentence sentence) {
         this.sentences.add(sentence);
     }
+
+    public void transform() {
+        //THIS IS SYNTAX TRANSFORMATIONS!!! HRAAAAA!
+        
+        for (PPSentence sentence : sentences) {
+            sentence.transform();
+        }
+    }
     
 }

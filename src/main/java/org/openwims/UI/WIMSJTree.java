@@ -116,9 +116,9 @@ public class WIMSJTree extends FTree {
                 this.add(new WIMRelationNode(relation));
             }
             
-            for (WIMRelation inverse : frame.listInverses()) {
-                this.add(new WIMRelationNode(inverse));
-            }
+//            for (WIMRelation inverse : frame.listInverses()) {
+//                this.add(new WIMRelationNode(inverse));
+//            }
         }
         
     }

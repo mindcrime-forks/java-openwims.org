@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.LinkedList;
+import org.openwims.Objects.Preprocessor.PPMention;
 import org.openwims.Serialization.LexiconSerializer;
 import org.openwims.Serialization.PostgreSQLLexiconSerializer;
 
@@ -115,6 +116,26 @@ public class Lexicon {
         stmt.close();
         
         return verbs;
+    }
+    
+    public LinkedList<Sense> getSenses(PPMention mention){
+        LinkedList<Sense> list = new LinkedList<Sense>();
+        Word word = word(mention.lemma());
+        list.addAll(word.listSenses());
+        //handle NER
+        if(list.size() == 0 && !mention.getNERtype().equalsIgnoreCase("")){
+            if(mention.getNERtype().equalsIgnoreCase("date")){
+                Sense dateSense = new Sense("@temporal-object:" + mention.lemma() + "-n-" + nextInstanceNumber("@temporal-object", mention.lemma(), "n"));
+                list.add(dateSense);
+                word.addSense(dateSense);
+            }
+            if(mention.getNERtype().equalsIgnoreCase("person")){
+                Sense personSense = new Sense("@human:" + mention.lemma() + "-n-" + nextInstanceNumber("@human", mention.lemma(), "n"));
+                list.add(personSense);
+                word.addSense(personSense);
+            }
+        }
+        return list;
     }
     
     public Word word(String representation) {
