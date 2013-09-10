@@ -4,8 +4,10 @@
  */
 package org.openwims.UI;
 
+import com.jesseenglish.swingftfy.extensions.FDialog;
 import com.jesseenglish.swingftfy.extensions.FNode;
 import com.jesseenglish.swingftfy.extensions.FTree;
+import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,6 +23,7 @@ import org.openwims.Objects.WIM;
 import org.openwims.Objects.WIMAttribute;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Objects.WIMRelation;
+import org.openwims.WIMGlobals;
 
 /**
  *
@@ -87,6 +90,25 @@ public class WIMSJTree extends FTree {
             setIcon(FRAMES);
             for (WIMFrame frame : wim.listFrames()) {
                 this.add(new WIMFrameNode(frame));
+            }
+        }
+        
+        @Override
+        public void mouseReleased(MouseEvent me) {
+            super.mouseReleased(me);
+            
+            if (this.wim == null) {
+                return;
+            }
+            
+            if (SwingUtilities.isRightMouseButton(me)) {
+            
+                JPopupMenu menu = new JPopupMenu();
+                menu.add(new ShowGraphJMenuItem(wim));
+
+                Rectangle r = WIMSJTree.this.getPathBounds(WIMSJTree.this.getPath(this));
+                menu.show(WIMSJTree.this, r.x, r.y + r.height);
+            
             }
         }
         
@@ -206,6 +228,31 @@ public class WIMSJTree extends FTree {
             for (SenseSelectionListener listener : WIMSJTree.this.listeners) {
                 listener.senseSelected(sense);
             }
+        }
+        
+    }
+    
+    private class ShowGraphJMenuItem extends JMenuItem implements ActionListener {
+        
+        private WIM wim;
+
+        public ShowGraphJMenuItem(WIM wim) {
+            super("Show Graph");
+            this.wim = wim;
+            
+            this.addActionListener(this);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            FDialog d = new FDialog(WIMGlobals.frame);
+            d.setTitle("Graph View");
+            d.setModal(false);
+            d.setLayout(new GridLayout(1, 1));
+            d.setSize(500, 500);
+            d.add(new WIMsGraphJPanel(wim));
+            d.setVisible(true);
+            d.center();
         }
         
     }
