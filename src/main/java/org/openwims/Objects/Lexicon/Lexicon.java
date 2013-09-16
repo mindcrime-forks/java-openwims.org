@@ -142,10 +142,16 @@ public class Lexicon {
             
             ResultSet rs = stmt.executeQuery("SELECT * FROM senses WHERE word='" + representation.replaceAll("'", "''") + "';");
             while (rs.next()) {
+                String example = rs.getString("example");
+                if (example == null) {
+                    example = "";
+                }
+                
                 Sense sense = new Sense(rs.getString("id"));
                 sense.setDefinition(rs.getString("definition"));
-                sense.setExample(rs.getString("example"));
+                sense.setExample(example);
                 sense.setFrequency(rs.getDouble("frequency"));
+                sense.setUid(rs.getInt("uid"));
                 word.addSense(sense);
             }
             

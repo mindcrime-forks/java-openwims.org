@@ -18,6 +18,7 @@ public class Sense {
     private String definition;
     private String example;
     private double frequency;
+    private int uid;
     
     public Sense(String id) {
         this.id = id;
@@ -26,6 +27,15 @@ public class Sense {
         this.definition = "";
         this.example = "";
         this.frequency = 0.5;
+        this.uid = -1;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
+    }
+
+    public int getUid() {
+        return uid;
     }
 
     public String getId() {

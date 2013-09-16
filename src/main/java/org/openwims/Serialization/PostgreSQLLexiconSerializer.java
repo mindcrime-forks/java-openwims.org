@@ -56,8 +56,8 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         builder.append("BEGIN;\n");
         
         //DELETE OLD SENSE (IF IT EXISTS); CASCADE / FKEYS HANDLE THE REST
-        builder.append("DELETE FROM senses WHERE id='");
-        builder.append(sense.getId().replaceAll("'", "''"));
+        builder.append("DELETE FROM senses WHERE uid='");
+        builder.append(sense.getUid());
         builder.append("';\n");
         
         //ADD WORD (IF IT DOES NOT EXIST)
@@ -68,7 +68,11 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         builder.append("');\n");
         
         //INSERT SENSE
-        builder.append("INSERT INTO senses (id, word, definition, example, frequency) VALUES ('");
+        builder.append("INSERT INTO senses (id, word, definition, example, frequency");
+        if (sense.getUid() != -1) {
+            builder.append(", uid");
+        }
+        builder.append(") VALUES ('");
         builder.append(sense.getId().replaceAll("'", "''"));
         builder.append("', '");
         builder.append(sense.word().replaceAll("'", "''"));
@@ -78,6 +82,10 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         builder.append(sense.getExample().replaceAll("'", "''"));
         builder.append("', ");
         builder.append(sense.getFrequency());
+        if (sense.getUid() != -1) {
+            builder.append(", ");
+            builder.append(sense.getUid());
+        }
         builder.append(");\n");
         
         //INSERT MEANINGS
