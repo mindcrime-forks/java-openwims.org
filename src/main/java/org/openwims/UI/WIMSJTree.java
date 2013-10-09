@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.LinkedList;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -41,6 +42,9 @@ public class WIMSJTree extends FTree {
     public WIMSJTree(LinkedList<WIM> wims) {
         this.wims = wims;
         this.listeners = new LinkedList();
+        
+        Collections.sort(this.wims);
+        Collections.reverse(this.wims);
     
         WIMSNode root = new WIMSNode(wims);
         DefaultTreeModel model = new DefaultTreeModel(root);
@@ -82,7 +86,7 @@ public class WIMSJTree extends FTree {
         private WIM wim;
 
         public WIMNode(WIM wim) {
-            super("WIM");
+            super("WIM (" + wim.score() + ")");
             this.wim = wim;
             setIcon(FRAMES);
             for (WIMFrame frame : wim.listFrames()) {
@@ -97,7 +101,7 @@ public class WIMSJTree extends FTree {
         private WIMFrame frame;
 
         public WIMFrameNode(WIMFrame frame) {
-            super(frame.getName());
+            super(frame.getName() + " (" + frame.score() + ")");
             this.frame = frame;
             setIcon(ROOT);
             

@@ -27,6 +27,8 @@ import org.openwims.Objects.Lexicon.*;
 import org.openwims.UI.Editors.DefinitionEditorJPanel;
 import org.openwims.UI.Editors.DependencyEditorJPanel;
 import org.openwims.UI.Editors.DependencySetEditorJPanel;
+import org.openwims.UI.Editors.ExampleEditorJPanel;
+import org.openwims.UI.Editors.FrequencyEditorJPanel;
 import org.openwims.UI.Editors.MeaningEditorJPanel;
 import org.openwims.UI.Editors.RemapConceptJPanel;
 import org.openwims.WIMGlobals;
@@ -44,6 +46,7 @@ public class SenseJTree extends FTree {
     private static ImageIcon EXAMPLE = new ImageIcon(SenseJTree.class.getResource("/images/example.png"));
     private static ImageIcon MANDATORY = new ImageIcon(SenseJTree.class.getResource("/images/mandatory.png"));
     private static ImageIcon OPTIONAL = new ImageIcon(SenseJTree.class.getResource("/images/optional.png"));
+    private static ImageIcon FREQUENCY = new ImageIcon(SenseJTree.class.getResource("/images/frequency.png"));
     
     private Sense sense;
     private ArraySet<Object> expanded;
@@ -117,6 +120,7 @@ public class SenseJTree extends FTree {
             
             this.add(new SenseJTree.DefinitionNode(this.sense));
             this.add(new SenseJTree.ExampleNode(this.sense));
+            this.add(new SenseJTree.FrequencyNode(this.sense));
             
             for (Meaning meaning : sense.listMeanings()) {
                 this.add(new SenseJTree.MeaningRelationNode(this.sense, meaning));
@@ -191,11 +195,55 @@ public class SenseJTree extends FTree {
             this.sense = sense;
             setIcon(EXAMPLE);
         }
+        
+        @Override
+        public void mouseReleased(MouseEvent me) {
+            super.mouseReleased(me);
+            
+            if (SwingUtilities.isRightMouseButton(me)) {
+            
+                JPopupMenu menu = new JPopupMenu();
+                menu.add(new EditExampleJMenuItem(this.sense));
+                
+                Rectangle r = SenseJTree.this.getPathBounds(SenseJTree.this.getPath(this));
+                menu.show(SenseJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
+            }
+        }
 
         @Override
         public Object recall() {
             return this.sense.getExample();
         }
+    }
+    
+    private class FrequencyNode extends ExpansionMemoryNode {
+        
+        private Sense sense;
+        
+        public FrequencyNode(Sense sense) {
+            super(sense.getFrequency());
+            this.sense = sense;
+            setIcon(FREQUENCY);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent me) {
+            super.mouseReleased(me);
+            
+            if (SwingUtilities.isRightMouseButton(me)) {
+                JPopupMenu menu = new JPopupMenu();
+                menu.add(new EditFrequencyJMenuItem(this.sense));
+                
+                Rectangle r = SenseJTree.this.getPathBounds(SenseJTree.this.getPath(this));
+                menu.show(SenseJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
+            }
+        }
+
+        @Override
+        public Object recall() {
+            return null;
+        }
+        
     }
     
     private class MeaningRelationNode extends ExpansionMemoryNode {
@@ -517,6 +565,57 @@ public class SenseJTree extends FTree {
         @Override
         public void actionPerformed(ActionEvent ae) {
             DefinitionEditorJPanel e = new DefinitionEditorJPanel(this.sense);
+            
+            FDialog d =  new FDialog(WIMGlobals.frame);
+            d.setModal(true);
+            d.setSize(250, 50);
+            d.add(e);
+            d.center();
+            d.setVisible(true);
+            
+            SenseJTree.this.refresh();
+        }
+        
+    }
+    
+    private class EditExampleJMenuItem extends JMenuItem implements ActionListener {
+        
+        private Sense sense;
+
+        public EditExampleJMenuItem(Sense sense) {
+            super("Edit Example");
+            this.sense = sense;
+            this.addActionListener(this);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            ExampleEditorJPanel e = new ExampleEditorJPanel(this.sense);
+            
+            FDialog d =  new FDialog(WIMGlobals.frame);
+            d.setModal(true);
+            d.setSize(250, 50);
+            d.add(e);
+            d.center();
+            d.setVisible(true);
+            
+            SenseJTree.this.refresh();
+        }
+        
+    }
+    
+    private class EditFrequencyJMenuItem extends JMenuItem implements ActionListener {
+        
+        private Sense sense;
+        
+        public EditFrequencyJMenuItem(Sense sense) {
+            super("Edit Frequency");
+            this.sense = sense;
+            this.addActionListener(this);
+        }
+
+        public void actionPerformed(ActionEvent ae) {
+            FrequencyEditorJPanel e = new FrequencyEditorJPanel(this.sense);
             
             FDialog d =  new FDialog(WIMGlobals.frame);
             d.setModal(true);

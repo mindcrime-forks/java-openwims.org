@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.LinkedList;
+import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Serialization.LexiconSerializer;
 import org.openwims.Serialization.PostgreSQLLexiconSerializer;
 
@@ -127,6 +128,35 @@ public class Lexicon {
         stmt.close();
         
         return verbs;
+    }
+    
+    public LinkedList<Sense> listSenses(PPToken token){
+        LinkedList<Sense> list = new LinkedList<Sense>();
+        Word word = word(token.lemma());
+        list.addAll(word.listSenses(token.rootPOS()));
+        
+        //handle NER
+        if(list.size() == 0 && !token.nerType().equalsIgnoreCase("")){
+            if(token.nerType().equalsIgnoreCase("date")){
+                Sense dateSense = new Sense("@temporal-object:" + token.lemma() + "-n-" + nextInstanceNumber("@temporal-object", token.lemma(), "n"));
+                list.add(dateSense);
+                word.addSense(dateSense);
+            }
+            if(token.nerType().equalsIgnoreCase("person")){
+                Sense personSense = new Sense("@human:" + token.lemma() + "-n-" + nextInstanceNumber("@human", token.lemma(), "n"));
+                list.add(personSense);
+                word.addSense(personSense);
+            }
+        }
+        
+        //handle unknowns
+        if (list.size() == 0) {
+            Sense noneSense = new Sense("@none:" + token.lemma() + "-" + token.rootPOS().toLowerCase() + "-1");
+            list.add(noneSense);
+            word.addSense(noneSense);
+        }
+        
+        return list;
     }
 
     public Word word(String representation) {

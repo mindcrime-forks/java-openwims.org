@@ -5,6 +5,7 @@
 package org.openwims.Objects.Preprocessor;
 
 import java.util.LinkedList;
+import org.openwims.WIMGlobals;
 
 /**
  *
@@ -32,6 +33,17 @@ public class PPDocument {
     
     public void addSentence(PPSentence sentence) {
         this.sentences.add(sentence);
+    }
+    
+    public int countPossibleSenseInterpretations() {
+        int possibilities = 1;
+        for (PPSentence sentence : listSentences()) {
+            for (PPToken token : sentence.listTokens()) {
+                int senses = WIMGlobals.lexicon().listSenses(token).size();
+                possibilities *= senses;
+            }
+        }
+        return possibilities;
     }
     
 }

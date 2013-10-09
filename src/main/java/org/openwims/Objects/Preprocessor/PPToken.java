@@ -16,12 +16,18 @@ public class PPToken implements Comparable<PPToken> {
     protected String text;
     protected String lemma;
     protected String pos;
+    protected String nerType;
 
     public PPToken() {
         this.index = -1;
         this.text = "";
         this.lemma = "";
         this.pos = "";
+        this.nerType = "";
+    }
+
+    public void setNERtype(String NERtype) {
+        this.nerType = NERtype;
     }
     
     public void setAnchor(String anchor) {
@@ -52,6 +58,10 @@ public class PPToken implements Comparable<PPToken> {
     
     public String pos() {
         return this.pos;
+    }
+    
+    public String nerType() {
+        return this.nerType;
     }
     
     public String rootPOS() {

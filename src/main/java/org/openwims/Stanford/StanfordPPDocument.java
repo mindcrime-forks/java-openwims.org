@@ -105,6 +105,7 @@ public class StanfordPPDocument extends PPDocument {
             this.text = token.originalText();
             this.lemma = token.lemma();
             this.pos = token.tag();
+            this.nerType = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         }
         
     }

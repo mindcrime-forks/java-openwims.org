@@ -86,6 +86,7 @@ public class JSONPPDocumentSerializer {
         token.setAnchor((String)o.get("anchor"));
         token.setLemma((String)o.get("lemma"));
         token.setPOS((String)o.get("pos"));
+        token.setNERtype((String)o.get("ner"));
         
         return token;
     }
@@ -184,6 +185,10 @@ public class JSONPPDocumentSerializer {
         
         json.append("\"pos\": \"");
         json.append(token.pos());
+        json.append("\",");
+        
+        json.append("\"ner\": \"");
+        json.append(token.nerType());
         json.append("\"");
         
         json.append("}");

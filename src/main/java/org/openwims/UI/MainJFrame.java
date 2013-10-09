@@ -29,6 +29,8 @@ import org.openwims.Objects.Disambiguation.SenseGraph;
 import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Lexicon.Word;
 import org.openwims.Objects.Preprocessor.PPDocument;
+import org.openwims.Objects.Preprocessor.PPSentence;
+import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
 import org.openwims.Processors.TieredGroupingDisambiguation;
 import org.openwims.Processors.WIMProcessor;
@@ -606,6 +608,8 @@ public class MainJFrame extends javax.swing.JFrame {
         if (this.document == null) {
             return;
         }
+        
+        System.out.println("TOTAL POSSIBILITIES: " + this.document.countPossibleSenseInterpretations());
         
         SenseGraph wse = this.wseProcessor.wse(document);
         LinkedList<WIM> wims = this.wimProcessor.wimify(wse);

@@ -42,6 +42,18 @@ public class Word {
         return new LinkedList(this.senses.values());
     }
     
+    public LinkedList<Sense> listSenses(String pos) {
+        LinkedList<Sense> matches = new LinkedList();
+        
+        for (Sense sense : this.senses.values()) {
+            if (WIMGlobals.tagmaps().doTagsMatch(pos, sense.pos())) {
+                matches.add(sense);
+            }
+        }
+        
+        return matches;
+    }
+    
     public boolean canBeConcept(String concept) {
         for (Sense sense : senses.values()) {
             if (WIMGlobals.ontology().isDescendant(sense.concept(), concept)) {

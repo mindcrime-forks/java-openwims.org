@@ -11,7 +11,7 @@ import org.openwims.Objects.Preprocessor.PPToken;
  *
  * @author jesseenglish
  */
-public class WIM {
+public class WIM implements Comparable<WIM> {
     
     private LinkedList<WIMFrame> frames;
 
@@ -34,6 +34,16 @@ public class WIM {
         this.frames.add(frame);
         return frame;
     }
+    
+    public double score() {
+        double score = 1.0;
+        
+        for (WIMFrame frame : frames) {
+            score = score * (frame.score());
+        }
+        
+        return score;
+    }
 
     @Override
     public String toString() {
@@ -42,6 +52,10 @@ public class WIM {
             out += frame + "\n\n";
         }
         return out;
+    }
+
+    public int compareTo(WIM o) {
+        return (int)(this.score() * 100) - (int)(o.score() * 100);
     }
     
 }

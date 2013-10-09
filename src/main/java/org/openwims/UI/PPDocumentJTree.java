@@ -238,6 +238,9 @@ public class PPDocumentJTree extends FTree {
             
             this.add(new PPPOSNode(this.governor));
             this.add(new PPLemmaNode(this.governor));
+            if (!this.governor.nerType().equalsIgnoreCase("O")) {
+                this.add(new PPNERTypeNode(this.governor));
+            }
         }
         
         @Override
@@ -272,6 +275,9 @@ public class PPDocumentJTree extends FTree {
             
             this.add(new PPPOSNode(this.dependent));
             this.add(new PPLemmaNode(this.dependent));
+            if (!this.dependent.nerType().equalsIgnoreCase("O")) {
+                this.add(new PPNERTypeNode(this.dependent));
+            }
         }
         
         @Override
@@ -318,6 +324,23 @@ public class PPDocumentJTree extends FTree {
 
         public PPLemmaNode(PPToken token) {
             super(token.lemma());
+            this.token = token;
+            setIcon(LEAF);
+        }
+
+        @Override
+        public Object recall() {
+            return null;
+        }
+        
+    }
+    
+    private class PPNERTypeNode extends ExpansionMemoryNode {
+        
+        private PPToken token;
+        
+        public PPNERTypeNode(PPToken token) {
+            super(token.nerType());
             this.token = token;
             setIcon(LEAF);
         }

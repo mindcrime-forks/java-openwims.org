@@ -64,7 +64,7 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
         //First we build a collection of possibly valid sense mappings for each verb
         for (PPSentence sentence : document.listSentences()) {
             for (PPToken verb : sentence.listTokens("V")) {
-                for (Sense sense : WIMGlobals.lexicon().word(verb.lemma()).listSenses()) {
+                for (Sense sense : WIMGlobals.lexicon().listSenses(verb)) {
                     if (!WIMGlobals.tagmaps().doTagsMatch(verb.pos(), sense.pos())) {
                         continue;
                     }
@@ -86,7 +86,7 @@ public class TieredGroupingDisambiguation extends WIMProcessor implements WSEPro
             for (PPToken noun : sentence.listTokens("N")) {
                 HashMap<Sense, Integer> nounSenseCounts = new HashMap();
                 
-                for (Sense sense : WIMGlobals.lexicon().word(noun.lemma()).listSenses()) {
+                for (Sense sense : WIMGlobals.lexicon().listSenses(noun)) {
                     if (!WIMGlobals.tagmaps().doTagsMatch(noun.pos(), sense.pos())) {
                         continue;
                     }

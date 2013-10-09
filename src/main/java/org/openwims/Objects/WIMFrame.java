@@ -89,6 +89,10 @@ public class WIMFrame {
         return false;
     }
     
+    public double score() {
+        return this.sense.getFrequency() + 0.5;
+    }
+    
     public String getConcept() {
         String concept = "unknown";
         
