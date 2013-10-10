@@ -9,7 +9,7 @@ import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Preprocessor.PPToken;
 
 /**
- *
+ * @deprecated 
  * @author jesseenglish
  */
 public class InterpretationSet {

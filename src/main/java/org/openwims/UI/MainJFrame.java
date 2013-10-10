@@ -25,13 +25,12 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.openwims.Objects.Disambiguation.SenseGraph;
+import org.openwims.Objects.Disambiguation.Interpretation;
 import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Lexicon.Word;
 import org.openwims.Objects.Preprocessor.PPDocument;
-import org.openwims.Objects.Preprocessor.PPSentence;
-import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
+import org.openwims.Processors.LandGrabDisambiguation;
 import org.openwims.Processors.TieredGroupingDisambiguation;
 import org.openwims.Processors.WIMProcessor;
 import org.openwims.Processors.WIMProcessor.WSDProcessor;
@@ -54,11 +53,9 @@ public class MainJFrame extends javax.swing.JFrame {
     
     private WSDProcessor wsdProcessor;
     private WSEProcessor wseProcessor;
-    private WIMProcessor wimProcessor;
     
     private ButtonGroup wsdProcessorGroup;
     private ButtonGroup wseProcessorGroup;
-    private ButtonGroup wimProcessorGroup;
     
     /**
      * Creates new form MainJFrame
@@ -89,17 +86,14 @@ public class MainJFrame extends javax.swing.JFrame {
         
         this.wsdProcessorGroup = new ButtonGroup();
         this.wseProcessorGroup = new ButtonGroup();
-        this.wimProcessorGroup = new ButtonGroup();
         
         
-        this.wseProcessor = new TieredGroupingDisambiguation();
-        this.wsdProcessor = new TieredGroupingDisambiguation();
-        this.wimProcessor = new WIMProcessor() {};
+        this.wseProcessor = new LandGrabDisambiguation();
+        this.wsdProcessor = new LandGrabDisambiguation();
         
         
-        this.WSEJMenu.add(new WSEJMenuItem("Tiered Grouping", this.wseProcessor));
-        this.WSDJMenu.add(new WSDJMenuItem("Tiered Grouping", this.wsdProcessor));
-        this.WIMJMenu.add(new WIMJMenuItem("Default Wimify", this.wimProcessor));
+        this.WSEJMenu.add(new WSEJMenuItem("Land Grab", this.wseProcessor));
+        this.WSDJMenu.add(new WSDJMenuItem("Land Grab", this.wsdProcessor));
     }
 
     /**
@@ -148,7 +142,6 @@ public class MainJFrame extends javax.swing.JFrame {
         OptionsJMenu = new javax.swing.JMenu();
         WSEJMenu = new javax.swing.JMenu();
         WSDJMenu = new javax.swing.JMenu();
-        WIMJMenu = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("WIMs Explorer");
@@ -357,9 +350,6 @@ public class MainJFrame extends javax.swing.JFrame {
         WSDJMenu.setText("WSD Processor");
         OptionsJMenu.add(WSDJMenu);
 
-        WIMJMenu.setText("WIM Processor");
-        OptionsJMenu.add(WIMJMenu);
-
         MainJMenuBar.add(OptionsJMenu);
 
         setJMenuBar(MainJMenuBar);
@@ -470,7 +460,6 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JTextField SearchJTextField;
     private javax.swing.JPanel SenseContainerJPanel;
     private javax.swing.JList SensesJList;
-    private javax.swing.JMenu WIMJMenu;
     private javax.swing.JButton WIMifyJButton;
     private javax.swing.JPanel WIMsContainerJPanel;
     private javax.swing.JScrollPane WIMsJScrollPane;
@@ -611,8 +600,12 @@ public class MainJFrame extends javax.swing.JFrame {
         
         System.out.println("TOTAL POSSIBILITIES: " + this.document.countPossibleSenseInterpretations());
         
-        SenseGraph wse = this.wseProcessor.wse(document);
-        LinkedList<WIM> wims = this.wimProcessor.wimify(wse);
+        LinkedList<Interpretation> wse = this.wseProcessor.wse(document);
+        LinkedList<WIM> wims = new LinkedList();
+        for (Interpretation interpretation : wse) {
+            wims.add(interpretation.wim());
+        }
+        
         load(wims);
     }
     
@@ -740,30 +733,6 @@ public class MainJFrame extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent ae) {
             MainJFrame.this.wsdProcessor = processor;
-            this.setSelected(true);
-        }
-        
-    }
-    
-    private class WIMJMenuItem extends JRadioButtonMenuItem implements ActionListener {
-        
-        private WIMProcessor processor;
-
-        public WIMJMenuItem(String label, WIMProcessor processor) {
-            super(label);
-            this.processor = processor;
-            this.addActionListener(this);
-            
-            if (MainJFrame.this.wimProcessor == processor) {
-                this.setSelected(true);
-            }
-            
-            MainJFrame.this.wimProcessorGroup.add(this);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent ae) {
-            MainJFrame.this.wimProcessor = processor;
             this.setSelected(true);
         }
         

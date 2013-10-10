@@ -22,16 +22,14 @@ import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.Disambiguation.SenseGraph;
 import org.openwims.Objects.Disambiguation.SenseMapping;
 import org.openwims.Objects.WIM;
-import org.openwims.Processors.WIMProcessor.WSDProcessor;
-import org.openwims.Processors.WIMProcessor.WSEProcessor;
 import org.openwims.Stanford.StanfordHelper;
 import org.openwims.WIMGlobals;
 
 /**
- *
+ * @deprecated 
  * @author jesseenglish
  */
-public class TieredGroupingDisambiguation extends WIMProcessor implements WSEProcessor, WSDProcessor {
+public class TieredGroupingDisambiguation extends WIMProcessor {
     
     public static void main(String[] args) throws Exception {
         String testPath = "/Users/jesseenglish/Desktop/test.stn";

@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import org.openwims.Objects.Preprocessor.PPToken;
 
 /**
- *
+ * @deprecated 
  * @author jesseenglish
  */
 public class SenseGraph {

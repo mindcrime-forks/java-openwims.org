@@ -12,7 +12,7 @@ import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPToken;
 
 /**
- *
+ * @deprecated 
  * @author jesseenglish
  */
 public class SenseMapping {

@@ -19,11 +19,6 @@
                 <Property name="text" type="java.lang.String" value="WSD Processor"/>
               </Properties>
             </Menu>
-            <Menu class="javax.swing.JMenu" name="WIMJMenu">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="WIM Processor"/>
-              </Properties>
-            </Menu>
           </SubComponents>
         </Menu>
       </SubComponents>

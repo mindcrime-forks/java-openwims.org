@@ -6,6 +6,7 @@ package org.openwims.Processors;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import org.openwims.Objects.Disambiguation.Interpretation;
 import org.openwims.Objects.Disambiguation.InterpretationSet;
 import org.openwims.Objects.Disambiguation.SenseGraph;
 import org.openwims.Objects.Disambiguation.SenseMapping;
@@ -30,11 +31,11 @@ import org.openwims.WIMGlobals;
 public abstract class WIMProcessor {
     
     public interface WSEProcessor {
-        public SenseGraph wse(PPDocument document);
+        public LinkedList<Interpretation> wse(PPDocument document);
     }
     
     public interface WSDProcessor {
-        public SenseGraph wsd(SenseGraph graph);
+        public Interpretation wsd(LinkedList<Interpretation> interpretations);
     }
     
     protected boolean doDependenciesMatch(PPToken anchor, Dependency wimDep, PPDependency ppDep, SenseMapping mapping) {
