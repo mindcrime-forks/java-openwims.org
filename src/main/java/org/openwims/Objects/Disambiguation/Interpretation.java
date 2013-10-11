@@ -13,6 +13,7 @@ import org.openwims.Objects.Lexicon.Structure;
 import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
+import org.openwims.Objects.WIMAttribute;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Objects.WIMRelation;
 
@@ -90,9 +91,25 @@ public class Interpretation implements Comparable<Interpretation> {
                 PPToken domain = this.variables.get(dependencySet).get(meaning.target);
                 PPToken range = this.variables.get(dependencySet).get(meaning.wim);
                 
+                if (meaning.isAttribute()) {
+                    WIMAttribute attribute = new WIMAttribute(meaning.relation, meaning.wim);
+                    wim.frame(domain).addAttribute(attribute);
+                    continue;
+                }
+                
                 WIMRelation relation = new WIMRelation(meaning.relation, wim.frame(range));
                 wim.frame(domain).addRelation(relation);
                 wim.frame(range).addInverse(relation);
+            }
+        }
+        
+        for (PPToken token : senses.keySet()) {
+            for (Meaning meaning : senses.get(token).listMeanings()) {
+                if (!meaning.isAttribute() || !meaning.target.equalsIgnoreCase("SELF")) {
+                    continue; //consider throwing exception here?  this would be invalid knowledge
+                }
+                
+                wim.frame(token).addAttribute(new WIMAttribute(meaning.relation, meaning.wim));
             }
         }
         

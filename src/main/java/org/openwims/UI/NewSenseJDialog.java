@@ -200,9 +200,7 @@ public class NewSenseJDialog extends FDialog {
         
         int next = WIMGlobals.lexicon().nextInstanceNumber(concept, word, pos);
         
-        String id = concept + ":" + word + "-" + pos + "-" + next;
-        
-        Sense sense = new Sense(id);
+        Sense sense = new Sense(concept, word, pos, next);
         sense.setDefinition(this.DefinitionFTextField.getText().trim());
         
         return sense;

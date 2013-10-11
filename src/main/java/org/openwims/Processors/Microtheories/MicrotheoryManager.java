@@ -21,6 +21,9 @@ public class MicrotheoryManager {
     public MicrotheoryManager() {
         this.unavailable = new LinkedList();
         this.microtheories = new HashMap();
+        
+        this.microtheories.put("#time", new TimeMicrotheory());
+        this.microtheories.put("#date", new DateMicrotheory());
     }
     
     public boolean test(String microtheory, Sense sense) {

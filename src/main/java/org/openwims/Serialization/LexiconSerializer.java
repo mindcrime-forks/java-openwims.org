@@ -13,6 +13,5 @@ import org.openwims.Objects.Lexicon.Sense;
 public abstract class LexiconSerializer {
     
     public abstract void saveSense(Sense sense) throws Exception;
-    public abstract void renameSense(Sense sense, String newID) throws Exception;
     
 }

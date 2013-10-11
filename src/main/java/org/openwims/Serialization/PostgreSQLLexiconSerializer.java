@@ -68,15 +68,21 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         builder.append("');\n");
         
         //INSERT SENSE
-        builder.append("INSERT INTO senses (id, word, definition, example, frequency");
+        builder.append("INSERT INTO senses (id, meaning, word, pos, instance, definition, example, frequency");
         if (sense.getUid() != -1) {
             builder.append(", uid");
         }
         builder.append(") VALUES ('");
         builder.append(sense.getId().replaceAll("'", "''"));
         builder.append("', '");
+        builder.append(sense.concept().replaceAll("'", "''"));
+        builder.append("', '");
         builder.append(sense.word().replaceAll("'", "''"));
         builder.append("', '");
+        builder.append(sense.pos().replaceAll("'", "''"));
+        builder.append("', ");
+        builder.append(sense.instance());
+        builder.append(", '");
         builder.append(sense.getDefinition().replaceAll("'", "''"));
         builder.append("', '");
         builder.append(sense.getExample().replaceAll("'", "''"));
@@ -162,14 +168,6 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         
         Statement stmt = PostgreSQLLexiconSerializer.conn().createStatement();
         stmt.execute(insert);
-        stmt.close();
-    }
-
-    @Override
-    public void renameSense(Sense sense, String newID) throws Exception {
-        String update = "UPDATE senses SET id='" + newID.replaceAll("'", "''") + "' WHERE id='" + sense.getId().replaceAll("'", "''") + "';";
-        Statement stmt = PostgreSQLLexiconSerializer.conn().createStatement();
-        stmt.execute(update);
         stmt.close();
     }
     

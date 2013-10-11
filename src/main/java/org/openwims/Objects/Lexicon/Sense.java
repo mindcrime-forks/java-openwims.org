@@ -12,7 +12,10 @@ import java.util.LinkedList;
  */
 public class Sense {
     
-    private String id;
+    private String concept;
+    private String word;
+    private String pos;
+    private int instance;
     private LinkedList<Structure> structures;
     private LinkedList<Meaning> meanings;
     private String definition;
@@ -20,14 +23,33 @@ public class Sense {
     private double frequency;
     private int uid;
     
-    public Sense(String id) {
-        this.id = id;
+    public Sense(String concept, String word, String pos, int instance) {
+        this.concept = concept;
+        this.word = word;
+        this.pos = pos;
+        this.instance = instance;
         this.structures = new LinkedList();
         this.meanings = new LinkedList();
         this.definition = "";
         this.example = "";
         this.frequency = 0.5;
         this.uid = -1;
+    }
+
+    public void setConcept(String concept) {
+        this.concept = concept;
+    }
+
+    public void setWord(String word) {
+        this.word = word;
+    }
+
+    public void setPos(String pos) {
+        this.pos = pos;
+    }
+
+    public void setInstance(int instance) {
+        this.instance = instance;
     }
 
     public void setUid(int uid) {
@@ -39,11 +61,7 @@ public class Sense {
     }
 
     public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+        return this.concept + ":" + this.word + "-" + this.pos + "-" + this.instance;
     }
 
     public double getFrequency() {
@@ -83,51 +101,19 @@ public class Sense {
     }
     
     public String concept() {
-        if (this.id.contains(":")) {
-            return this.id.split(":")[0].trim();
-        }
-        
-        return "unknown";
+        return this.concept;
     }
     
     public String pos() {
-        if (!this.id.contains(":")) {
-            return "unknown";
-        }
-        
-        if (this.id.contains("-")) {
-            return this.id.split(":")[1].split("-")[1].trim();
-        }
-        
-        return "unknown";
+        return this.pos;
     }
     
     public String word() {
-        if (!this.id.contains(":")) {
-            return "unknown";
-        }
-        
-        if (this.id.contains("-")) {
-            return this.id.split(":")[1].split("-")[0].trim();
-        }
-        
-        return "unknown";
+        return this.word;
     }
     
     public int instance() {
-        if (!this.id.contains(":")) {
-            return -1;
-        }
-        
-        if (this.id.contains("-")) {
-            String rhs = this.id.split(":")[1];
-            String[] parts = rhs.split("-");
-            String instance = parts[parts.length - 1].trim();
-            
-            return Integer.parseInt(instance);
-        }
-        
-        return -1;
+        return this.instance;
     }
     
     public void addMeaning(Meaning meaning) {
@@ -146,7 +132,7 @@ public class Sense {
     public String toString() {
         StringBuilder out = new StringBuilder();
         
-        out.append(this.id);
+        out.append(this.getId());
         out.append("\n");
         out.append(this.definition);
         

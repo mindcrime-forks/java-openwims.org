@@ -42,7 +42,6 @@ public class RemapConceptJPanel extends javax.swing.JPanel {
         ConceptFTextField = new com.jesseenglish.swingftfy.extensions.FTextField();
         fLabel1 = new com.jesseenglish.swingftfy.extensions.FLabel();
         InstanceFLabel = new com.jesseenglish.swingftfy.extensions.FLabel();
-        jLabel1 = new javax.swing.JLabel();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -55,32 +54,25 @@ public class RemapConceptJPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         add(ConceptFTextField, gridBagConstraints);
 
         fLabel1.setText(":");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         add(fLabel1, gridBagConstraints);
 
         InstanceFLabel.setText("-?");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
         add(InstanceFLabel, gridBagConstraints);
-
-        jLabel1.setForeground(new java.awt.Color(255, 0, 0));
-        jLabel1.setText("WARNING: This change persists immediately!");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
-        add(jLabel1, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void ConceptFTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ConceptFTextFieldKeyReleased
@@ -96,7 +88,6 @@ public class RemapConceptJPanel extends javax.swing.JPanel {
     private com.jesseenglish.swingftfy.extensions.FTextField ConceptFTextField;
     private com.jesseenglish.swingftfy.extensions.FLabel InstanceFLabel;
     private com.jesseenglish.swingftfy.extensions.FLabel fLabel1;
-    private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 
     private void validateConcept() {
@@ -117,16 +108,11 @@ public class RemapConceptJPanel extends javax.swing.JPanel {
         
         int next = WIMGlobals.lexicon().nextInstanceNumber(concept, word, pos);
         
-        String newID = concept + ":" + word + "-" + pos + "-" + next;
-        
-        try {
-            WIMGlobals.lexicon().serializer().renameSense(sense, newID);
-        } catch (Exception ex) {
-            Logger.getLogger(RemapConceptJPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
         this.InstanceFLabel.setText(word + "-" + pos + "-" + next);
-        sense.setId(newID);
+        sense.setConcept(concept);
+        sense.setWord(word);
+        sense.setPos(pos);
+        sense.setInstance(next);
         
         this.validate();
         this.repaint();

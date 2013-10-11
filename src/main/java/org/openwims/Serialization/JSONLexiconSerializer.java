@@ -55,7 +55,7 @@ public class JSONLexiconSerializer {
     }
     
     private static Sense sense(JSONObject o) {
-        Sense sense = new Sense((String)o.get("id"));
+        Sense sense = new Sense((String)o.get("concept"), (String)o.get("word"), (String)o.get("pos"), Integer.parseInt((String)o.get("instance")));
         
         sense.setDefinition((String)o.get("definition"));
         sense.setExample((String)o.get("example"));
