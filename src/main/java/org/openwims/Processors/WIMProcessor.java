@@ -132,6 +132,7 @@ public abstract class WIMProcessor {
         return true;
     }
     
+    @Deprecated
     public LinkedList<WIM> wimify(SenseGraph senseGraph) {
         LinkedList<WIM> wims = new LinkedList();
         

@@ -106,6 +106,11 @@ public class StanfordPPDocument extends PPDocument {
             this.lemma = token.lemma();
             this.pos = token.tag();
             this.nerType = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+            
+            //This seems to be wrong coming from stanford (consistently)
+            if (this.lemma.equalsIgnoreCase("yourselve")) {
+                this.lemma = "yourselves";
+            }
         }
         
     }

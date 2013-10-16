@@ -6,6 +6,7 @@ package org.openwims.Serialization;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import org.openwims.Objects.Lexicon.Dependency;
 import org.openwims.Objects.Lexicon.DependencySet;
@@ -56,9 +57,9 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         builder.append("BEGIN;\n");
         
         //DELETE OLD SENSE (IF IT EXISTS); CASCADE / FKEYS HANDLE THE REST
-        builder.append("DELETE FROM senses WHERE uid='");
+        builder.append("DELETE FROM senses WHERE uid=");
         builder.append(sense.getUid());
-        builder.append("';\n");
+        builder.append(";\n");
         
         //ADD WORD (IF IT DOES NOT EXIST)
         builder.append("INSERT INTO words (representation) SELECT '");
@@ -96,24 +97,32 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         
         //INSERT MEANINGS
         for (Meaning meaning : sense.listMeanings()) {
-            builder.append("INSERT INTO meanings (sense, target, relation, wim, structure) VALUES ('");
-            builder.append(sense.getId().replaceAll("'", "''"));
-            builder.append("', '");
+            builder.append("INSERT INTO sense_meanings (sense_uid, target, relation, wim) VALUES (");
+            if (sense.getUid() != -1) {
+                builder.append(sense.getUid());
+            } else {
+                builder.append("(SELECT max(uid) FROM senses)");
+            }
+            builder.append(", '");
             builder.append(meaning.target.replaceAll("'", "''"));
             builder.append("', '");
             builder.append(meaning.relation.replaceAll("'", "''"));
             builder.append("', '");
             builder.append(meaning.wim.replaceAll("'", "''"));
-            builder.append("', -1);\n");
+            builder.append("');\n");
         }
         
         //INSERT STRUCTURES / DEPENDENCY SETS (CURRENTLY ONE TABLE)
         int series = 1;
         for (Structure structure : sense.listStructures()) {
             for (DependencySet set : structure.listDependencies()) {
-                builder.append("INSERT INTO structures (sense, series, label, optional) VALUES ('");
-                builder.append(sense.getId().replaceAll("'", "''"));
-                builder.append("', ");
+                builder.append("INSERT INTO structures (sense_uid, series, label, optional) VALUES (");
+                if (sense.getUid() != -1) {
+                    builder.append(sense.getUid());
+                } else {
+                    builder.append("(SELECT max(uid) FROM senses)");
+                }
+                builder.append(", ");
                 builder.append(series);
                 builder.append(", '");
                 builder.append(set.label.replaceAll("'", "''"));
@@ -145,9 +154,13 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
                 
                 //INSERT MEANINGS
                 for (Meaning meaning : set.meanings) {
-                    builder.append("INSERT INTO meanings (sense, target, relation, wim, structure) VALUES ('");
-                    builder.append(sense.getId().replaceAll("'", "''"));
-                    builder.append("', '");
+                    builder.append("INSERT INTO dependency_meanings (sense_uid, target, relation, wim, structure) VALUES (");
+                    if (sense.getUid() != -1) {
+                        builder.append(sense.getUid());
+                    } else {
+                        builder.append("(SELECT max(uid) FROM senses)");
+                    }
+                    builder.append(", '");
                     builder.append(meaning.target.replaceAll("'", "''"));
                     builder.append("', '");
                     builder.append(meaning.relation.replaceAll("'", "''"));
@@ -168,6 +181,15 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
         
         Statement stmt = PostgreSQLLexiconSerializer.conn().createStatement();
         stmt.execute(insert);
+        
+        if (sense.getUid() == -1) {
+            ResultSet rs = stmt.executeQuery("SELECT max(uid) AS uid FROM senses;");
+            if (rs.next()) {
+                sense.setUid(rs.getInt("uid"));
+                System.out.println("WARNING: (super unlikely) desync of sense UID possible - this needs to be fixed (" + sense.getId() + " = " + sense.getUid());
+            }
+        }
+        
         stmt.close();
     }
     

@@ -113,6 +113,19 @@ public class Interpretation implements Comparable<Interpretation> {
             }
         }
         
+        //Now clean up all of the frame instance numbers
+        HashMap<String, Integer> instances = new HashMap();
+        for (WIMFrame frame : wim.listFrames()) {
+            Integer count = instances.get(frame.getConcept());
+            if (count == null) {
+                instances.put(frame.getConcept(), new Integer(1));
+            } else {
+                count++;
+                frame.setInstance(count);
+                instances.put(frame.getConcept(), count);
+            }
+        }
+        
         return this.wim;
     }
     

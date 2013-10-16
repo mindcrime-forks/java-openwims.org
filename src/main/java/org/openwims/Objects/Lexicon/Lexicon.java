@@ -175,7 +175,7 @@ public class Lexicon {
         try {
             Statement stmt = Lexicon.conn().createStatement();
             
-            ResultSet rs = stmt.executeQuery("SELECT * FROM senses WHERE word='" + representation.replaceAll("'", "''") + "';");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM senses WHERE word='" + representation.toLowerCase().replaceAll("'", "''") + "';");
             while (rs.next()) {
                 String example = rs.getString("example");
                 if (example == null) {
@@ -196,7 +196,7 @@ public class Lexicon {
                 HashMap<Integer, Structure> structures = new HashMap();
                 HashMap<Integer, Dependency> dependencies = new HashMap();
                 
-                String query = "SELECT * FROM structures WHERE sense='" + sense.getId().replaceAll("'", "''") + "';";
+                String query = "SELECT * FROM structures WHERE sense_uid=" + sense.getUid() + ";";
                 
                 rs = stmt.executeQuery(query);
                 while (rs.next()) {
@@ -250,7 +250,7 @@ public class Lexicon {
                     }
                 }
                 
-                query = "SELECT * FROM meanings WHERE sense='" + sense.getId().replaceAll("'", "''") + "';";
+                query = "SELECT * FROM dependency_meanings WHERE sense_uid=" + sense.getUid() + ";";
 
                 rs = stmt.executeQuery(query);
                 while (rs.next()) {
@@ -259,19 +259,20 @@ public class Lexicon {
                     String wim = rs.getString("wim");
                     String struct = rs.getString("structure");
                     
-                    try {
-                        int structID = Integer.parseInt(struct);
-                        if (structID == -1) {
-                            sense.addMeaning(new Meaning(target, relation, wim));
-                        } else {
-                            dependencySets.get(structID).meanings.add(new Meaning(target, relation, wim));
-                        }
-                    } catch (Exception err) {
-                        sense.addMeaning(new Meaning(target, relation, wim));
-                    }
-                    
+                    int structID = Integer.parseInt(struct);
+                    dependencySets.get(structID).meanings.add(new Meaning(target, relation, wim));
                 }
                 
+                query = "SELECT * FROM sense_meanings WHERE sense_uid=" + sense.getUid() + ";";
+                
+                rs = stmt.executeQuery(query);
+                while (rs.next()) {
+                    String target = rs.getString("target");
+                    String relation = rs.getString("relation");
+                    String wim = rs.getString("wim");
+                    
+                    sense.addMeaning(new Meaning(target, relation, wim));
+                }
             }
             
             stmt.close();
