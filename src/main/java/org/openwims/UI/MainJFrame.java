@@ -15,8 +15,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,9 +31,11 @@ import org.openwims.Objects.Disambiguation.Interpretation;
 import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Lexicon.Word;
 import org.openwims.Objects.Preprocessor.PPDocument;
+import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
+import org.openwims.Processors.Iterators.NaivePossibilityIterator;
+import org.openwims.Processors.Iterators.PossibilityIterator;
 import org.openwims.Processors.LandGrabDisambiguation;
-import org.openwims.Processors.TieredGroupingDisambiguation;
 import org.openwims.Processors.WIMProcessor;
 import org.openwims.Processors.WIMProcessor.WSDProcessor;
 import org.openwims.Processors.WIMProcessor.WSEProcessor;
@@ -51,11 +55,15 @@ public class MainJFrame extends javax.swing.JFrame {
     
     
     
+    private Class<? extends PossibilityIterator> iterator;
     private WSDProcessor wsdProcessor;
     private WSEProcessor wseProcessor;
     
+    private ButtonGroup iteratorGroup;
     private ButtonGroup wsdProcessorGroup;
     private ButtonGroup wseProcessorGroup;
+    
+    private DebugJPanel debug;
     
     /**
      * Creates new form MainJFrame
@@ -84,16 +92,46 @@ public class MainJFrame extends javax.swing.JFrame {
         this.OntologyJScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         
         
+        this.iteratorGroup = new ButtonGroup();
         this.wsdProcessorGroup = new ButtonGroup();
         this.wseProcessorGroup = new ButtonGroup();
         
-        
+        this.iterator = NaivePossibilityIterator.class;
         this.wseProcessor = new LandGrabDisambiguation();
         this.wsdProcessor = new LandGrabDisambiguation();
         
         
+        this.PossibilityIteratorJMenu.add(new PossibilityIteratorJMenuItem("Naive", NaivePossibilityIterator.class));
         this.WSEJMenu.add(new WSEJMenuItem("Land Grab", this.wseProcessor));
         this.WSDJMenu.add(new WSDJMenuItem("Land Grab", this.wsdProcessor));
+        
+        WIMProcessor.wseLoggers.add(new WIMProcessor.WSELogger() {
+            public void logPossibilityElimination(HashMap<PPToken, Sense> possibility, Exception reason) {
+                if (debug != null) {
+                    for (PPToken token : possibility.keySet()) {
+                        if (debug.getMapping().get(token) != possibility.get(token)) {
+                            return;
+                        }
+                    }
+                    
+                    StringBuilder log = new StringBuilder();
+                    
+                    log.append("Eliminating possibility:\n");
+                    for (PPToken token : possibility.keySet()) {
+                        log.append("  ");
+                        log.append(token.anchor());
+                        log.append(" = ");
+                        log.append(possibility.get(token).getId());
+                        log.append("\n");
+                    }
+                    
+                    log.append("Due to:\n");
+                    log.append(reason.toString());
+                    
+                    LogJTextArea.setText(log.toString());
+                }
+            }
+        });
     }
 
     /**
@@ -128,6 +166,8 @@ public class MainJFrame extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JToolBar.Separator();
         SavePPJButton = new javax.swing.JButton();
         LoadPPJButton = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
+        LoggingJButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel3 = new javax.swing.JPanel();
@@ -135,11 +175,13 @@ public class MainJFrame extends javax.swing.JFrame {
         DocumentContainerJPanel = new javax.swing.JPanel();
         WIMsJScrollPane = new javax.swing.JScrollPane();
         WIMsContainerJPanel = new javax.swing.JPanel();
+        DebugContainerJPanel = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         LogJTextArea = new javax.swing.JTextArea();
         MainJMenuBar = new javax.swing.JMenuBar();
         OptionsJMenu = new javax.swing.JMenu();
+        PossibilityIteratorJMenu = new javax.swing.JMenu();
         WSEJMenu = new javax.swing.JMenu();
         WSDJMenu = new javax.swing.JMenu();
 
@@ -291,6 +333,18 @@ public class MainJFrame extends javax.swing.JFrame {
             }
         });
         jToolBar1.add(LoadPPJButton);
+        jToolBar1.add(jSeparator2);
+
+        LoggingJButton.setText("Logging OFF");
+        LoggingJButton.setFocusable(false);
+        LoggingJButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        LoggingJButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        LoggingJButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LoggingJButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(LoggingJButton);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -315,6 +369,9 @@ public class MainJFrame extends javax.swing.JFrame {
         jPanel3.add(WIMsJScrollPane);
 
         jTabbedPane1.addTab("Results", jPanel3);
+
+        DebugContainerJPanel.setLayout(new java.awt.GridLayout(1, 1));
+        jTabbedPane1.addTab("Debug", DebugContainerJPanel);
 
         jPanel4.setLayout(new java.awt.GridLayout(1, 1));
 
@@ -343,6 +400,9 @@ public class MainJFrame extends javax.swing.JFrame {
         getContentPane().add(RightJPanel);
 
         OptionsJMenu.setText("Options");
+
+        PossibilityIteratorJMenu.setText("Possibility Iterator");
+        OptionsJMenu.add(PossibilityIteratorJMenu);
 
         WSEJMenu.setText("WSE Processor");
         OptionsJMenu.add(WSEJMenu);
@@ -396,6 +456,13 @@ public class MainJFrame extends javax.swing.JFrame {
         loadPP();
     }//GEN-LAST:event_LoadPPJButtonActionPerformed
 
+    private void LoggingJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoggingJButtonActionPerformed
+        WIMProcessor.LOGGING = !WIMProcessor.LOGGING;
+        LoggingJButton.setText("Logging " + (WIMProcessor.LOGGING == true ? "ON" : "OFF"));
+        this.validate();
+        this.repaint();
+    }//GEN-LAST:event_LoggingJButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -438,6 +505,7 @@ public class MainJFrame extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel DebugContainerJPanel;
     private javax.swing.JLabel DefinitionJLabel;
     private javax.swing.JButton DeleteSenseJButton;
     private javax.swing.JPanel DocumentContainerJPanel;
@@ -449,12 +517,14 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JPanel LexiconJPanel;
     private javax.swing.JButton LoadPPJButton;
     private javax.swing.JTextArea LogJTextArea;
+    private javax.swing.JButton LoggingJButton;
     private javax.swing.JMenuBar MainJMenuBar;
     private javax.swing.JButton NewSenseJButton;
     private javax.swing.JPanel OntologyJPanel;
     private javax.swing.JScrollPane OntologyJScrollPane;
     private javax.swing.JPanel OntologyTreeContainerJPanel;
     private javax.swing.JMenu OptionsJMenu;
+    private javax.swing.JMenu PossibilityIteratorJMenu;
     private javax.swing.JPanel RightJPanel;
     private javax.swing.JButton SavePPJButton;
     private javax.swing.JTextField SearchJTextField;
@@ -472,6 +542,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JToolBar.Separator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JToolBar jToolBar1;
     // End of variables declaration//GEN-END:variables
@@ -562,6 +633,10 @@ public class MainJFrame extends javax.swing.JFrame {
         tree.addFilesDraggedListener(new PPFilesDraggedEventListener());
         this.DocumentContainerJPanel.add(tree);
         
+        this.debug = new DebugJPanel(document);
+        this.DebugContainerJPanel.removeAll();
+        this.DebugContainerJPanel.add(new JScrollPane(this.debug));
+        
         this.validate();
         this.repaint();
     }
@@ -600,13 +675,21 @@ public class MainJFrame extends javax.swing.JFrame {
         
         System.out.println("TOTAL POSSIBILITIES: " + this.document.countPossibleSenseInterpretations());
         
-        LinkedList<Interpretation> wse = this.wseProcessor.wse(document);
-        LinkedList<WIM> wims = new LinkedList();
-        for (Interpretation interpretation : wse) {
-            wims.add(interpretation.wim());
+        try {
+            PossibilityIterator i = iterator.getConstructor(PPDocument.class).newInstance(document);
+            
+            LinkedList<Interpretation> wse = this.wseProcessor.wse(i);
+            LinkedList<WIM> wims = new LinkedList();
+            for (Interpretation interpretation : wse) {
+                wims.add(interpretation.wim());
+            }
+
+            load(wims);
+            
+        } catch (Exception ex) {
+            Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        load(wims);
     }
     
     
@@ -733,6 +816,29 @@ public class MainJFrame extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent ae) {
             MainJFrame.this.wsdProcessor = processor;
+            this.setSelected(true);
+        }
+        
+    }
+    
+    private class PossibilityIteratorJMenuItem extends JRadioButtonMenuItem implements ActionListener {
+        
+        private Class<? extends PossibilityIterator> iterator;
+        
+        public PossibilityIteratorJMenuItem(String label, Class<? extends PossibilityIterator> iterator) {
+            super(label);
+            this.iterator = iterator;
+            this.addActionListener(this);
+            
+            if (MainJFrame.this.iterator == iterator) {
+                this.setSelected(true);
+            }
+            
+            MainJFrame.this.iteratorGroup.add(this);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            MainJFrame.this.iterator = iterator;
             this.setSelected(true);
         }
         

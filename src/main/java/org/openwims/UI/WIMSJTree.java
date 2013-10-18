@@ -18,6 +18,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import org.openwims.Objects.Lexicon.Sense;
+import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
 import org.openwims.Objects.WIMAttribute;
 import org.openwims.Objects.WIMFrame;
@@ -109,8 +110,9 @@ public class WIMSJTree extends FTree {
                 setIcon(INFERRED);
             }
             
-            this.add(new WIMAnchorNode(frame.getAnchor().anchor()));
-            this.add(new WIMSenseNode(frame.getSense()));
+            for (PPToken anchor : frame.getAnchors().keySet()) {
+                this.add(new WIMSenseNode(anchor, frame.getAnchors().get(anchor)));
+            }
             
             for (WIMAttribute attribute : frame.listAttributes()) {
                 this.add(new WIMAttributeNode(attribute));
@@ -147,24 +149,14 @@ public class WIMSJTree extends FTree {
         
     }
     
-    private class WIMAnchorNode extends FNode {
-        
-        private String anchor;
-
-        public WIMAnchorNode(String anchor) {
-            super("anchor: " + anchor);
-            this.anchor = anchor;
-            setIcon(ANNOTATION);
-        }
-        
-    }
-    
     private class WIMSenseNode extends FNode {
         
+        private PPToken anchor;
         private Sense sense;
 
-        public WIMSenseNode(Sense sense) {
-            super("sense: " + ((sense == null) ? "unknown" : sense.getId()));
+        public WIMSenseNode(PPToken anchor, Sense sense) {
+            super("sense: " + ((sense == null) ? "unknown" : sense.getId()) + " (" + anchor.anchor() +")");
+            this.anchor = anchor;
             this.sense = sense;
             setIcon(ANNOTATION);
         }

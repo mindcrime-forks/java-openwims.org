@@ -18,6 +18,10 @@ public class WIMRelation {
         this.frame = frame;
     }
 
+    public void setFrame(WIMFrame frame) {
+        this.frame = frame;
+    }
+
     public WIMFrame getFrame() {
         return frame;
     }

@@ -5,6 +5,7 @@
 package org.openwims.Objects.Disambiguation;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import org.openwims.Objects.Lexicon.Dependency;
 import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Meaning;
@@ -71,7 +72,7 @@ public class Interpretation implements Comparable<Interpretation> {
         
         for (PPToken token : senses.keySet()) {
             WIMFrame frame = this.wim.frame(token);
-            frame.setSense(senses.get(token));
+            frame.getAnchors().put(token, senses.get(token));
         }
         
         for (PPToken token : senses.keySet()) {
@@ -113,16 +114,29 @@ public class Interpretation implements Comparable<Interpretation> {
             }
         }
         
+        //Now merge all of the corefered frames
+        LinkedList<PPToken> alreadyMerged = new LinkedList();
+        for (PPToken token : senses.keySet()) {
+            if (token.getCorefers().size() > 0 && !alreadyMerged.contains(token)) {
+                WIMFrame frame = wim.frame(token);
+                for (PPToken coreferred : token.getCorefers()) {
+                    wim.merge(frame, wim.frame(coreferred));
+                }
+                alreadyMerged.add(token);
+                alreadyMerged.addAll(token.getCorefers());
+            }
+        }
+        
         //Now clean up all of the frame instance numbers
         HashMap<String, Integer> instances = new HashMap();
         for (WIMFrame frame : wim.listFrames()) {
-            Integer count = instances.get(frame.getConcept());
+            Integer count = instances.get(frame.getConcepts().toString());
             if (count == null) {
-                instances.put(frame.getConcept(), new Integer(1));
+                instances.put(frame.getConcepts().toString(), new Integer(1));
             } else {
                 count++;
                 frame.setInstance(count);
-                instances.put(frame.getConcept(), count);
+                instances.put(frame.getConcepts().toString(), count);
             }
         }
         

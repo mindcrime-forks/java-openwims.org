@@ -4,6 +4,7 @@
  */
 package org.openwims.Objects.Preprocessor;
 
+import java.util.LinkedList;
 import org.openwims.WIMGlobals;
 
 /**
@@ -17,6 +18,7 @@ public class PPToken implements Comparable<PPToken> {
     protected String lemma;
     protected String pos;
     protected String nerType;
+    protected LinkedList<PPToken> corefers;
 
     public PPToken() {
         this.index = -1;
@@ -24,6 +26,11 @@ public class PPToken implements Comparable<PPToken> {
         this.lemma = "";
         this.pos = "";
         this.nerType = "";
+        this.corefers = new LinkedList();
+    }
+
+    public LinkedList<PPToken> getCorefers() {
+        return corefers;
     }
 
     public void setNERtype(String NERtype) {

@@ -111,6 +111,16 @@ public class PPSentence {
         return null;
     }
     
+    public PPToken tokenWithIndex(int index) {
+        for (PPToken token : tokens) {
+            if (token.index == index) {
+                return token;
+            }
+        }
+        
+        return null;
+    }
+    
     public void removeDependency(PPDependency dependency) {
         this.dependencies.remove(dependency);
     }

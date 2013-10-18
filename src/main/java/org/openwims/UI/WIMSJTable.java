@@ -20,11 +20,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import org.openwims.Objects.Disambiguation.Interpretation;
 import org.openwims.Objects.Preprocessor.PPDocument;
 import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
 import org.openwims.Objects.WIMFrame;
-import org.openwims.Processors.TieredGroupingDisambiguation;
+import org.openwims.Processors.Iterators.NaivePossibilityIterator;
+import org.openwims.Processors.LandGrabDisambiguation;
 import org.openwims.Serialization.JSONPPDocumentSerializer;
 
 /**
@@ -37,8 +39,12 @@ public class WIMSJTable extends JTable {
     
     public static void main(String[] args) throws Exception {
         PPDocument document = JSONPPDocumentSerializer.deserialize("/Users/jesseenglish/Desktop/test.pp");
-        TieredGroupingDisambiguation tgd = new TieredGroupingDisambiguation();
-        LinkedList<WIM> wims = tgd.wimify(tgd.wse(document));
+        LandGrabDisambiguation lgd = new LandGrabDisambiguation();
+        
+        LinkedList<WIM> wims = new LinkedList();
+        for (Interpretation interpretation : lgd.wse(new NaivePossibilityIterator(document))) {
+            wims.add(interpretation.wim());
+        }
         
         WIMSJTable table = new WIMSJTable(wims);
         
@@ -82,7 +88,7 @@ public class WIMSJTable extends JTable {
         
         LinkedList<PPToken> tokens = new LinkedList();
         for (WIMFrame frame : wims.getFirst().listFrames()) {
-            tokens.add(frame.getAnchor());
+            //tokens.add(frame.getAnchor());
         }
         
         Collections.sort(tokens);
@@ -141,7 +147,7 @@ public class WIMSJTable extends JTable {
             if (frame == null) {
                 label.setText("???");
             } else {
-                label.setText(frame.getSense().getId());
+                //label.setText(frame.getSense().getId());
             }
             
             return label;

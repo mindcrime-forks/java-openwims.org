@@ -4,9 +4,10 @@
  */
 package org.openwims.Processors;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import org.openwims.Objects.Disambiguation.Interpretation;
 import org.openwims.Objects.Lexicon.Dependency;
@@ -16,10 +17,11 @@ import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPDocument;
 import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
+import org.openwims.Processors.Iterators.NaivePossibilityIterator;
+import org.openwims.Processors.Iterators.PossibilityIterator;
 import org.openwims.Processors.WIMProcessor.WSDProcessor;
 import org.openwims.Processors.WIMProcessor.WSEProcessor;
 import org.openwims.Serialization.JSONPPDocumentSerializer;
-import org.openwims.WIMGlobals;
 
 /**
  *
@@ -34,7 +36,7 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         
         PPDocument document = JSONPPDocumentSerializer.deserialize("/Users/jesseenglish/Desktop/test.pp");
         LandGrabDisambiguation d = new LandGrabDisambiguation();
-        for (Interpretation interpretation : d.wse(document)) {
+        for (Interpretation interpretation : d.wse(new NaivePossibilityIterator(document))) {
             System.out.println(interpretation.wim());
         }
     }
@@ -47,33 +49,21 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         return interpretations.getFirst();
     }
     
-    public LinkedList<Interpretation> wse(PPDocument document) {
-        //HACK, turn it all into one sentence for now
-        this.sentence = new PPSentence();
-        for (PPSentence s : document.listSentences()) {
-            for (PPToken token : s.listTokens()) {
-                this.sentence.addToken(token);
-            }
-            for (PPDependency ppDependency : s.listDependencies()) {
-                this.sentence.addDependency(ppDependency);
-            }
-        }
-        
-        //flatten tokens
+    public LinkedList<Interpretation> wse(PossibilityIterator iter) {
+        this.sentence = iter.getSentence();
         this.flattenedTokens = this.sentence.listFlattenedTokens();
         
         LinkedList<Interpretation> interpretations = new LinkedList();
         
-        PossibilityIterator iter = new PossibilityIterator(sentence);
         while (iter.hasNext()) {
+            HashMap<PPToken, Sense> possibility = iter.next();
             try {
-                HashMap<PPToken, Sense> possibility = iter.next();
                 HashMap<PPDependency, Dependency> mapping = landgrab(possibility);
                 interpretations.add(new Interpretation(possibility, mapping));
             } catch (IncompleteMappingException e) {
-                
+                WIMProcessor.logPossibilityElimination(possibility, e);
             } catch (UnusedNonOptionalSetException e) {
-                
+                WIMProcessor.logPossibilityElimination(possibility, e);
             }
         }
         
@@ -89,7 +79,7 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         
         //Verify that all ppdeps have been mapped
         if (!claims.keySet().containsAll(this.sentence.listDependencies())) {
-            throw new IncompleteMappingException();
+            throw new IncompleteMappingException(this.sentence.listDependencies(), claims.keySet());
         }
         
         //Verify that all senses have all non-optional sets used
@@ -157,12 +147,12 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         
         //Verify expectations match (excluding any variable already mapped)
         if (!variables.containsKey(dependency.governor)) {
-            if (!doesSenseSatisfyExpectations(possibility.get(ppDependency.getGovernor()), dependency.expectations)) {
+            if (!doesPossibilitySatisfyExpectations(ppDependency.getGovernor(), possibility, dependency.expectations)) {
                 return false;
             }
         }
         if (!variables.containsKey(dependency.dependent)) {
-            if (!doesSenseSatisfyExpectations(possibility.get(ppDependency.getDependent()), dependency.expectations)) {
+            if (!doesPossibilitySatisfyExpectations(ppDependency.getDependent(), possibility, dependency.expectations)) {
                 return false;
             }
         }
@@ -171,6 +161,22 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
     }
     
     private class IncompleteMappingException extends Exception {
+        
+        private Collection<PPDependency> inputDependencies;
+        private Collection<PPDependency> claimedDependencies;
+
+        public IncompleteMappingException(Collection<PPDependency> inputDependencies, Collection<PPDependency> claimedDependencies) {
+            this.inputDependencies = inputDependencies;
+            this.claimedDependencies = claimedDependencies;
+        }
+
+        @Override
+        public String toString() {
+            HashSet<PPDependency> inputs = new HashSet(inputDependencies);
+            inputs.removeAll(claimedDependencies);
+            
+            return "no matches found for inputs: " + inputs;
+        }
         
     }
     
@@ -185,64 +191,10 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
             this.sense = sense;
             this.dependencySet = dependencySet;
         }
-        
-    }
-    
-    private class PossibilityIterator implements Iterator<HashMap<PPToken, Sense>> {
-        
-        private PPSentence sentence;
-        private LinkedList<PPToken> tokens;
-        private HashMap<PPToken, LinkedList<Sense>> senses;
-        private HashMap<PPToken, Integer> pointers;
-        private boolean finished;
-        
-        public PossibilityIterator(PPSentence sentence) {
-            this.sentence = sentence;
-            this.tokens = sentence.listTokens();
-            
-            this.senses = new HashMap();
-            this.pointers = new HashMap();
-            this.finished = false;
-            
-            for (PPToken token : this.tokens) {
-                this.senses.put(token, WIMGlobals.lexicon().listSenses(token));
-                this.pointers.put(token, 0);
-            }
-        }
 
-        public boolean hasNext() {
-            return !this.finished;
-        }
-
-        public HashMap<PPToken, Sense> next() {
-            HashMap<PPToken, Sense> next = new HashMap();
-            
-            for (PPToken token : this.tokens) {
-                next.put(token, this.senses.get(token).get(this.pointers.get(token)));
-            }
-            
-            increment(this.tokens.getLast());
-            
-            return next;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
-        private void increment(PPToken token) {
-            int pointer = this.pointers.get(token) + 1;
-            this.pointers.put(token, pointer);
-            
-            if (pointer >= this.senses.get(token).size()) {
-                this.pointers.put(token, 0);
-                
-                if (token != this.tokens.getFirst()) {
-                    increment(this.tokens.get(this.tokens.indexOf(token) - 1));
-                } else {
-                    this.finished = true;
-                }
-            }
+        @Override
+        public String toString() {
+            return token.anchor() + " (" + sense.getId() + ") found no match for NON-OPTIONAL dependency set " + dependencySet;
         }
         
     }

@@ -4,6 +4,8 @@
  */
 package org.openwims.Stanford;
 
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -13,7 +15,9 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPDocument;
 import org.openwims.Objects.Preprocessor.PPSentence;
@@ -54,6 +58,24 @@ public class StanfordPPDocument extends PPDocument {
         
         for (CoreMap sentence : stanfordSentences) {
             this.sentences.add(new StanfordPPSentence(sentence));
+        }
+        
+        Map<Integer, CorefChain> entities = document.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+        for (CorefChain chain : entities.values()) {
+            
+            HashSet<PPToken> corefers = new HashSet();
+            
+            for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
+                int wordNum = mention.headIndex;
+                int sentenceNum = mention.sentNum;
+                PPToken token = sentences.get(sentenceNum - 1).tokenWithIndex(wordNum);
+                corefers.add(token);
+            }
+            
+            for (PPToken token : corefers) {
+                token.getCorefers().addAll(corefers);
+                token.getCorefers().remove(token);
+            }
         }
         
     }

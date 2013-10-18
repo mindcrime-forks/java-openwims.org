@@ -241,6 +241,9 @@ public class PPDocumentJTree extends FTree {
             if (!this.governor.nerType().equalsIgnoreCase("O")) {
                 this.add(new PPNERTypeNode(this.governor));
             }
+            if (this.governor.getCorefers().size() > 0) {
+                this.add(new PPCorefersNode(this.governor));
+            }
         }
         
         @Override
@@ -278,6 +281,9 @@ public class PPDocumentJTree extends FTree {
             if (!this.dependent.nerType().equalsIgnoreCase("O")) {
                 this.add(new PPNERTypeNode(this.dependent));
             }
+            if (this.dependent.getCorefers().size() > 0) {
+                this.add(new PPCorefersNode(this.dependent));
+            }
         }
         
         @Override
@@ -297,6 +303,44 @@ public class PPDocumentJTree extends FTree {
         @Override
         public Object recall() {
             return this.dependent;
+        }
+        
+    }
+    
+    private class PPCorefersNode extends ExpansionMemoryNode {
+        
+        private PPToken token;
+        
+        public PPCorefersNode(PPToken token) {
+            super("Coreferences");
+            this.token = token;
+            setIcon(NODE);
+            
+            for (PPToken corefer : this.token.getCorefers()) {
+                this.add(new PPCoreferNode(corefer));
+            }
+        }
+
+        @Override
+        public Object recall() {
+            return this.token.getCorefers();
+        }
+        
+    }
+    
+    private class PPCoreferNode extends ExpansionMemoryNode {
+        
+        private PPToken corefer;
+        
+        public PPCoreferNode(PPToken corefer) {
+            super(corefer.anchor());
+            this.corefer = corefer;
+            setIcon(LEAF);
+        }
+
+        @Override
+        public Object recall() {
+            return null;
         }
         
     }

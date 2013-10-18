@@ -9,6 +9,11 @@
             <Property name="text" type="java.lang.String" value="Options"/>
           </Properties>
           <SubComponents>
+            <Menu class="javax.swing.JMenu" name="PossibilityIteratorJMenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Possibility Iterator"/>
+              </Properties>
+            </Menu>
             <Menu class="javax.swing.JMenu" name="WSEJMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="WSE Processor"/>
@@ -43,7 +48,7 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,21,0,0,2,105"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,28,0,0,2,-18"/>
   </AuxValues>
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
@@ -275,6 +280,19 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="LoadPPJButtonActionPerformed"/>
               </Events>
             </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator2">
+            </Component>
+            <Component class="javax.swing.JButton" name="LoggingJButton">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Logging OFF"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="LoggingJButtonActionPerformed"/>
+              </Events>
+            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="jPanel2">
@@ -334,6 +352,20 @@
                       </SubComponents>
                     </Container>
                   </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="DebugContainerJPanel">
+                  <Constraints>
+                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+                      <JTabbedPaneConstraints tabName="Debug">
+                        <Property name="tabTitle" type="java.lang.String" value="Debug"/>
+                      </JTabbedPaneConstraints>
+                    </Constraint>
+                  </Constraints>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
+                    <Property name="columns" type="int" value="1"/>
+                    <Property name="rows" type="int" value="1"/>
+                  </Layout>
                 </Container>
                 <Container class="javax.swing.JPanel" name="jPanel4">
                   <Constraints>
