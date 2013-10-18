@@ -152,6 +152,11 @@ public class Lexicon {
                 list.add(timeSense);
                 word.addSense(timeSense);
             }
+            if (token.nerType().equalsIgnoreCase("location")) {
+                Sense locationSense = new Sense("@location-object", token.lemma(), "n", nextInstanceNumber("@location-object", token.lemma(), "n"));
+                list.add(locationSense);
+                word.addSense(locationSense);
+            }
         }
         
         //handle unknowns
