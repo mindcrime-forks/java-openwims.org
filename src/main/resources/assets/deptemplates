@@ -1,0 +1,92 @@
+DIRECT-OBJECT(v)
+dobj(SELF,theme)
+>SELF.theme=theme
+
+SUBJECT(v)
+nsubj(SELF,agent[pos=NN])
+>SELF.agent=agent
+
++AT-LOCATION(v)
+prep(SELF,at[token=at])
+pobj(at,location[pos=NN,ont=@physical-object])
+>SELF.location=location
+"[SELF] at the mall"
+
++AT-TIME(v)
+prep(SELF,at[token=at])
+pobj(at,time[micro=#time,pos=NN])
+>SELF.time=time
+"[SELF] at 8:52am"
+
++FOR-DESTINATION(v)
+prep(SELF,for[token=for])
+pobj(for,destination[ont=@location-object,pos=NN])
+>SELF.destination=destination
+"[SELF] for the hills"
+
++FOR-DURATION(v)
+prep(SELF,for[token=for])
+pobj(for,duration[micro=#duration])
+>SELF.duration=duration
+"[SELF] for an hour"
+
++FOR-PURPOSE(v)
+prep(SELF,for[token=for])
+pobj(for,purpose[pos=NN])
+>SELF.purpose=purpose
+"[SELF] for her kids"
+
++IN-LOCATION(v)
+prep(SELF,in[token=in])
+pobj(in,location[pos=NN,ont=@physical-object])
+>SELF.location=location
+"[SELF] in the house"
+
++ON-DATE(v)
+prep(SELF,on[token=on])
+pobj(on,date[micro=#date,pos=NNP])
+>SELF.date=date
+"[SELF] on Tuesday"
+
++ON-LOCATION(v)
+prep(SELF,on[token=on])
+pobj(on,date[micro=#date,pos=NNP])
+>SELF.date=date
+"[SELF] on Main street"
+
++TO-LOCATION(v)
+prep(SELF,to[token=to])
+pobj(to,location[pos=NN,ont=@physical-object])
+>SELF.location=location
+"[SELF] to Hawaii"
+
++TO-PURPOSE-INFINITIVE(v)
+prep(SELF,to[token=to])
+pobj(to,purpose[micro=#infinitive,pos=VB])
+>SELF.purpose=purpose
+"[SELF] to live"
+
++TO-PURPOSE-NOMINAL(v)
+prep(SELF,to[token=to])
+pobj(to,purpose[pos=NN])
+>SELF.purpose=purpose
+
++WITH-ASSOCIATE(v)
+prep(SELF,with[token=with])
+pobj(with,associate[ont=@animal,pos=NN])
+>SELF.agent=associate
+"[SELF] with Jenny"
+
++WITH-INSTRUMENT(v)
+prep(SELF,with[token=with])
+pobj(with,instrument[ont=@physical-object,pos=NN])
+>SELF.instrument=instrument
+"[SELF] with the hammer"
+
++DETERMINED(n)
+det(SELF,the[token=the])
+"the [SELF]"
+
++UNDETERMINED(n)
+det(SELF,a[token=a])
+"a [SELF]"

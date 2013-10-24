@@ -12,6 +12,12 @@ public class Meaning {
     public String target;
     public String relation;
     public String wim;
+    
+    public Meaning(Meaning toCopy) {
+        this.target = toCopy.target;
+        this.relation = toCopy.relation;
+        this.wim = toCopy.wim;
+    }
 
     public Meaning(String target, String relation, String wim) {
         this.target = target;

@@ -12,6 +12,11 @@ public class Expectation {
     
     private String specification;
     private String expectation;
+    
+    public Expectation(Expectation toCopy) {
+        this.specification = toCopy.specification;
+        this.expectation = toCopy.expectation;
+    }
 
     public Expectation(String specification, String expectation) {
         this.specification = specification;

@@ -48,6 +48,10 @@ public class TagMaps {
         }
     }
     
+    public boolean doesTagExist(String tag) {
+        return maps.containsKey(tag.toUpperCase());
+    }
+    
     public boolean doTagsMatch(String tag1, String tag2) {
         if (tag1.equalsIgnoreCase(tag2)) {
             return true;

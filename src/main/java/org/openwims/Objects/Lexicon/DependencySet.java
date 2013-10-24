@@ -16,6 +16,20 @@ public class DependencySet {
     public boolean optional;
     public String label;
 
+    public DependencySet(DependencySet toCopy) {
+        this.dependencies = new LinkedList();
+        this.meanings = new LinkedList();
+        this.optional = toCopy.optional;
+        this.label = toCopy.label;
+        
+        for (Dependency dependency : toCopy.dependencies) {
+            this.dependencies.add(new Dependency(dependency));
+        }
+        for (Meaning meaning : toCopy.meanings) {
+            this.meanings.add(new Meaning(meaning));
+        }
+    }
+    
     public DependencySet(LinkedList<Dependency> dependencies, LinkedList<Meaning> meanings, boolean optional, String label) {
         this.dependencies = dependencies;
         this.meanings = meanings;
