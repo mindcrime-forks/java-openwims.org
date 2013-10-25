@@ -40,6 +40,7 @@ import org.openwims.Processors.WIMProcessor.WSDProcessor;
 import org.openwims.Processors.WIMProcessor.WSEProcessor;
 import org.openwims.Serialization.JSONPPDocumentSerializer;
 import org.openwims.Stanford.StanfordHelper;
+import org.openwims.UI.LexiconEditor.LexiconEditorJFrame;
 import org.openwims.WIMGlobals;
 
 /**
@@ -179,6 +180,8 @@ public class MainJFrame extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         LogJTextArea = new javax.swing.JTextArea();
         MainJMenuBar = new javax.swing.JMenuBar();
+        ViewJMenu = new javax.swing.JMenu();
+        ShowLexiconEditorJMenuItem = new javax.swing.JMenuItem();
         OptionsJMenu = new javax.swing.JMenu();
         PossibilityIteratorJMenu = new javax.swing.JMenu();
         WSEJMenu = new javax.swing.JMenu();
@@ -398,6 +401,18 @@ public class MainJFrame extends javax.swing.JFrame {
 
         getContentPane().add(RightJPanel);
 
+        ViewJMenu.setText("View");
+
+        ShowLexiconEditorJMenuItem.setText("Lexicon Editor");
+        ShowLexiconEditorJMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ShowLexiconEditorJMenuItemActionPerformed(evt);
+            }
+        });
+        ViewJMenu.add(ShowLexiconEditorJMenuItem);
+
+        MainJMenuBar.add(ViewJMenu);
+
         OptionsJMenu.setText("Options");
 
         PossibilityIteratorJMenu.setText("Possibility Iterator");
@@ -461,6 +476,12 @@ public class MainJFrame extends javax.swing.JFrame {
         this.validate();
         this.repaint();
     }//GEN-LAST:event_LoggingJButtonActionPerformed
+
+    private void ShowLexiconEditorJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShowLexiconEditorJMenuItemActionPerformed
+        LexiconEditorJFrame lexEditor = new LexiconEditorJFrame();
+        lexEditor.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        lexEditor.setVisible(true);
+    }//GEN-LAST:event_ShowLexiconEditorJMenuItemActionPerformed
 
     /**
      * @param args the command line arguments
@@ -529,6 +550,8 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JTextField SearchJTextField;
     private javax.swing.JPanel SenseContainerJPanel;
     private javax.swing.JList SensesJList;
+    private javax.swing.JMenuItem ShowLexiconEditorJMenuItem;
+    private javax.swing.JMenu ViewJMenu;
     private javax.swing.JButton WIMifyJButton;
     private javax.swing.JPanel WIMsContainerJPanel;
     private javax.swing.JScrollPane WIMsJScrollPane;

@@ -2,15 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.openwims.UI.NEW;
+package org.openwims.UI.LexiconEditor;
 
 import com.jesseenglish.swingftfy.extensions.FLabel;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
@@ -23,6 +25,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
 import org.openwims.Objects.Lexicon.Dependency;
 import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Expectation;
@@ -33,7 +37,7 @@ import org.openwims.Objects.Lexicon.Sense;
  *
  * @author jesseenglish
  */
-public class TemplatesJPanel extends JPanel {
+public class TemplatesJPanel extends JPanel implements Scrollable {
     
     private HashMap<String, LinkedList<DependencySet>> templates;
     private HashMap<DependencySet, String> examples;
@@ -171,6 +175,26 @@ public class TemplatesJPanel extends JPanel {
         for (TemplatesListener listener : this.listeners) {
             listener.templateAdded(template);
         }
+    }
+    
+    public Dimension getPreferredScrollableViewportSize() {
+        return getPreferredSize();
+    }
+
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+       return 16;
+    }
+
+    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return ((orientation == SwingConstants.VERTICAL) ? visibleRect.height : visibleRect.width) - 16;
+    }
+
+    public boolean getScrollableTracksViewportWidth() {
+        return true;
+    }
+
+    public boolean getScrollableTracksViewportHeight() {
+        return false;
     }
     
     public interface TemplatesListener {

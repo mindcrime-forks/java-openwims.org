@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.openwims.UI.NEW;
+package org.openwims.UI.LexiconEditor;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -20,7 +20,7 @@ import org.openwims.WIMGlobals;
  *
  * @author jesseenglish
  */
-public class MainJFrame extends javax.swing.JFrame {
+public class LexiconEditorJFrame extends javax.swing.JFrame {
     
     private SensesJList senses;
     private SenseEditorJPanel editor;
@@ -29,7 +29,7 @@ public class MainJFrame extends javax.swing.JFrame {
     /**
      * Creates new form MainJFrame
      */
-    public MainJFrame() {
+    public LexiconEditorJFrame() {
         initComponents();
         this.setSize(1200, 800);
         
@@ -43,25 +43,25 @@ public class MainJFrame extends javax.swing.JFrame {
         this.templates = new TemplatesJPanel();
         this.templates.addTemplatesListener(new TemplatesJPanel.TemplatesListener() {
             public void templateAdded(DependencySet template) {
-                if (MainJFrame.this.editor == null) {
+                if (LexiconEditorJFrame.this.editor == null) {
                     return;
                 }
                 
-                MainJFrame.this.editor.getSense().addDependencySet(template);
-                MainJFrame.this.editor.refresh();
-                MainJFrame.this.validate();
-                MainJFrame.this.repaint();
+                LexiconEditorJFrame.this.editor.getSense().addDependencySet(template);
+                LexiconEditorJFrame.this.editor.refresh();
+                LexiconEditorJFrame.this.validate();
+                LexiconEditorJFrame.this.repaint();
             }
         });
         
         this.SensesJScrollPane.setViewportView(this.senses);
-        this.TemplateContainerJPanel.add(this.templates);
+        this.TemplateJScrollPane.setViewportView(this.templates);
         
         this.jSplitPane1.setBorder(null);
         this.jSplitPane2.setBorder(null);
         
         this.SenseEditorJScrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
-        this.TemplateContainerJPanel.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
+        this.TemplateJScrollPane.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
     }
 
     /**
@@ -77,13 +77,14 @@ public class MainJFrame extends javax.swing.JFrame {
         jSplitPane1 = new javax.swing.JSplitPane();
         jSplitPane2 = new javax.swing.JSplitPane();
         SenseEditorJScrollPane = new javax.swing.JScrollPane();
-        TemplateContainerJPanel = new javax.swing.JPanel();
+        TemplateJScrollPane = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
         SensesJScrollPane = new javax.swing.JScrollPane();
         SearchFTextField = new com.jesseenglish.swingftfy.extensions.FTextField();
         NewJButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Lexicon Editor");
         getContentPane().setLayout(new java.awt.GridLayout(1, 1));
 
         jSplitPane1.setDividerLocation(250);
@@ -93,12 +94,14 @@ public class MainJFrame extends javax.swing.JFrame {
         SenseEditorJScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jSplitPane2.setLeftComponent(SenseEditorJScrollPane);
 
-        TemplateContainerJPanel.setLayout(new java.awt.GridLayout(1, 1));
-        jSplitPane2.setRightComponent(TemplateContainerJPanel);
+        TemplateJScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jSplitPane2.setRightComponent(TemplateJScrollPane);
 
         jSplitPane1.setRightComponent(jSplitPane2);
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        SensesJScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -193,7 +196,7 @@ public class MainJFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainJFrame().setVisible(true);
+                new LexiconEditorJFrame().setVisible(true);
             }
         });
     }
@@ -202,7 +205,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private com.jesseenglish.swingftfy.extensions.FTextField SearchFTextField;
     private javax.swing.JScrollPane SenseEditorJScrollPane;
     private javax.swing.JScrollPane SensesJScrollPane;
-    private javax.swing.JPanel TemplateContainerJPanel;
+    private javax.swing.JScrollPane TemplateJScrollPane;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
@@ -212,7 +215,7 @@ public class MainJFrame extends javax.swing.JFrame {
         this.editor = new SenseEditorJPanel(sense);
         this.editor.addSenseEditorListener(new DependencySetRemovedListener());
 
-        this.SenseEditorJScrollPane.setViewportView(MainJFrame.this.editor);
+        this.SenseEditorJScrollPane.setViewportView(LexiconEditorJFrame.this.editor);
 
         this.templates.setSelected(sense);
 
@@ -232,7 +235,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private class DependencySetRemovedListener implements SenseEditorJPanel.SenseEditorListener {
         
         public void dependencySetRemoved(Sense sense, DependencySet set) {
-            MainJFrame.this.templates.refresh();
+            LexiconEditorJFrame.this.templates.refresh();
         }
         
     }

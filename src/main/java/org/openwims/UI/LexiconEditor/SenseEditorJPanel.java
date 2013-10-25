@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.openwims.UI.NEW;
+package org.openwims.UI.LexiconEditor;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,9 +31,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
+import org.openwims.Objects.Disambiguation.Interpretation;
 import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Meaning;
 import org.openwims.Objects.Lexicon.Sense;
+import org.openwims.Objects.Preprocessor.PPDocument;
+import org.openwims.Objects.Preprocessor.PPSentence;
+import org.openwims.Objects.WIMFrame;
+import org.openwims.Processors.Iterators.NaivePossibilityIterator;
+import org.openwims.Processors.LandGrabDisambiguation;
+import org.openwims.Stanford.StanfordHelper;
+import org.openwims.Stanford.StanfordPPDocument;
 import org.openwims.WIMGlobals;
 
 /**
@@ -83,7 +91,7 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         DefinitionFTextField = new com.jesseenglish.swingftfy.extensions.FTextField();
         jLabel3 = new javax.swing.JLabel();
         ExampleFTextField = new com.jesseenglish.swingftfy.extensions.FTextField();
-        TestJButton = new javax.swing.JButton();
+        QuickTestJButton = new javax.swing.JButton();
         ResultsJLabel = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         FrequencyFTextField = new com.jesseenglish.swingftfy.extensions.FTextField();
@@ -141,13 +149,18 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(ExampleFTextField, gridBagConstraints);
 
-        TestJButton.setText("test");
+        QuickTestJButton.setText("test");
+        QuickTestJButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                QuickTestJButtonActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
-        add(TestJButton, gridBagConstraints);
+        add(QuickTestJButton, gridBagConstraints);
 
-        ResultsJLabel.setText("[verify]");
+        ResultsJLabel.setText("results");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
@@ -344,19 +357,58 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         }
     }//GEN-LAST:event_SaveJButtonActionPerformed
 
+    private void QuickTestJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_QuickTestJButtonActionPerformed
+        //Quick Test
+        PPDocument document = new StanfordPPDocument(StanfordHelper.annotate(this.sense.getExample()));
+        NaivePossibilityIterator iterator = new NaivePossibilityIterator(document);
+        LandGrabDisambiguation disambiguator = new LandGrabDisambiguation();
+        LinkedList<Interpretation> interpretations = disambiguator.wse(iterator);
+        
+        double bestScore = 0.0;
+        double bestMatch = 0.0;
+        for (Interpretation interpretation : interpretations) {
+            double score = interpretation.score();
+            if (score > bestScore) {
+                bestScore = score;
+            }
+            for (WIMFrame frame : interpretation.wim().listFrames()) {
+                if (frame.getAnchors().containsValue(this.sense)) {
+                    if (score > bestMatch) {
+                        bestMatch = score;
+                    }
+                }
+            }
+        }
+        
+        try {
+            if (bestMatch == 0.0) {
+                this.ResultsJLabel.setIcon(new ImageIcon(ImageIO.read(SenseEditorJPanel.class.getResourceAsStream("/images/error.png"))));
+            } else if (bestMatch != bestScore) {
+                this.ResultsJLabel.setIcon(new ImageIcon(ImageIO.read(SenseEditorJPanel.class.getResourceAsStream("/images/warning.png"))));
+            } else {
+                this.ResultsJLabel.setIcon(new ImageIcon(ImageIO.read(SenseEditorJPanel.class.getResourceAsStream("/images/mandatory.png"))));
+            }
+        } catch (Exception err) {}
+        
+        this.ResultsJLabel.setText("");
+        this.ResultsJLabel.setVisible(true);
+        this.validate();
+        this.repaint();
+    }//GEN-LAST:event_QuickTestJButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.jesseenglish.swingftfy.extensions.FLabel AddSemanticsJLabel;
     private com.jesseenglish.swingftfy.extensions.FTextField DefinitionFTextField;
     private javax.swing.JPanel DependenciesJPanel;
     private com.jesseenglish.swingftfy.extensions.FTextField ExampleFTextField;
     private com.jesseenglish.swingftfy.extensions.FTextField FrequencyFTextField;
+    private javax.swing.JButton QuickTestJButton;
     private javax.swing.JLabel ResultsJLabel;
     private javax.swing.JButton SaveJButton;
     private javax.swing.JPanel SemanticsContentsJPanel;
     private javax.swing.JPanel SemanticsHeaderJPanel;
     private javax.swing.JLabel SenseJLabel;
     private javax.swing.JPanel SenseLabelContainerJPanel;
-    private javax.swing.JButton TestJButton;
     private com.jesseenglish.swingftfy.extensions.FLabel fLabel1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel2;
@@ -380,6 +432,7 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         this.DefinitionFTextField.setText(sense.getDefinition());
         this.ExampleFTextField.setText(sense.getExample());
         this.FrequencyFTextField.setText("" + sense.getFrequency());
+        this.ResultsJLabel.setVisible(false);
         
         this.SenseLabelContainerJPanel.removeAll();
         this.SenseLabelContainerJPanel.add(new ConceptJTextField(sense));

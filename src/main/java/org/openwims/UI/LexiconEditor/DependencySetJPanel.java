@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.openwims.UI.NEW;
+package org.openwims.UI.LexiconEditor;
 
 import com.jesseenglish.swingftfy.extensions.FLabel;
 import java.awt.Color;

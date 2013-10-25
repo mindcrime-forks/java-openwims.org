@@ -24,6 +24,11 @@ public class PPSentence {
         this.dependencies = new LinkedList();
     }
     
+    public PPSentence(String text) {
+        this();
+        this.text = text;
+    }
+    
     public String text() {
         return this.text;
     }
