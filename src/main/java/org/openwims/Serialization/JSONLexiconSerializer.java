@@ -20,7 +20,6 @@ import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Expectation;
 import org.openwims.Objects.Lexicon.Meaning;
 import org.openwims.Objects.Lexicon.Sense;
-import org.openwims.Objects.Lexicon.Structure;
 
 /**
  *
@@ -65,9 +64,9 @@ public class JSONLexiconSerializer {
             sense.addMeaning(meaning((JSONObject)meaning));
         }
         
-        JSONArray structures = (JSONArray)o.get("structures");
-        for (Object structure : structures) {
-            sense.addStructure(structure((JSONObject)structure));
+        JSONArray dependencySets = (JSONArray)o.get("sets");
+        for (Object dependencySet : dependencySets) {
+            sense.addDependencySet(set((JSONObject)dependencySet));
         }
         
         return sense;
@@ -76,17 +75,6 @@ public class JSONLexiconSerializer {
     private static Meaning meaning(JSONObject o) {
         Meaning meaning = new Meaning((String)o.get("target"), (String)o.get("relation"), (String)o.get("wim"));
         return meaning;
-    }
-    
-    private static Structure structure(JSONObject o) {
-        Structure structure = new Structure();
-        
-        JSONArray sets = (JSONArray)o.get("sets");
-        for (Object set : sets) {
-            structure.addDependencySet(set((JSONObject)set));
-        }
-        
-        return structure;
     }
     
     private static DependencySet set(JSONObject o) {
@@ -180,10 +168,10 @@ public class JSONLexiconSerializer {
         }
         json.append("],");
         
-        json.append("\"structures\": [");
-        for (Structure structure : sense.listStructures()) {
-            json.append(json(structure));
-            if (structure != sense.listStructures().getLast()) {
+        json.append("\"sets\": [");
+        for (DependencySet dependencySet : sense.listDependencySets()) {
+            json.append(json(dependencySet));
+            if (dependencySet != sense.listDependencySets().getLast()) {
                 json.append(", ");
             }
         }
@@ -210,25 +198,6 @@ public class JSONLexiconSerializer {
         json.append("\"wim\": \"");
         json.append(meaning.wim);
         json.append("\"");
-        
-        json.append("}");
-        
-        return json.toString();
-    }
-    
-    private static String json(Structure structure) {
-        StringBuilder json = new StringBuilder();
-        
-        json.append("{");
-        
-        json.append("\"sets\": [");
-        for (DependencySet dependencySet : structure.listDependencies()) {
-            json.append(json(dependencySet));
-            if (dependencySet != structure.listDependencies().getLast()) {
-                json.append(", ");
-            }
-        }
-        json.append("]");
         
         json.append("}");
         

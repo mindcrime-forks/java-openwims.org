@@ -28,7 +28,6 @@ import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Expectation;
 import org.openwims.Objects.Lexicon.Meaning;
 import org.openwims.Objects.Lexicon.Sense;
-import org.openwims.Objects.Lexicon.Structure;
 
 /**
  *
@@ -45,7 +44,6 @@ public class TemplatesJPanel extends JPanel {
         this.setLayout(new GridBagLayout());
         this.listeners = new LinkedList();
         this.selected = new Sense("", "???", "", 0);
-        this.selected.addStructure(new Structure());
         try {
             parseTemplates();
         } catch (Exception ex) {
@@ -188,11 +186,7 @@ public class TemplatesJPanel extends JPanel {
             this.template = template;
             this.addMouseListener(this);
             
-            if (selected.listStructures().size() == 0) {
-                return;
-            }
-            
-            for (DependencySet dependencySet : selected.listStructures().getFirst().listDependencies()) {
+            for (DependencySet dependencySet : selected.listDependencySets()) {
                 if (dependencySet.label.equals(this.template.label)) {
                     this.setForeground(new Color(0.5f, 0.5f, 0.5f));
                     this.removeMouseListener(this);

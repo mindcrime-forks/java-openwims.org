@@ -86,11 +86,7 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         for (PPToken token : possibility.keySet()) {
             Sense sense = possibility.get(token);
             
-            //HACK: ASSUME STRUCTURE 1 FOR NOW
-            if (sense.listStructures().size() == 0) {
-                continue; //nothing to claim; e.g., @none:the-det-1
-            }
-            for (DependencySet dependencySet : sense.listStructures().getFirst().listDependencies()) {
+            for (DependencySet dependencySet : sense.listDependencySets()) {
                 if (!dependencySet.optional && !claims.values().containsAll(dependencySet.dependencies)) {
                     throw new UnusedNonOptionalSetException(token, sense, dependencySet);
                 }
@@ -102,11 +98,8 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
     
     private void claim(PPToken token, HashMap<PPToken, Sense> possibility, HashMap<PPDependency, Dependency> claims) {
         Sense sense = possibility.get(token);
-        //HACK: ASSUME STRUCTURE 1 FOR NOW
-        if (sense.listStructures().size() == 0) {
-            return; //nothing to claim; e.g., @none:the-det-1
-        }
-        for (DependencySet dependencySet : sense.listStructures().getFirst().listDependencies()) {
+        
+        for (DependencySet dependencySet : sense.listDependencySets()) {
             HashMap<PPDependency, Dependency> consideredClaims = new HashMap();
             HashMap<String, PPToken> variables = new HashMap();
             variables.put("SELF", token);

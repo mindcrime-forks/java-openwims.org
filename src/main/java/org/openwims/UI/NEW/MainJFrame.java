@@ -47,7 +47,7 @@ public class MainJFrame extends javax.swing.JFrame {
                     return;
                 }
                 
-                MainJFrame.this.editor.getSense().listStructures().getFirst().addDependencySet(template);
+                MainJFrame.this.editor.getSense().addDependencySet(template);
                 MainJFrame.this.editor.refresh();
                 MainJFrame.this.validate();
                 MainJFrame.this.repaint();

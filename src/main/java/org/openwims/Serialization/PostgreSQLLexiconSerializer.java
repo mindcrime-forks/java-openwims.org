@@ -13,7 +13,6 @@ import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Expectation;
 import org.openwims.Objects.Lexicon.Meaning;
 import org.openwims.Objects.Lexicon.Sense;
-import org.openwims.Objects.Lexicon.Structure;
 
 /**
  *
@@ -112,66 +111,60 @@ public class PostgreSQLLexiconSerializer extends LexiconSerializer {
             builder.append("');\n");
         }
         
-        //INSERT STRUCTURES / DEPENDENCY SETS (CURRENTLY ONE TABLE)
-        int series = 1;
-        for (Structure structure : sense.listStructures()) {
-            for (DependencySet set : structure.listDependencies()) {
-                builder.append("INSERT INTO structures (sense_uid, series, label, optional) VALUES (");
+        //DEPENDENCY SETS
+        for (DependencySet set : sense.listDependencySets()) {
+            builder.append("INSERT INTO dependency_sets (sense_uid, label, optional) VALUES (");
+            if (sense.getUid() != -1) {
+                builder.append(sense.getUid());
+            } else {
+                builder.append("(SELECT max(uid) FROM senses)");
+            }
+            builder.append(", '");
+            builder.append(set.label.replaceAll("'", "''"));
+            builder.append("', ");
+            builder.append(set.optional);
+            builder.append(");\n");
+
+            //INSERT DEPENDENCIES
+            for (Dependency dependency : set.dependencies) {
+                builder.append("INSERT INTO dependencies (struct, dependency, governor, dependent) VALUES (");
+                builder.append("(SELECT max(id) FROM dependency_sets), '");
+                builder.append(dependency.type.replaceAll("'", "''"));
+                builder.append("', '");
+                builder.append(dependency.governor.replaceAll("'", "''"));
+                builder.append("', '");
+                builder.append(dependency.dependent.replaceAll("'", "''"));
+                builder.append("');\n");
+
+                //INSERT SPECIFICATIONS
+                for (Expectation expectation : dependency.expectations) {
+                    builder.append("INSERT INTO specifications (dependency, spec, expectation) VALUES (");
+                    builder.append("(SELECT max(id) FROM dependencies), '");
+                    builder.append(expectation.getSpecification().replaceAll("'", "''"));
+                    builder.append("', '");
+                    builder.append(expectation.getExpectation().replaceAll("'", "''"));
+                    builder.append("');\n");
+                }
+            }
+
+            //INSERT MEANINGS
+            for (Meaning meaning : set.meanings) {
+                builder.append("INSERT INTO dependency_meanings (sense_uid, target, relation, wim, structure) VALUES (");
                 if (sense.getUid() != -1) {
                     builder.append(sense.getUid());
                 } else {
                     builder.append("(SELECT max(uid) FROM senses)");
                 }
-                builder.append(", ");
-                builder.append(series);
                 builder.append(", '");
-                builder.append(set.label.replaceAll("'", "''"));
-                builder.append("', ");
-                builder.append(set.optional);
-                builder.append(");\n");
-                
-                //INSERT DEPENDENCIES
-                for (Dependency dependency : set.dependencies) {
-                    builder.append("INSERT INTO dependencies (struct, dependency, governor, dependent) VALUES (");
-                    builder.append("(SELECT max(id) FROM structures), '");
-                    builder.append(dependency.type.replaceAll("'", "''"));
-                    builder.append("', '");
-                    builder.append(dependency.governor.replaceAll("'", "''"));
-                    builder.append("', '");
-                    builder.append(dependency.dependent.replaceAll("'", "''"));
-                    builder.append("');\n");
-                    
-                    //INSERT SPECIFICATIONS
-                    for (Expectation expectation : dependency.expectations) {
-                        builder.append("INSERT INTO specifications (dependency, spec, expectation) VALUES (");
-                        builder.append("(SELECT max(id) FROM dependencies), '");
-                        builder.append(expectation.getSpecification().replaceAll("'", "''"));
-                        builder.append("', '");
-                        builder.append(expectation.getExpectation().replaceAll("'", "''"));
-                        builder.append("');\n");
-                    }
-                }
-                
-                //INSERT MEANINGS
-                for (Meaning meaning : set.meanings) {
-                    builder.append("INSERT INTO dependency_meanings (sense_uid, target, relation, wim, structure) VALUES (");
-                    if (sense.getUid() != -1) {
-                        builder.append(sense.getUid());
-                    } else {
-                        builder.append("(SELECT max(uid) FROM senses)");
-                    }
-                    builder.append(", '");
-                    builder.append(meaning.target.replaceAll("'", "''"));
-                    builder.append("', '");
-                    builder.append(meaning.relation.replaceAll("'", "''"));
-                    builder.append("', '");
-                    builder.append(meaning.wim.replaceAll("'", "''"));
-                    builder.append("', (SELECT max(id) FROM structures));\n");
-                }
+                builder.append(meaning.target.replaceAll("'", "''"));
+                builder.append("', '");
+                builder.append(meaning.relation.replaceAll("'", "''"));
+                builder.append("', '");
+                builder.append(meaning.wim.replaceAll("'", "''"));
+                builder.append("', (SELECT max(id) FROM dependency_sets));\n");
             }
-            
-            series += 1;
         }
+            
         
         //COMMIT
         builder.append("COMMIT;\n");

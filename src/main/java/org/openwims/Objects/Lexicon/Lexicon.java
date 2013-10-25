@@ -198,27 +198,18 @@ public class Lexicon {
             for (Sense sense : word.listSenses()) {
                 
                 HashMap<Integer, DependencySet> dependencySets = new HashMap();
-                HashMap<Integer, Structure> structures = new HashMap();
                 HashMap<Integer, Dependency> dependencies = new HashMap();
                 
-                String query = "SELECT * FROM structures WHERE sense_uid=" + sense.getUid() + ";";
+                String query = "SELECT * FROM dependency_sets WHERE sense_uid=" + sense.getUid() + ";";
                 
                 rs = stmt.executeQuery(query);
                 while (rs.next()) {
                     int id = rs.getInt("id");
-                    int series = rs.getInt("series");
                     String set = rs.getString("label");
                     boolean optional = rs.getBoolean("optional");
-                                        
-                    Structure structure = structures.get(series);
-                    if (structure == null) {
-                        structure = new Structure();
-                        sense.addStructure(structure);
-                        structures.put(series, structure);
-                    }
                     
                     DependencySet dependencySet = new DependencySet(new LinkedList(), new LinkedList(), optional, set);
-                    structure.addDependencySet(dependencySet);
+                    sense.addDependencySet(dependencySet);
                     
                     dependencySets.put(id, dependencySet);
                 }

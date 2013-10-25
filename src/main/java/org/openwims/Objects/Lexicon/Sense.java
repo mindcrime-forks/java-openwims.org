@@ -16,7 +16,7 @@ public class Sense {
     private String word;
     private String pos;
     private int instance;
-    private LinkedList<Structure> structures;
+    private LinkedList<DependencySet> dependencySets;
     private LinkedList<Meaning> meanings;
     private String definition;
     private String example;
@@ -28,7 +28,7 @@ public class Sense {
         this.word = word;
         this.pos = pos;
         this.instance = instance;
-        this.structures = new LinkedList();
+        this.dependencySets = new LinkedList();
         this.meanings = new LinkedList();
         this.definition = "";
         this.example = "";
@@ -88,12 +88,12 @@ public class Sense {
         return example;
     }
     
-    public void addStructure(Structure structure) {
-        this.structures.add(structure);
+    public void addDependencySet(DependencySet dependencySet) {
+        this.dependencySets.add(dependencySet);
     }
     
-    public void removeStructure(Structure structure) {
-        this.structures.remove(structure);
+    public void removeDependencySet(DependencySet dependencySet) {
+        this.dependencySets.remove(dependencySet);
     }
     
     public void removeMeaning(Meaning meaning) {
@@ -120,8 +120,8 @@ public class Sense {
         this.meanings.add(meaning);
     }
     
-    public LinkedList<Structure> listStructures() {
-        return new LinkedList(this.structures);
+    public LinkedList<DependencySet> listDependencySets() {
+        return new LinkedList(this.dependencySets);
     }
     
     public LinkedList<Meaning> listMeanings() {
@@ -136,10 +136,10 @@ public class Sense {
         out.append("\n");
         out.append(this.definition);
         
-        out.append("\n Structures:\n");
-        for (Structure structure : structures) {
+        out.append("\n Dependency Sets:\n");
+        for (DependencySet dependencySet : this.dependencySets) {
             out.append("  ");
-            out.append(structure);
+            out.append(dependencySet);
         }
         
         out.append("\n Meaning:\n");

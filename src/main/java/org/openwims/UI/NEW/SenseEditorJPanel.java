@@ -438,14 +438,8 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
             this.DependenciesJPanel.removeAll();
             GridBagConstraints c = new GridBagConstraints();
             c.gridy = -1;
-            
-            if (sense.listStructures().size() == 0) {
-                this.validate();
-                this.repaint();
-                return;
-            }
 
-            LinkedList<DependencySet> dependencies = sense.listStructures().getFirst().listDependencies();
+            LinkedList<DependencySet> dependencies = sense.listDependencySets();
             Collections.sort(dependencies, new DependencySetComparator());
 
             for (DependencySet dependencySet : dependencies) {
@@ -644,7 +638,7 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         public void mousePressed(MouseEvent e) {}
 
         public void mouseReleased(MouseEvent e) {
-            SenseEditorJPanel.this.sense.listStructures().getFirst().removeDependencySet(dependencySet);
+            SenseEditorJPanel.this.sense.removeDependencySet(dependencySet);
             SenseEditorJPanel.this.fireDependencySetDeletedListeners(dependencySet);
             SenseEditorJPanel.this.refresh();
         }

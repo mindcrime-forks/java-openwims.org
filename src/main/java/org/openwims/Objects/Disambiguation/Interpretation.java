@@ -10,7 +10,6 @@ import org.openwims.Objects.Lexicon.Dependency;
 import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Meaning;
 import org.openwims.Objects.Lexicon.Sense;
-import org.openwims.Objects.Lexicon.Structure;
 import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Objects.WIM;
@@ -46,11 +45,9 @@ public class Interpretation implements Comparable<Interpretation> {
     
     private DependencySet dependencySetForDependency(Dependency dependency) {
         for (Sense sense : senses.values()) {
-            for (Structure structure : sense.listStructures()) {
-                for (DependencySet dependencySet : structure.listDependencies()) {
-                    if (dependencySet.dependencies.contains(dependency)) {
-                        return dependencySet;
-                    }
+            for (DependencySet dependencySet : sense.listDependencySets()) {
+                if (dependencySet.dependencies.contains(dependency)) {
+                    return dependencySet;
                 }
             }
         }

@@ -126,8 +126,8 @@ public class SenseJTree extends FTree {
                 this.add(new SenseJTree.MeaningRelationNode(this.sense, meaning));
             }
             
-            for (Structure structure : sense.listStructures()) {
-                this.add(new SenseJTree.StructureNode(this.sense, structure));
+            for (DependencySet dependencySet : sense.listDependencySets()) {
+                this.add(new SenseJTree.DependencySetNode(dependencySet));
             }
         }
 
@@ -139,7 +139,7 @@ public class SenseJTree extends FTree {
             
                 JPopupMenu menu = new JPopupMenu();
                 menu.add(new AddMeaningJMenuItem(this.sense));
-                menu.add(new AddStructureJMenuItem(this.sense));
+                menu.add(new AddDependencySetJMenuItem());
                 menu.addSeparator();
                 menu.add(new RemapJMenuItem(this.sense));
                 menu.add(new SaveJMenuItem(this.sense));
@@ -293,52 +293,12 @@ public class SenseJTree extends FTree {
         
     }
     
-    private class StructureNode extends ExpansionMemoryNode {
-        
-        private Sense sense;
-        private Structure structure;
-
-        public StructureNode(Sense sense, Structure structure) {
-            super("Structure");
-            this.sense = sense;
-            this.structure = structure;
-            setIcon(ROOT);
-            
-            for (DependencySet set : structure.listDependencies()) {
-                this.add(new SenseJTree.DependencySetNode(this.structure, set));
-            }
-        }
-        
-        @Override
-        public void mouseReleased(MouseEvent me) {
-            super.mouseReleased(me);
-            
-            if (SwingUtilities.isRightMouseButton(me)) {
-            
-                JPopupMenu menu = new JPopupMenu();
-                menu.add(new AddDependencySetJMenuItem(this.structure));
-                menu.add(new DeleteStructureJMenuItem(this.sense, this.structure));
-
-                Rectangle r = SenseJTree.this.getPathBounds(SenseJTree.this.getPath(this));
-                menu.show(SenseJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
-            }
-        }
-
-        @Override
-        public Object recall() {
-            return this.structure;
-        }
-        
-    }
-    
     private class DependencySetNode extends ExpansionMemoryNode {
         
-        private Structure structure;
         private DependencySet set;
 
-        public DependencySetNode(Structure structure, DependencySet set) {
+        public DependencySetNode(DependencySet set) {
             super(set.label);
-            this.structure = structure;
             this.set = set;
             
             if (set.optional) {
@@ -367,7 +327,7 @@ public class SenseJTree extends FTree {
                 menu.add(new AddMeaningJMenuItem(this.set));
                 menu.addSeparator();
                 menu.add(new EditDependencySetJMenuItem(this.set));
-                menu.add(new DeleteDependencySetJMenuItem(this.structure, this.set));
+                menu.add(new DeleteDependencySetJMenuItem(this.set));
                 
                 Rectangle r = SenseJTree.this.getPathBounds(SenseJTree.this.getPath(this));
                 menu.show(SenseJTree.this, r.x + getIcon().getIconWidth(), r.y + r.height);
@@ -675,26 +635,6 @@ public class SenseJTree extends FTree {
         
     }
     
-    private class DeleteStructureJMenuItem extends JMenuItem implements ActionListener {
-        
-        private Sense sense;
-        private Structure structure;
-
-        public DeleteStructureJMenuItem(Sense sense, Structure structure) {
-            super("Delete Structure");
-            this.sense = sense;
-            this.structure = structure;
-            this.addActionListener(this);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent ae) {
-            this.sense.removeStructure(this.structure);
-            SenseJTree.this.refresh();
-        }
-        
-    }
-    
     private class EditDependencySetJMenuItem extends JMenuItem implements ActionListener {
         
         private DependencySet set;
@@ -723,19 +663,17 @@ public class SenseJTree extends FTree {
     
     private class DeleteDependencySetJMenuItem extends JMenuItem implements ActionListener {
         
-        private Structure structure;
         private DependencySet set;
 
-        public DeleteDependencySetJMenuItem(Structure structure, DependencySet set) {
+        public DeleteDependencySetJMenuItem(DependencySet set) {
             super("Delete Dependency Set");
-            this.structure = structure;
             this.set = set;
             this.addActionListener(this);
         }
 
         @Override
         public void actionPerformed(ActionEvent ae) {
-            this.structure.removeDependencySet(this.set);
+            SenseJTree.this.sense.removeDependencySet(this.set);
             SenseJTree.this.refresh();
         }
         
@@ -816,24 +754,6 @@ public class SenseJTree extends FTree {
         
     }
     
-    private class AddStructureJMenuItem extends JMenuItem implements ActionListener {
-        
-        private Sense sense;
-
-        public AddStructureJMenuItem(Sense sense) {
-            super("Add Structure");
-            this.sense = sense;
-            this.addActionListener(this);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent ae) {
-            this.sense.addStructure(new Structure());
-            SenseJTree.this.refresh();
-        }
-        
-    }
-    
     private class EditMeaningJMenuItem extends JMenuItem implements ActionListener {
         
         private Meaning meaning;
@@ -895,11 +815,8 @@ public class SenseJTree extends FTree {
     
     private class AddDependencySetJMenuItem extends JMenuItem implements ActionListener {
         
-        private Structure structure;
-
-        public AddDependencySetJMenuItem(Structure structure) {
+        public AddDependencySetJMenuItem() {
             super("Add Dependency Set");
-            this.structure = structure;
             this.addActionListener(this);
         }
 
@@ -916,7 +833,7 @@ public class SenseJTree extends FTree {
             d.center();
             d.setVisible(true);
             
-            this.structure.addDependencySet(set);
+            SenseJTree.this.sense.addDependencySet(set);
             
             SenseJTree.this.refresh();
         }
