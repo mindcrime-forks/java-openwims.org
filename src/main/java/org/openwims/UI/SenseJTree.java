@@ -298,7 +298,7 @@ public class SenseJTree extends FTree {
         private DependencySet set;
 
         public DependencySetNode(DependencySet set) {
-            super(set.label);
+            super((set.optional ? "+" : "") + set.label);
             this.set = set;
             
             if (set.optional) {

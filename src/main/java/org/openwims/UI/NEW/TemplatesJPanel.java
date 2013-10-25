@@ -63,7 +63,7 @@ public class TemplatesJPanel extends JPanel {
         
         while ((line = br.readLine()) != null) {
             if (current == null) {
-                current = new DependencySet(new LinkedList(), new LinkedList(), false, line.split("\\(")[0]);
+                current = new DependencySet(new LinkedList(), new LinkedList(), false, line.split("\\(")[0].replaceAll("\\+", ""));
                 if (line.startsWith("+")) {
                     current.optional = true;
                 }

@@ -79,6 +79,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         HeaderJPanel = new javax.swing.JPanel();
+        OptionalJLabel = new javax.swing.JLabel();
         OptionalFLabel = new com.jesseenglish.swingftfy.extensions.FLabel();
         AddDependencyJLabel = new com.jesseenglish.swingftfy.extensions.FLabel();
         AddMeaningJLabel = new com.jesseenglish.swingftfy.extensions.FLabel();
@@ -101,6 +102,12 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         });
         HeaderJPanel.setLayout(new java.awt.GridBagLayout());
 
+        OptionalJLabel.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        OptionalJLabel.setText("+");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        HeaderJPanel.add(OptionalJLabel, gridBagConstraints);
+
         OptionalFLabel.setText("optional");
         OptionalFLabel.setBold(false);
         OptionalFLabel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -115,7 +122,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         HeaderJPanel.add(OptionalFLabel, gridBagConstraints);
@@ -133,6 +140,8 @@ public class DependencySetJPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         HeaderJPanel.add(AddDependencyJLabel, gridBagConstraints);
 
@@ -149,14 +158,14 @@ public class DependencySetJPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         HeaderJPanel.add(AddMeaningJLabel, gridBagConstraints);
 
         TitleJTextField.setBackground(new java.awt.Color(204, 204, 204));
         TitleJTextField.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        TitleJTextField.setText("+WITH-INSTRUMENT (this is removed)");
+        TitleJTextField.setText("WITH-INSTRUMENT (this is removed)");
         TitleJTextField.setBorder(null);
         TitleJTextField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -164,7 +173,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
@@ -201,8 +210,10 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         this.dependencySet.optional = !this.dependencySet.optional;
         if (this.dependencySet.optional) {
             this.OptionalFLabel.setText("optional");
+            this.OptionalJLabel.setVisible(true);
         } else {
             this.OptionalFLabel.setText("required");
+            this.OptionalJLabel.setVisible(false);
         }
         this.validate();
         this.repaint();
@@ -270,6 +281,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
     private javax.swing.JPanel ContentsJPanel;
     private javax.swing.JPanel HeaderJPanel;
     private com.jesseenglish.swingftfy.extensions.FLabel OptionalFLabel;
+    private javax.swing.JLabel OptionalJLabel;
     private javax.swing.JTextField TitleJTextField;
     // End of variables declaration//GEN-END:variables
 
@@ -283,8 +295,10 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         this.TitleJTextField.setText(dependencySet.label);
         if (this.dependencySet.optional) {
             this.OptionalFLabel.setText("optional");
+            this.OptionalJLabel.setVisible(true);
         } else {
             this.OptionalFLabel.setText("required");
+            this.OptionalJLabel.setVisible(false);
         }
         
         this.ContentsJPanel.removeAll();
@@ -293,7 +307,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         {
             this.HeaderJPanel.remove(this.TitleJTextField);
             GridBagConstraints c = new GridBagConstraints();
-            c.gridx = 0;
+            c.gridx = 1;
             c.gridy = 0;
             c.weightx = 0.1;
             c.anchor = GridBagConstraints.WEST;
