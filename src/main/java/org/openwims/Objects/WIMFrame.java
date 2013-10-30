@@ -134,7 +134,7 @@ public class WIMFrame {
         for (Iterator<String> it = concepts.iterator(); it.hasNext();) {
             String concept = it.next();
             for (String child : concepts) {
-                if (WIMGlobals.ontology().isDescendant(child, concept) && !child.equalsIgnoreCase(concept)) {
+                if (WIMGlobals.ontology().concept(child).isDescendant(WIMGlobals.ontology().concept(concept)) && !child.equalsIgnoreCase(concept)) {
                     it.remove();
                     continue OUTER;
                 }

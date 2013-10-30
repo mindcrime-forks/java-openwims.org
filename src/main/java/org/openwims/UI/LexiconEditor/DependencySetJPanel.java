@@ -36,6 +36,8 @@ import org.openwims.WIMGlobals;
  */
 public class DependencySetJPanel extends javax.swing.JPanel {
 
+    private static String[] validTypes = new String[] { "nsubj", "dobj", "prep", "pobj", "det" };
+    
     private static BufferedImage DELETE = null;
     private static BufferedImage DELETE_OVER = null;
     
@@ -501,7 +503,6 @@ public class DependencySetJPanel extends javax.swing.JPanel {
     private class DependencyTypeJTextField extends DiscreteJTextField implements KeyListener {
         
         private Dependency dependency;
-        private String[] validTypes = new String[] { "nsubj", "dobj", "prep", "pobj", "det" };
         
         public DependencyTypeJTextField(Dependency dependency) {
             super(dependency.type);
@@ -807,7 +808,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
             if (expectation.getSpecification().equals("pos")) {
                 return !WIMGlobals.tagmaps().doesTagExist(this.getText().trim());
             } else if (expectation.getSpecification().equals("ont")) {
-                return !WIMGlobals.ontology().concepts().contains(this.getText().trim());
+                return !WIMGlobals.ontology().doesConceptExist(this.getText().trim());
             } else if (expectation.getSpecification().equals("token")) {
                 return false;
             } else if (expectation.getSpecification().equals("micro")) {

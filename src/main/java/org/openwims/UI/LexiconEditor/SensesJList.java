@@ -9,8 +9,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.util.LinkedList;
 import javax.swing.DefaultListCellRenderer;
@@ -79,7 +81,6 @@ public class SensesJList extends JList implements Scrollable {
             if (sense == null) {
                 return;
             }
-            
             SensesJList.this.fireSenseSelectionListeners(sense);
         }
         
@@ -96,7 +97,7 @@ public class SensesJList extends JList implements Scrollable {
             
             if (i % 2 == 1) {
                 panel.setBackground(new Color(0.9f, 0.95f, 1.0f));
-                panel.setBorder(new LineBorder(Color.WHITE, 1));
+                panel.setBorder(new LineBorder(Color.WHITE, 2));
             }
             
             if (bln) {
@@ -110,6 +111,8 @@ public class SensesJList extends JList implements Scrollable {
                 
                 GridBagConstraints c = new GridBagConstraints();
                 
+                EditorScoreJPanel editorScoreJPanel = new EditorScoreJPanel(sense);
+                
                 FLabel idLabel = new FLabel(sense.getId());
                 idLabel.setBold(true);
                 
@@ -119,20 +122,76 @@ public class SensesJList extends JList implements Scrollable {
                 
                 c.gridx = 0;
                 c.gridy = 0;
+                c.gridheight = 2;
+                c.weightx = 0.0;
+                c.weighty = 0.0;
+                c.fill = GridBagConstraints.BOTH;
+                c.ipadx = 0;
+                panel.add(editorScoreJPanel, c);
+                
+                c.gridx = 1;
+                c.gridy = 0;
+                c.gridheight = 1;
                 c.weightx = 0.0;
                 c.weighty = 0.0;
                 c.fill = GridBagConstraints.HORIZONTAL;
+                c.ipadx = 0;
+                c.insets = new Insets(0, 2, 0, 0);
                 panel.add(idLabel, c);
                 
-                c.gridx = 0;
+                c.gridx = 1;
                 c.gridy = 1;
+                c.gridheight = 1;
                 c.weightx = 0.1;
                 c.weighty = 0.1;
                 c.fill = GridBagConstraints.BOTH;
+                c.ipadx = 0;
+                c.insets = new Insets(0, 2, 0, 0);
                 panel.add(defLabel, c);
             }
             
             return panel;
+        }
+        
+    }
+    
+    private class EditorScoreJPanel extends JPanel {
+        
+        private Sense sense;
+
+        public EditorScoreJPanel(Sense sense) {
+            this.sense = sense;
+        }
+
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g);
+            
+            float score = (float)sense.editorScore();
+            
+            float red;
+            if (score <= 0.5) {
+                red = 1.0f;
+            } else {
+                red = 1.0f - ((score - 0.5f) * 2.0f);
+            }
+            
+            float green;
+            if (score >= 0.5) {
+                green = 1.0f;
+            } else {
+                green = (score * 2.0f);
+            }
+            
+            g.setColor(new Color(red, green, 0.0f));
+            
+            g.fillRect(0, 0, this.getWidth(), this.getHeight());
+            
+            g.setColor(Color.DARK_GRAY);
+            
+            
+            int barHeight = this.getHeight() - (int)((float)this.getHeight() * score);
+            g.drawLine(0, barHeight, this.getWidth(), barHeight);
         }
         
     }

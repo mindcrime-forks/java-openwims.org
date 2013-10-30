@@ -6,7 +6,6 @@ package org.openwims.Processors;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.logging.Logger;
 import org.openwims.Objects.Disambiguation.Interpretation;
 import org.openwims.Objects.Lexicon.Expectation;
 import org.openwims.Objects.Lexicon.Sense;
@@ -76,9 +75,12 @@ public abstract class WIMProcessor {
                 LinkedList<PPToken> corefers = new LinkedList(token.getCorefers());
                 corefers.add(token);
                 for (PPToken corefer : corefers) {
-                    if (WIMGlobals.ontology().isDescendant(possibility.get(corefer).concept(), expectation.getExpectation())) {
+                    if (WIMGlobals.ontology().concept(possibility.get(corefer).concept()).isDescendant(WIMGlobals.ontology().concept(expectation.getExpectation()))) {
                         continue EXPLOOP;
                     }
+//                    if (WIMGlobals.ontology().isDescendant(possibility.get(corefer).concept(), expectation.getExpectation())) {
+//                        continue EXPLOOP;
+//                    }
                 }
                 return false;
             } else if (expectation.getSpecification().equalsIgnoreCase("micro")) {
@@ -124,9 +126,12 @@ public abstract class WIMProcessor {
                        !(expectation.getExpectation().equalsIgnoreCase(sense.word()))) {
                 return false;
             } else if (expectation.getSpecification().equalsIgnoreCase("ont")) {
-                if (!WIMGlobals.ontology().isDescendant(sense.concept(), expectation.getExpectation())) {
+                if (!WIMGlobals.ontology().concept(sense.concept()).isDescendant(WIMGlobals.ontology().concept(expectation.getExpectation()))) {
                     return false;
                 }
+//                if (!WIMGlobals.ontology().isDescendant(sense.concept(), expectation.getExpectation())) {
+//                    return false;
+//                }
             } else if (expectation.getSpecification().equalsIgnoreCase("micro")) {
                 return WIMGlobals.microtheories().test(expectation.getExpectation(), sense);
             }

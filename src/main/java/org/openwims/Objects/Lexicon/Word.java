@@ -56,9 +56,12 @@ public class Word {
     
     public boolean canBeConcept(String concept) {
         for (Sense sense : senses.values()) {
-            if (WIMGlobals.ontology().isDescendant(sense.concept(), concept)) {
+            if (WIMGlobals.ontology().concept(sense.concept()).isDescendant(WIMGlobals.ontology().concept(concept))) {
                 return true;
             }
+//            if (WIMGlobals.ontology().isDescendant(sense.concept(), concept)) {
+//                return true;
+//            }
         }
         
         return false;

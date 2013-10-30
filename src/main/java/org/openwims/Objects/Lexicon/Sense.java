@@ -4,7 +4,10 @@
  */
 package org.openwims.Objects.Lexicon;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import org.openwims.WIMGlobals;
 
 /**
  *
@@ -126,6 +129,72 @@ public class Sense {
     
     public LinkedList<Meaning> listMeanings() {
         return new LinkedList(this.meanings);
+    }
+    
+    //calculate a rough approximation of how manually edited this sense is
+    public double editorScore() {
+        double score = 1.0;
+        
+        //max 10% contribution for complex concept mapping
+            //depth == 0, 1 = 0%
+            //depth == 2 = 20%
+            //depth == 3 = 50%
+            //depth == 4 = 100%
+        double mappingContribution = 0.0;
+        int depth = WIMGlobals.ontology().concept(this.concept).depth();
+        if (depth == 2) {
+            mappingContribution = 0.2;
+        } else if (depth == 3) {
+            mappingContribution = 0.5;
+        } else if (depth >= 4) {
+            mappingContribution = 1.0;
+        }
+        mappingContribution *= 0.1; //max 10% contribution
+        
+        //max 10% contribution for special meanings
+            //any special meanings = 100%
+        double senseLevelMeaningContribution = 0.0;
+        if (this.meanings.size() > 0) {
+            senseLevelMeaningContribution = 1.0;
+        }
+        senseLevelMeaningContribution *= 0.1; //max 10% contribution
+        
+        //max 80% contribution for dependency set structures
+            //cross reference each template (by name) to find total template count (between this sense and the pos template)
+            //each template in the total count will contribute 1/n to the total 80%
+            //if template is in sense and not pos template == full contribution
+            //if template is in pos template and not sense == full contribution
+            //else weight contribution by scoring templates against each other
+        double dependencySetContribution = 0.0;
+        HashSet<String> uniqueTemplateNames = new HashSet();
+        HashMap<String, DependencySet> defined = new HashMap();
+        HashMap<String, DependencySet> templated = new HashMap();
+        for (DependencySet dependencySet : dependencySets) {
+            uniqueTemplateNames.add(dependencySet.label);
+            defined.put(dependencySet.label, dependencySet);
+        }
+        for (DependencySet dependencySet : WIMGlobals.templates().templates(pos)) {
+            uniqueTemplateNames.add(dependencySet.label);
+            templated.put(dependencySet.label, dependencySet);
+        }
+        double independentContribution = 1.0 / (double)uniqueTemplateNames.size();
+        for (DependencySet dependencySet : dependencySets) {
+            if (templated.containsKey(dependencySet.label)) {
+                dependencySetContribution += independentContribution * dependencySet.editorScore(templated.get(dependencySet.label));
+            } else {
+                dependencySetContribution += independentContribution; //full contribution
+            }
+        }
+        for (DependencySet dependencySet : WIMGlobals.templates().templates(pos)) {
+            if (!defined.containsKey(dependencySet.label)) {
+                dependencySetContribution += independentContribution; //full contribution
+            }
+        }
+        
+        dependencySetContribution *= 0.8; //max 80% contribution
+        
+        score = mappingContribution + senseLevelMeaningContribution + dependencySetContribution;
+        return score;
     }
 
     @Override

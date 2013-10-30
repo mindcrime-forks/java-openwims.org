@@ -561,7 +561,7 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
 
         @Override
         protected boolean error() {
-            if (!WIMGlobals.ontology().concepts().contains(this.sense.concept())) {
+            if (!WIMGlobals.ontology().doesConceptExist(this.sense.concept())) {
                 return true;
             }
             

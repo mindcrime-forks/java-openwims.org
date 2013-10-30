@@ -18,9 +18,10 @@ import java.util.LinkedList;
 public class Ontology {
     
     private static Connection conn = null;
-    private HashMap<String, String> isa;
-    private HashMap<String, LinkedList<String>> subclasses;
-    private HashMap<String, String> definitions;
+//    private HashMap<String, String> isa;
+//    private HashMap<String, LinkedList<String>> subclasses;
+//    private HashMap<String, String> definitions;
+    private HashMap<String, Concept> concepts;
     
     public static Connection conn() throws Exception {
         if (Ontology.conn == null) {
@@ -51,12 +52,13 @@ public class Ontology {
     }
     
     public void reload() {
-        this.isa = new HashMap();
-        this.subclasses = new HashMap();
-        this.definitions = new HashMap();
+//        this.isa = new HashMap();
+//        this.subclasses = new HashMap();
+//        this.definitions = new HashMap();
+        this.concepts = new HashMap();
         
         try {
-            String query = "SELECT concept, parent, definition FROM ontology;";
+            String query = "SELECT concept, parent, definition, gloss FROM ontology;";
             Statement stmt = Ontology.conn().createStatement();
             
             ResultSet rs = stmt.executeQuery(query);
@@ -64,17 +66,23 @@ public class Ontology {
                 String concept = rs.getString("concept");
                 String parent = rs.getString("parent");
                 String definition = rs.getString("definition");
+                String gloss = rs.getString("gloss");
                 
-                this.isa.put(concept, parent);
-                this.definitions.put(concept, definition);
+                Concept c = concept(concept);
+                c.setParent(concept(parent));
+                c.setDefinition(definition);
+                c.setGloss(gloss);
                 
-                LinkedList<String> children = this.subclasses.get(parent);
-                if (children == null) {
-                    children = new LinkedList();
-                    this.subclasses.put(parent, children);
-                }
+//                this.isa.put(concept, parent);
+//                this.definitions.put(concept, definition);
                 
-                children.add(concept);
+//                LinkedList<String> children = this.subclasses.get(parent);
+//                if (children == null) {
+//                    children = new LinkedList();
+//                    this.subclasses.put(parent, children);
+//                }
+                
+//                children.add(concept);
             }
             
             stmt.close();
@@ -84,34 +92,59 @@ public class Ontology {
         }
     }
     
-    public String definition(String concept) {
-        return this.definitions.get(concept);
+    public boolean doesConceptExist(String name) {
+        return this.concepts.get(name) != null;
     }
+    
+    public Concept concept(String name) {
+        Concept concept = this.concepts.get(name);
+        if (concept == null) {
+            concept = new Concept(name);
+            this.concepts.put(name, concept);
+        }
+        
+        return concept;
+    }
+    
+//    public String definition(String concept) {
+//        return this.definitions.get(concept);
+//    }
     
     public LinkedList<String> concepts() {
-        return new LinkedList(this.isa.keySet());
+//        return new LinkedList(this.isa.keySet());
+        return new LinkedList(this.concepts.values());
     }
     
-    public LinkedList<String> children(String concept) {
-        return this.subclasses.get(concept);
-    }
+//    public LinkedList<String> children(String concept) {
+//        return this.subclasses.get(concept);
+//    }
     
-    public boolean isDescendant(String concept, String ancestor) {
-        if (concept == null || ancestor == null) {
-            return false;
-        }
-        
-        if (concept.equalsIgnoreCase(ancestor)) {
-            return true;
-        }
-
-        if (this.isa.get(concept) != null) {
-            if (isDescendant(this.isa.get(concept), ancestor)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
+//    public String parent(String concept) {
+//        return this.isa.get(concept);
+//    }
+    
+//    public void setParent(String concept, String newParent) {
+//        this.subclasses.get(this.isa.get(concept)).remove(concept);
+//        this.isa.put(concept, newParent);
+//        this.subclasses.get(newParent).add(concept);
+//    }
+    
+//    public boolean isDescendant(String concept, String ancestor) {
+//        if (concept == null || ancestor == null) {
+//            return false;
+//        }
+//        
+//        if (concept.equalsIgnoreCase(ancestor)) {
+//            return true;
+//        }
+//
+//        if (this.isa.get(concept) != null) {
+//            if (isDescendant(this.isa.get(concept), ancestor)) {
+//                return true;
+//            }
+//        }
+//        
+//        return false;
+//    }
     
 }
