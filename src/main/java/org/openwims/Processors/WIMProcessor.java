@@ -69,7 +69,8 @@ public abstract class WIMProcessor {
                 !WIMGlobals.tagmaps().doTagsMatch(expectation.getExpectation(), possibility.get(token).pos())) {
                 return false;
             } else if (expectation.getSpecification().equalsIgnoreCase("token") &&
-                       !(expectation.getExpectation().equalsIgnoreCase(possibility.get(token).word()))) {
+                       (!(expectation.getExpectation().equalsIgnoreCase(possibility.get(token).word())) &&
+                        !(expectation.getExpectation().equalsIgnoreCase(token.text())))) {
                 return false;
             } else if (expectation.getSpecification().equalsIgnoreCase("ont")) {
                 LinkedList<PPToken> corefers = new LinkedList(token.getCorefers());

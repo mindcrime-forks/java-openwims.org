@@ -23,7 +23,7 @@ public class Dependency {
         this.dependent = toCopy.dependent;
         this.expectations = new LinkedList();
         
-        for (Expectation expectation : expectations) {
+        for (Expectation expectation : toCopy.expectations) {
             this.expectations.add(new Expectation(expectation));
         }
     }

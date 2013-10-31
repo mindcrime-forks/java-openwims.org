@@ -36,7 +36,7 @@ import org.openwims.WIMGlobals;
  */
 public class DependencySetJPanel extends javax.swing.JPanel {
 
-    private static String[] validTypes = new String[] { "nsubj", "dobj", "prep", "pobj", "det" };
+    private static String[] validTypes = new String[] { "nsubj", "dobj", "prep", "pobj", "det", "cop" };
     
     private static BufferedImage DELETE = null;
     private static BufferedImage DELETE_OVER = null;
@@ -547,6 +547,10 @@ public class DependencySetJPanel extends javax.swing.JPanel {
 
         @Override
         protected boolean warning() {
+            if (dependency.governor.equals("SELF")) {
+                return false;
+            }
+            
             int usages = 0;
             for (Dependency d : DependencySetJPanel.this.dependencySet.dependencies) {
                 if (d.governor.equals(dependency.governor)) {
@@ -595,6 +599,10 @@ public class DependencySetJPanel extends javax.swing.JPanel {
 
         @Override
         protected boolean warning() {
+            if (dependency.dependent.equals("SELF")) {
+                return false;
+            }
+            
             int usages = 0;
             for (Dependency d : DependencySetJPanel.this.dependencySet.dependencies) {
                 if (d.governor.equals(dependency.dependent)) {

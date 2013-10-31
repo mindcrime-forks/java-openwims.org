@@ -98,28 +98,36 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
     
     private void claim(PPToken token, HashMap<PPToken, Sense> possibility, HashMap<PPDependency, Dependency> claims) {
         Sense sense = possibility.get(token);
-        
+
         for (DependencySet dependencySet : sense.listDependencySets()) {
-            HashMap<PPDependency, Dependency> consideredClaims = new HashMap();
-            HashMap<String, PPToken> variables = new HashMap();
-            variables.put("SELF", token);
+            boolean keepGoing = true;
+            while (keepGoing) {
             
-            for (Dependency dependency : dependencySet.dependencies) {
-                for (PPDependency ppDependency : sentence.listDependencies()) {
-                    if (claims.containsKey(ppDependency)) {
-                        continue;
-                    }
-                    if (doDependenciesMatch(dependency, ppDependency, possibility, variables)) {
-                        consideredClaims.put(ppDependency, dependency);
-                        variables.put(dependency.governor, ppDependency.getGovernor());
-                        variables.put(dependency.dependent, ppDependency.getDependent());
+                HashMap<PPDependency, Dependency> consideredClaims = new HashMap();
+                HashMap<String, PPToken> variables = new HashMap();
+                variables.put("SELF", token);
+
+                for (Dependency dependency : dependencySet.dependencies) {
+                    for (PPDependency ppDependency : sentence.listDependencies()) {
+                        if (claims.containsKey(ppDependency)) {
+                            continue;
+                        }
+                        if (doDependenciesMatch(dependency, ppDependency, possibility, variables)) {
+                            consideredClaims.put(ppDependency, dependency);
+                            variables.put(dependency.governor, ppDependency.getGovernor());
+                            variables.put(dependency.dependent, ppDependency.getDependent());
+                        }
                     }
                 }
-            }
+
+                //Add to official claims only if the dependency set is fully satisfied
+                if (consideredClaims.values().containsAll(dependencySet.dependencies)) {
+                    claims.putAll(consideredClaims);
+                    keepGoing = true;
+                } else {
+                    keepGoing = false;
+                }
             
-            //Add to official claims only if the dependency set is fully satisfied
-            if (consideredClaims.values().containsAll(dependencySet.dependencies)) {
-                claims.putAll(consideredClaims);
             }
         }
     }

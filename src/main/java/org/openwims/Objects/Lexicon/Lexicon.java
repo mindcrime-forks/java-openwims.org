@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import org.openwims.Objects.Preprocessor.PPToken;
 import org.openwims.Serialization.LexiconSerializer;
 import org.openwims.Serialization.PostgreSQLLexiconSerializer;
+import org.openwims.WIMGlobals;
 
 /**
  *
@@ -144,6 +145,7 @@ public class Lexicon {
             }
             if(token.nerType().equalsIgnoreCase("person")){
                 Sense personSense = new Sense("@human", token.lemma(), "n", nextInstanceNumber("@human", token.lemma(), "n"));
+                personSense.addDependencySet(new DependencySet(WIMGlobals.templates().template("n", "COMPOUNDED")));
                 list.add(personSense);
                 word.addSense(personSense);
             }
@@ -154,9 +156,17 @@ public class Lexicon {
             }
             if (token.nerType().equalsIgnoreCase("location")) {
                 Sense locationSense = new Sense("@location-object", token.lemma(), "n", nextInstanceNumber("@location-object", token.lemma(), "n"));
+                locationSense.addDependencySet(new DependencySet(WIMGlobals.templates().template("n", "COMPOUNDED")));
                 list.add(locationSense);
                 word.addSense(locationSense);
             }
+        }
+        //handle ADJECTIVES
+        if (list.size() == 0 && WIMGlobals.tagmaps().doTagsMatch("J", token.pos())) {
+            Sense adjSense = new Sense("@property", token.lemma(), "j", nextInstanceNumber("@property", token.lemma(), "j"));
+            adjSense.addDependencySet(new DependencySet(WIMGlobals.templates().template("j", "MODIFIES")));
+            list.add(adjSense);
+            word.addSense(adjSense);
         }
         
         //handle unknowns
@@ -170,6 +180,7 @@ public class Lexicon {
     }
 
     public Word word(String representation) {
+        representation = representation.toLowerCase();
                 
         if (this.words.get(representation) != null) {
             return this.words.get(representation);

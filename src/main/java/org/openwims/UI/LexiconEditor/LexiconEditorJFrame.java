@@ -47,7 +47,7 @@ public class LexiconEditorJFrame extends javax.swing.JFrame {
                     return;
                 }
                 
-                LexiconEditorJFrame.this.editor.getSense().addDependencySet(template);
+                LexiconEditorJFrame.this.editor.getSense().addDependencySet(new DependencySet(template));
                 LexiconEditorJFrame.this.editor.refresh();
                 LexiconEditorJFrame.this.validate();
                 LexiconEditorJFrame.this.repaint();

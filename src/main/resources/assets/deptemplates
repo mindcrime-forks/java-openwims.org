@@ -1,8 +1,8 @@
-DIRECT-OBJECT(v)
++DIRECT-OBJECT(v)
 dobj(SELF,theme)
 >SELF.theme=theme
 
-SUBJECT(v)
++SUBJECT(v)
 nsubj(SELF,agent[pos=NN])
 >SELF.agent=agent
 
@@ -36,6 +36,12 @@ pobj(for,purpose[pos=NN])
 >SELF.purpose=purpose
 "[SELF] for her kids"
 
++IN-DATE(v)
+prep(SELF,in[token=in])
+pobj(in,date[pos=NN,ont=@temporal-object])
+>SELF.date=date
+"[SELF] in 1969"
+
 +IN-LOCATION(v)
 prep(SELF,in[token=in])
 pobj(in,location[pos=NN,ont=@physical-object])
@@ -53,6 +59,11 @@ prep(SELF,on[token=on])
 pobj(on,date[micro=#date,pos=NNP])
 >SELF.date=date
 "[SELF] on Main street"
+
++PASSIVE-THEME(v)
+nsubjpass(SELF,theme[pos=NN])
+>SELF.theme=theme
+"Joe was [SELF]"
 
 +TO-LOCATION(v)
 prep(SELF,to[token=to])
@@ -87,6 +98,15 @@ pobj(with,instrument[ont=@physical-object,pos=NN])
 det(SELF,the[token=the])
 "the [SELF]"
 
++COMPOUNDED(n)
+nn(SELF,noun[pos=NN])
+"school [SELF]"
+
 +UNDETERMINED(n)
 det(SELF,a[token=a])
 "a [SELF]"
+
++MODIFIES(j)
+amod(target,SELF)
+>target.property=SELF
+"the [SELF] shoes"

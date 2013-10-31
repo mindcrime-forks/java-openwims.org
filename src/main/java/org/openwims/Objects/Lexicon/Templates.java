@@ -41,6 +41,16 @@ public class Templates {
         return this.examples.get(dependencySet);
     }
     
+    public DependencySet template(String pos, String name) {
+        for (DependencySet dependencySet : this.templates.get(pos)) {
+            if (dependencySet.label.equals(name)) {
+                return dependencySet;
+            }
+        }
+        
+        return null;
+    }
+    
     private void parseTemplates() throws Exception {
         this.templates = new HashMap();
         this.examples = new HashMap();
