@@ -36,7 +36,7 @@ import org.openwims.WIMGlobals;
  */
 public class DependencySetJPanel extends javax.swing.JPanel {
 
-    private static String[] validTypes = new String[] { "nsubj", "dobj", "prep", "pobj", "det", "cop" };
+    private static String[] validTypes = new String[] { "nsubj", "dobj", "prep", "pobj", "det", "cop", "nsubjpass", "advmod", "dep" };
     
     private static BufferedImage DELETE = null;
     private static BufferedImage DELETE_OVER = null;

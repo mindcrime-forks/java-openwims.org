@@ -228,7 +228,7 @@ public class Lexicon {
                 for (Integer id : dependencySets.keySet()) {
                     DependencySet set = dependencySets.get(id);
                     
-                    query = "SELECT * FROM dependencies WHERE struct=" + id + ";";
+                    query = "SELECT * FROM dependencies WHERE struct=" + id + " ORDER BY id ASC;";
                     
                     rs = stmt.executeQuery(query);
                     while (rs.next()) {

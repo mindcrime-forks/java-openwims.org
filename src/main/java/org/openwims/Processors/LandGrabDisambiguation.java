@@ -107,7 +107,11 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
                 HashMap<String, PPToken> variables = new HashMap();
                 variables.put("SELF", token);
 
-                for (Dependency dependency : dependencySet.dependencies) {
+                LinkedList<Dependency> dependencies = new LinkedList(dependencySet.dependencies);
+                
+                while (dependencies.size() > 0) {
+                    Dependency dependency = popDependency(dependencies, variables);
+                    
                     for (PPDependency ppDependency : sentence.listDependencies()) {
                         if (claims.containsKey(ppDependency)) {
                             continue;
@@ -130,6 +134,21 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
             
             }
         }
+    }
+    
+    private Dependency popDependency(LinkedList<Dependency> dependencies, HashMap<String, PPToken> variables) {
+        Dependency next = null;
+        for (Dependency dependency : dependencies) {
+            if (variables.containsKey(dependency.governor)) {
+                next = dependency;
+                break;
+            }
+        }
+        if (next == null) {
+            next = dependencies.getFirst();
+        }
+        dependencies.remove(next);
+        return next;
     }
     
     private boolean doDependenciesMatch(Dependency dependency, PPDependency ppDependency, HashMap<PPToken, Sense> possibility, HashMap<String, PPToken> variables) {
