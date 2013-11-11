@@ -4,6 +4,7 @@
  */
 package org.openwims.UI.LexiconEditor;
 
+import com.jesseenglish.swingftfy.extensions.FLabel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -12,6 +13,8 @@ import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -27,8 +30,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import org.openwims.Objects.Disambiguation.Interpretation;
@@ -36,7 +41,6 @@ import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Meaning;
 import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Objects.Preprocessor.PPDocument;
-import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.WIMFrame;
 import org.openwims.Processors.Iterators.NaivePossibilityIterator;
 import org.openwims.Processors.LandGrabDisambiguation;
@@ -105,6 +109,7 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         fLabel1 = new com.jesseenglish.swingftfy.extensions.FLabel();
         AddSemanticsJLabel = new com.jesseenglish.swingftfy.extensions.FLabel();
         SemanticsContentsJPanel = new javax.swing.JPanel();
+        AddSyntaxFLabel = new com.jesseenglish.swingftfy.extensions.FLabel();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -293,6 +298,25 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(SemanticsContentsJPanel, gridBagConstraints);
+
+        AddSyntaxFLabel.setText("+syn");
+        AddSyntaxFLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                AddSyntaxFLabelMouseReleased(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                AddSyntaxFLabelMouseExited(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                AddSyntaxFLabelMouseEntered(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        add(AddSyntaxFLabel, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void DefinitionFTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_DefinitionFTextFieldKeyReleased
@@ -396,8 +420,26 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
         this.repaint();
     }//GEN-LAST:event_QuickTestJButtonActionPerformed
 
+    private void AddSyntaxFLabelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddSyntaxFLabelMouseEntered
+        this.AddSyntaxFLabel.setBold(true);
+        this.validate();
+        this.repaint();
+    }//GEN-LAST:event_AddSyntaxFLabelMouseEntered
+
+    private void AddSyntaxFLabelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddSyntaxFLabelMouseExited
+        this.AddSyntaxFLabel.setBold(false);
+        this.validate();
+        this.repaint();
+    }//GEN-LAST:event_AddSyntaxFLabelMouseExited
+
+    private void AddSyntaxFLabelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddSyntaxFLabelMouseReleased
+        this.sense.addDependencySet(new DependencySet(new LinkedList(), new LinkedList(), true, "DEPENDENCY-SET"));
+        refresh();
+    }//GEN-LAST:event_AddSyntaxFLabelMouseReleased
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.jesseenglish.swingftfy.extensions.FLabel AddSemanticsJLabel;
+    private com.jesseenglish.swingftfy.extensions.FLabel AddSyntaxFLabel;
     private com.jesseenglish.swingftfy.extensions.FTextField DefinitionFTextField;
     private javax.swing.JPanel DependenciesJPanel;
     private com.jesseenglish.swingftfy.extensions.FTextField ExampleFTextField;
@@ -669,9 +711,93 @@ public class SenseEditorJPanel extends javax.swing.JPanel implements Scrollable 
             c.gridy = 0;
             c.weightx = 0.0;
             c.weighty = 0.0;
-            c.insets = new Insets(1, 0, 0, 5);
+            c.ipadx = 5;
+            
+            header.add(new MutexFLabel(dependencySet), c);
                         
+            c.gridx = header.getComponentCount();
+            c.insets = new Insets(1, 0, 0, 0);
+            
             header.add(new DeleteDependencySetJLabel(dependencySet), c);
+        }
+        
+    }
+    
+    private class MutexFLabel extends FLabel implements MouseListener {
+        
+        private DependencySet dependencySet;
+
+        public MutexFLabel(DependencySet dependencySet) {
+            super("mutex");
+            this.dependencySet = dependencySet;
+            this.addMouseListener(this);
+            
+            int mutexCount = 0;
+            for (DependencySet target : sense.listDependencySets()) {
+                if (sense.areMutexed(dependencySet, target)) {
+                    mutexCount++;
+                }
+            }
+            if (mutexCount > 0) {
+                this.setText("mutex (" + mutexCount + ")");
+            }
+            
+        }
+
+        public void mouseClicked(MouseEvent e) {}
+
+        public void mousePressed(MouseEvent e) {}
+
+        public void mouseReleased(MouseEvent e) {
+            JPopupMenu mutexMenu = new JPopupMenu();
+            
+            LinkedList<DependencySet> dependencySets = sense.listDependencySets();
+            Collections.sort(dependencySets, new DependencySetComparator());
+            
+            for (DependencySet set : dependencySets) {
+                if (set == dependencySet) {
+                    continue;
+                }
+                mutexMenu.add(new MutexDependencySetJMenuItem(dependencySet, set));
+            }
+
+            mutexMenu.show(this, 0, this.getHeight());
+        }
+
+        public void mouseEntered(MouseEvent e) {
+            this.setBold(true);
+            this.validate();
+            this.repaint();
+        }
+
+        public void mouseExited(MouseEvent e) {
+            this.setBold(false);
+            this.validate();
+            this.repaint();
+        }
+        
+    }
+    
+    private class MutexDependencySetJMenuItem extends JCheckBoxMenuItem implements ActionListener {
+        
+        private DependencySet origin;
+        private DependencySet target;
+
+        public MutexDependencySetJMenuItem(DependencySet origin, DependencySet target) {
+            super(target.label);
+            this.origin = origin;
+            this.target = target;
+            this.setSelected(sense.areMutexed(origin, target));
+            this.addActionListener(this);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            if (sense.areMutexed(origin, target)) {
+                sense.removeMutex(origin, target);
+            } else {
+                sense.setMutex(origin, target);
+            }
+            SenseEditorJPanel.this.refresh();
         }
         
     }

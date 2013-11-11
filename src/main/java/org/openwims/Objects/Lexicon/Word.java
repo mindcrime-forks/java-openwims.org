@@ -38,6 +38,15 @@ public class Word {
         return this.senses.get(id);
     }
     
+    public Sense getSense(int uid) {
+        for (Sense sense : senses.values()) {
+            if (sense.getUid() == uid) {
+                return sense;
+            }
+        }
+        return null;
+    }
+    
     public LinkedList<Sense> listSenses() {
         return new LinkedList(this.senses.values());
     }

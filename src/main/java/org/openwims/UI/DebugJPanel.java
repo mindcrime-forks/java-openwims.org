@@ -9,7 +9,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
@@ -91,7 +94,10 @@ public class DebugJPanel extends JPanel {
         
             DefaultComboBoxModel model = new DefaultComboBoxModel();
             
-            for (Sense sense : WIMGlobals.lexicon().listSenses(token)) {
+            LinkedList<Sense> senses = WIMGlobals.lexicon().listSenses(token);
+            Collections.sort(senses, new SensesComparator());
+            
+            for (Sense sense : senses) {
                 model.addElement(sense);
             }
             
@@ -121,6 +127,14 @@ public class DebugJPanel extends JPanel {
             }
 
             return label;
+        }
+        
+    }
+    
+    private class SensesComparator implements Comparator<Sense> {
+
+        public int compare(Sense o1, Sense o2) {
+            return o1.getId().compareTo(o2.getId());
         }
         
     }

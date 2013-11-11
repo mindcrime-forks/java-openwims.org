@@ -25,6 +25,7 @@ public class Sense {
     private String example;
     private double frequency;
     private int uid;
+    private LinkedList<Mutex> mutexes;
     
     public Sense(String concept, String word, String pos, int instance) {
         this.concept = concept;
@@ -37,6 +38,7 @@ public class Sense {
         this.example = "";
         this.frequency = 0.5;
         this.uid = -1;
+        this.mutexes = new LinkedList();
     }
 
     public void setConcept(String concept) {
@@ -97,6 +99,9 @@ public class Sense {
     
     public void removeDependencySet(DependencySet dependencySet) {
         this.dependencySets.remove(dependencySet);
+        for (Mutex mutex : mutexes) {
+            mutex.sets.remove(dependencySet);
+        }
     }
     
     public void removeMeaning(Meaning meaning) {
@@ -129,6 +134,42 @@ public class Sense {
     
     public LinkedList<Meaning> listMeanings() {
         return new LinkedList(this.meanings);
+    }
+    
+    public void setMutex(DependencySet a, DependencySet b) {
+        for (Mutex mutex : mutexes) {
+            if (mutex.sets.contains(a) || mutex.sets.contains(b)) {
+                mutex.sets.add(a);
+                mutex.sets.add(b);
+                return;
+            }
+        }
+        
+        Mutex mutex = new Mutex();
+        mutex.sets.add(a);
+        mutex.sets.add(b);
+        mutexes.add(mutex);
+    }
+    
+    public void removeMutex(DependencySet a, DependencySet b) {
+        for (Mutex mutex : mutexes) {
+            if (mutex.sets.contains(a) && mutex.sets.contains(b)) {
+                mutex.sets.remove(b);
+            }
+        }
+    }
+    
+    public boolean areMutexed(DependencySet a, DependencySet b) {
+        if (a == b) {
+            return false;
+        }
+        
+        for (Mutex mutex : mutexes) {
+            if (mutex.sets.contains(a) && mutex.sets.contains(b)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     //calculate a rough approximation of how manually edited this sense is
@@ -218,6 +259,10 @@ public class Sense {
         }
         
         return out.toString();
+    }
+    
+    private class Mutex {
+        public HashSet<DependencySet> sets = new HashSet();
     }
     
 }

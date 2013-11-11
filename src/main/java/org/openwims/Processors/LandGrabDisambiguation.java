@@ -64,13 +64,15 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
                 WIMProcessor.logPossibilityElimination(possibility, e);
             } catch (UnusedNonOptionalSetException e) {
                 WIMProcessor.logPossibilityElimination(possibility, e);
+            } catch (MutexedOptionalSetsException e) {
+                WIMProcessor.logPossibilityElimination(possibility, e);
             }
         }
         
         return interpretations;
     }
     
-    private HashMap<PPDependency, Dependency> landgrab(HashMap<PPToken, Sense> possibility) throws IncompleteMappingException, UnusedNonOptionalSetException {
+    private HashMap<PPDependency, Dependency> landgrab(HashMap<PPToken, Sense> possibility) throws IncompleteMappingException, UnusedNonOptionalSetException, MutexedOptionalSetsException {
         HashMap<PPDependency, Dependency> claims = new HashMap();
         
         for (PPToken token : this.flattenedTokens) {
@@ -82,9 +84,31 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
             throw new IncompleteMappingException(this.sentence.listDependencies(), claims.keySet());
         }
         
-        //Verify that all senses have all non-optional sets used
+        //Verify that all senses have all non-optional sets used (allow for mutexes)
         for (PPToken token : possibility.keySet()) {
             Sense sense = possibility.get(token);
+            
+            // - an unused non-optional set is invalid unless it is mutexed with a used non-optional set
+            // - a used optional set is invalid if it is mutex with a used set
+            
+            OUTER:
+            for (DependencySet dependencySet : sense.listDependencySets()) {
+                if (!dependencySet.optional && !claims.values().containsAll(dependencySet.dependencies)) { //unused non-optional
+                    for (DependencySet innerSet : sense.listDependencySets()) {
+                        if (!innerSet.optional && claims.values().containsAll(innerSet.dependencies) && sense.areMutexed(dependencySet, innerSet)) {
+                            continue OUTER;
+                        }
+                    }
+                    throw new UnusedNonOptionalSetException(token, sense, dependencySet);
+                }
+                if (dependencySet.optional && claims.values().containsAll(dependencySet.dependencies)) {
+                    for (DependencySet innerSet : sense.listDependencySets()) {
+                        if (innerSet.optional && claims.values().containsAll(innerSet.dependencies) && sense.areMutexed(dependencySet, innerSet)) {
+                            throw new MutexedOptionalSetsException(token, sense, dependencySet, innerSet);
+                        }
+                    }
+                }
+            }
             
             for (DependencySet dependencySet : sense.listDependencySets()) {
                 if (!dependencySet.optional && !claims.values().containsAll(dependencySet.dependencies)) {
@@ -215,6 +239,27 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         @Override
         public String toString() {
             return token.anchor() + " (" + sense.getId() + ") found no match for NON-OPTIONAL dependency set " + dependencySet;
+        }
+        
+    }
+    
+    private class MutexedOptionalSetsException extends Exception {
+        
+        private PPToken token;
+        private Sense sense;
+        private DependencySet dependencySetA;
+        private DependencySet dependencySetB;
+
+        public MutexedOptionalSetsException(PPToken token, Sense sense, DependencySet dependencySetA, DependencySet dependencySetB) {
+            this.token = token;
+            this.sense = sense;
+            this.dependencySetA = dependencySetA;
+            this.dependencySetB = dependencySetB;
+        }
+
+        @Override
+        public String toString() {
+            return token.anchor() + " (" + sense.getId() + ") found mutexed matches for OPTIONAL dependency set " + dependencySetA + " and " + dependencySetB;
         }
         
     }

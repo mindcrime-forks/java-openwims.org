@@ -10,6 +10,8 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -22,12 +24,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import org.openwims.Objects.Lexicon.Dependency;
 import org.openwims.Objects.Lexicon.DependencySet;
 import org.openwims.Objects.Lexicon.Expectation;
 import org.openwims.Objects.Lexicon.Meaning;
+import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.WIMGlobals;
 
 /**
@@ -107,6 +112,8 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         OptionalJLabel.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         OptionalJLabel.setText("+");
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.ipadx = 5;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         HeaderJPanel.add(OptionalJLabel, gridBagConstraints);
 
@@ -126,7 +133,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
+        gridBagConstraints.ipadx = 5;
         HeaderJPanel.add(OptionalFLabel, gridBagConstraints);
 
         AddDependencyJLabel.setText("+syn");
@@ -144,7 +151,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        gridBagConstraints.ipadx = 5;
         HeaderJPanel.add(AddDependencyJLabel, gridBagConstraints);
 
         AddMeaningJLabel.setText("+sem");
@@ -162,7 +169,7 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        gridBagConstraints.ipadx = 5;
         HeaderJPanel.add(AddMeaningJLabel, gridBagConstraints);
 
         TitleJTextField.setBackground(new java.awt.Color(204, 204, 204));
@@ -178,8 +185,8 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipadx = 5;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         HeaderJPanel.add(TitleJTextField, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -968,5 +975,5 @@ public class DependencySetJPanel extends javax.swing.JPanel {
         }
         
     }
-    
+ 
 }

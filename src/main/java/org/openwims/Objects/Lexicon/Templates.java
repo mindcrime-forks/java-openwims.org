@@ -34,6 +34,9 @@ public class Templates {
     }
     
     public LinkedList<DependencySet> templates(String pos) {
+        if (this.templates.get(pos) == null) {
+            this.templates.put(pos, new LinkedList());
+        }
         return this.templates.get(pos);
     }
     

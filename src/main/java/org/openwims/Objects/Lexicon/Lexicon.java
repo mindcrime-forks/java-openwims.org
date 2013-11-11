@@ -63,6 +63,18 @@ public class Lexicon {
         return Lexicon.conn;
     }
     
+    public Sense sense(int uid) throws Exception {
+        Statement stmt = Lexicon.conn().createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT word FROM senses WHERE uid=" + uid + ";");
+        if (rs.next()) {
+            String word = rs.getString("word");
+            Word w = word(word);
+            return w.getSense(uid);
+        }
+        
+        return null;
+    }
+    
     public Sense sense(String id) throws Exception {
         Statement stmt = Lexicon.conn().createStatement();
         ResultSet rs = stmt.executeQuery("SELECT word FROM senses WHERE id='" + id.replaceAll("'", "''") + "';");
