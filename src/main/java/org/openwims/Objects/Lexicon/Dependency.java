@@ -4,6 +4,7 @@
  */
 package org.openwims.Objects.Lexicon;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -38,5 +39,13 @@ public class Dependency {
     @Override
     public String toString() {
         return this.type + "(" + this.governor + ", " + this.dependent + ")";
+    }
+
+    public HashMap<String, String> getExpectationsAsMap() {
+        HashMap<String, String> output = new HashMap();
+        for (Expectation expectation : expectations) {
+            output.put(expectation.getSpecification(), expectation.getExpectation());
+        }
+        return output;
     }
 }

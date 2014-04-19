@@ -41,6 +41,38 @@ public class Sense {
         this.mutexes = new LinkedList();
     }
 
+    public LinkedList<String> listVariables(){
+        HashSet<String> variables = new HashSet<String>();
+        for (Meaning meaning : this.listMeanings()) {
+            variables.add(meaning.wim);
+            variables.add(meaning.target);
+        }
+        for (DependencySet dependencySet : this.listDependencySets()) {
+            for (Meaning meaning : dependencySet.meanings) {
+                variables.add(meaning.wim);
+                variables.add(meaning.target);
+            }
+            for (Dependency dependency : dependencySet.dependencies) {
+                variables.add(dependency.governor);
+                variables.add(dependency.dependent);
+            }
+        }
+        return new LinkedList<String>(variables);
+    }
+
+    public HashMap<String, Object> getProperties(){
+        HashMap<String, Object> output = new HashMap<String, Object>();
+
+        output.put("pos", this.pos);
+        output.put("instance", this.instance);
+        output.put("definition", this.definition);
+        output.put("example", this.example);
+        output.put("frequency", this.frequency);
+        output.put("uid", this.uid);
+
+        return output;
+    }
+
     public void setConcept(String concept) {
         this.concept = concept;
     }
