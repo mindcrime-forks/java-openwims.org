@@ -31,6 +31,7 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
     
     private PPSentence sentence;
     private LinkedList<PPToken> flattenedTokens;
+    private PossibilityIterator iter;
     
     public static void main(String[] args) throws Exception {
         
@@ -50,6 +51,7 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
     }
     
     public LinkedList<Interpretation> wse(PossibilityIterator iter) {
+        this.iter = iter;
         this.sentence = iter.getSentence();
         this.flattenedTokens = this.sentence.listFlattenedTokens();
         
@@ -99,7 +101,7 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
                             continue OUTER;
                         }
                     }
-                    throw new UnusedNonOptionalSetException(token, sense, dependencySet);
+                    throw new UnusedNonOptionalSetException(token, sense, dependencySet, claims);
                 }
                 if (dependencySet.optional && claims.values().containsAll(dependencySet.dependencies)) {
                     for (DependencySet innerSet : sense.listDependencySets()) {
@@ -112,7 +114,7 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
             
             for (DependencySet dependencySet : sense.listDependencySets()) {
                 if (!dependencySet.optional && !claims.values().containsAll(dependencySet.dependencies)) {
-                    throw new UnusedNonOptionalSetException(token, sense, dependencySet);
+                    throw new UnusedNonOptionalSetException(token, sense, dependencySet, claims);
                 }
             }
         }
@@ -192,11 +194,13 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         //Verify expectations match (excluding any variable already mapped)
         if (!variables.containsKey(dependency.governor)) {
             if (!doesPossibilitySatisfyExpectations(ppDependency.getGovernor(), possibility, dependency.expectations)) {
+//                iter.doNotUseSenses(ppDependency.getGovernor(), possibility.get(ppDependency.getGovernor()), ppDependency.getDependent(), possibility.get(ppDependency.getDependent()));
                 return false;
             }
         }
         if (!variables.containsKey(dependency.dependent)) {
             if (!doesPossibilitySatisfyExpectations(ppDependency.getDependent(), possibility, dependency.expectations)) {
+//                iter.doNotUseSenses(ppDependency.getGovernor(), possibility.get(ppDependency.getGovernor()), ppDependency.getDependent(), possibility.get(ppDependency.getDependent()));
                 return false;
             }
         }
@@ -229,13 +233,21 @@ public class LandGrabDisambiguation extends WIMProcessor implements WSEProcessor
         private PPToken token;
         private Sense sense;
         private DependencySet dependencySet;
+        private HashMap<PPDependency, Dependency> claims;
 
-        public UnusedNonOptionalSetException(PPToken token, Sense sense, DependencySet dependencySet) {
+        public UnusedNonOptionalSetException(PPToken token, Sense sense, DependencySet dependencySet, HashMap<PPDependency, Dependency> claims) {
             this.token = token;
             this.sense = sense;
             this.dependencySet = dependencySet;
+            this.claims = claims;
         }
 
+        public LinkedList<Dependency> missingDependencies() {
+            LinkedList<Dependency> missing = new LinkedList(dependencySet.dependencies);
+            missing.removeAll(claims.values());
+            return missing;
+        }
+        
         @Override
         public String toString() {
             return token.anchor() + " (" + sense.getId() + ") found no match for NON-OPTIONAL dependency set " + dependencySet;

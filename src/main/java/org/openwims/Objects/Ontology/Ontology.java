@@ -110,7 +110,7 @@ public class Ontology {
 //        return this.definitions.get(concept);
 //    }
     
-    public LinkedList<String> concepts() {
+    public LinkedList<Concept> concepts() {
 //        return new LinkedList(this.isa.keySet());
         return new LinkedList(this.concepts.values());
     }

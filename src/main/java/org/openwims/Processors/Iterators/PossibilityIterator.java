@@ -26,4 +26,8 @@ public abstract class PossibilityIterator implements Iterator<HashMap<PPToken, S
         return sentence;
     }
     
+    public abstract void doNotUseSense(PPToken token, Sense sense);
+    
+    public abstract void doNotUseSenses(PPToken token1, Sense sense1, PPToken token2, Sense sense2);
+    
 }

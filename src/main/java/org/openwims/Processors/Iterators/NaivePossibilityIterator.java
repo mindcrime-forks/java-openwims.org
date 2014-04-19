@@ -11,6 +11,8 @@ import org.openwims.Objects.Preprocessor.PPDependency;
 import org.openwims.Objects.Preprocessor.PPDocument;
 import org.openwims.Objects.Preprocessor.PPSentence;
 import org.openwims.Objects.Preprocessor.PPToken;
+import org.openwims.Stanford.StanfordHelper;
+import org.openwims.Stanford.StanfordPPDocument;
 import org.openwims.WIMGlobals;
 
 /**
@@ -23,6 +25,7 @@ public class NaivePossibilityIterator extends PossibilityIterator {
     private HashMap<PPToken, LinkedList<Sense>> senses;
     private HashMap<PPToken, Integer> pointers;
     private boolean finished;
+    private LinkedList<DoNotUseSenses> doNotUseSenses;
     
     public NaivePossibilityIterator(PPDocument document) {
         this(HACK_COMBINE_SENTENCES(document));
@@ -35,7 +38,9 @@ public class NaivePossibilityIterator extends PossibilityIterator {
         this.senses = new HashMap();
         this.pointers = new HashMap();
         this.finished = false;
-
+        
+        this.doNotUseSenses = new LinkedList();
+        
         for (PPToken token : this.tokens) {
             this.senses.put(token, WIMGlobals.lexicon().listSenses(token));
             this.pointers.put(token, 0);
@@ -54,6 +59,10 @@ public class NaivePossibilityIterator extends PossibilityIterator {
         }
 
         increment(this.tokens.getLast());
+        
+        if (!validate(next) && hasNext()) {
+            return next();
+        }
 
         return next;
     }
@@ -77,6 +86,16 @@ public class NaivePossibilityIterator extends PossibilityIterator {
         }
     }
     
+    private boolean validate(HashMap<PPToken, Sense> possibility) {
+        for (DoNotUseSenses dnus : this.doNotUseSenses) {
+            if (!dnus.validate(possibility)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
     private static PPSentence HACK_COMBINE_SENTENCES(PPDocument document) {
         PPSentence sentence = new PPSentence();
         for (PPSentence s : document.listSentences()) {
@@ -88,6 +107,51 @@ public class NaivePossibilityIterator extends PossibilityIterator {
             }
         }
         return sentence;
+    }
+
+    @Override
+    public void doNotUseSense(PPToken token, Sense sense) {
+        if (senses.get(token).indexOf(sense) < pointers.get(token)) {
+            pointers.put(token, pointers.get(token) - 1);
+        }
+        
+        this.senses.get(token).remove(sense);
+    }
+
+    @Override
+    public void doNotUseSenses(PPToken token1, Sense sense1, PPToken token2, Sense sense2) {
+        this.doNotUseSenses.add(new DoNotUseSenses(token1, token2, sense1, sense2));
+    }
+    
+    private class DoNotUseSenses {
+        
+        private PPToken token1;
+        private PPToken token2;
+        private Sense sense1;
+        private Sense sense2;
+
+        public DoNotUseSenses(PPToken token1, PPToken token2, Sense sense1, Sense sense2) {
+            this.token1 = token1;
+            this.token2 = token2;
+            this.sense1 = sense1;
+            this.sense2 = sense2;
+            System.out.println(this);
+        }
+        
+        public boolean validate(HashMap<PPToken, Sense> possibility) {
+            if (possibility.get(token1) == sense1 && possibility.get(token2) == sense2) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return token1.text() + " -> " + sense1.getId() + " && " + token2.text() + " -> " + sense2.getId();
+        }
+        
+        
+        
     }
     
 }

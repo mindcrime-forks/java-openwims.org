@@ -161,6 +161,7 @@ public class MainJFrame extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         InputJTextArea = new javax.swing.JTextArea();
         jToolBar1 = new javax.swing.JToolBar();
+        PreprocessJButton = new javax.swing.JButton();
         FullProcessJButton = new javax.swing.JButton();
         WIMifyJButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
@@ -290,6 +291,17 @@ public class MainJFrame extends javax.swing.JFrame {
 
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
+
+        PreprocessJButton.setText("PP");
+        PreprocessJButton.setFocusable(false);
+        PreprocessJButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        PreprocessJButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        PreprocessJButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                PreprocessJButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(PreprocessJButton);
 
         FullProcessJButton.setText("Full Process");
         FullProcessJButton.setFocusable(false);
@@ -483,6 +495,15 @@ public class MainJFrame extends javax.swing.JFrame {
         lexEditor.setVisible(true);
     }//GEN-LAST:event_ShowLexiconEditorJMenuItemActionPerformed
 
+    private void PreprocessJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PreprocessJButtonActionPerformed
+        String input = this.InputJTextArea.getText().trim();
+        if (input.equalsIgnoreCase("")) {
+            return;
+        }
+        
+        setDocument(StanfordHelper.convert(StanfordHelper.annotate(input)));
+    }//GEN-LAST:event_PreprocessJButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -545,6 +566,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JPanel OntologyTreeContainerJPanel;
     private javax.swing.JMenu OptionsJMenu;
     private javax.swing.JMenu PossibilityIteratorJMenu;
+    private javax.swing.JButton PreprocessJButton;
     private javax.swing.JPanel RightJPanel;
     private javax.swing.JButton SavePPJButton;
     private javax.swing.JTextField SearchJTextField;
