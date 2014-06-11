@@ -27,6 +27,16 @@
               <role>researcher</role>
           </roles>
       </developer>
+      <developer>
+          <id>ben</id>
+          <name>Ben Johnson</name>
+          <email>doc.ben.johnson@gmail.com</email>
+          <roles>
+              <role>architect</role>
+              <role>developer</role>
+              <role>researcher</role>
+          </roles>
+      </developer>
   </developers>
 
   <properties>
