@@ -59,4 +59,16 @@ public class GraphUtils {
 
         return node;
     }
+
+    public static String replaceParams(String query, HashMap<String, Object> params) {
+        String output = query + "";
+        for (String paramName : params.keySet()) {
+            String quotes = "";
+            if (params.get(paramName) instanceof String) {
+                quotes = "\"";
+            }
+            output = output.replaceAll("\\{" + paramName + "\\}", quotes + params.get(paramName).toString() + quotes);
+        }
+        return output;
+    }
 }

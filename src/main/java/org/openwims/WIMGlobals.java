@@ -23,8 +23,8 @@ public class WIMGlobals {
     private static TagMaps tagmaps = null;
     private static MicrotheoryManager microtheories = null;
     private static Templates templates = null;
-    public static String graphdbpath = "/Users/jesse/Desktop/neo4j/data/graph.db/";
-    public static String graphdbsettings = "/Users/jesse/Desktop/neo4j/conf/neo4j.properties";
+    public static String graphdbpath = "/Users/ben/neo4j/data/graph.db/";
+    public static String graphdbsettings = "/Users/ben/neo4j/conf/neo4j.properties";
 
     public static Templates templates() {
         if (WIMGlobals.templates == null) {

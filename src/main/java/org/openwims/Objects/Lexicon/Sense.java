@@ -69,6 +69,7 @@ public class Sense {
         output.put("example", this.example);
         output.put("frequency", this.frequency);
         output.put("uid", this.uid);
+        output.put("name", this.getId());
 
         return output;
     }

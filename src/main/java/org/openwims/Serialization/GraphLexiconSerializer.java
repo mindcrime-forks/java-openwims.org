@@ -9,6 +9,7 @@ import org.openwims.Objects.Lexicon.Meaning;
 import org.openwims.Objects.Lexicon.Sense;
 import org.openwims.Utils.GraphUtils;
 import org.openwims.WIMGlobals;
+import scala.collection.Iterator;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,20 +28,29 @@ public class GraphLexiconSerializer {
                 saveRoot(root);
             }
 
-            LinkedList<String> senses = WIMGlobals.lexicon().senses();
-            Collections.sort(senses);
+//            LinkedList<String> senseNames = getSensesForSampleSentence();//WIMGlobals.lexicon().senses();
+//            Collections.sort(senseNames);
+//            int seen = 0;
+//            for (String senseName : senseNames) {
+//                //if(seen % 1000 == 0){
+//                    System.out.println(seen + " " + senseName);
+//                //}
+//
+//                //System.out.println(senseName);
+//                Sense sense = WIMGlobals.lexicon().sense(senseName);
+//                saveSense(sense);
+//                seen++;
+////                if (seen == 100){
+////                    break;
+////                }
+//            }
+
             int seen = 0;
-            for (String senseName : senses) {
-                if(seen % 1000 == 0){
-                    System.out.println(seen);
-                }
-                //System.out.println(senseName);
-                Sense sense = WIMGlobals.lexicon().sense(senseName);
-                saveSense(sense);
+            for (Sense sense : getSensesForSampleSentence()) {
                 seen++;
-                if (seen == 100){
-                    break;
-                }
+                System.out.println(seen + " " + sense);
+
+                saveSense(sense);
             }
             tx.success();
         } catch (Exception ex){
@@ -48,6 +58,17 @@ public class GraphLexiconSerializer {
             tx.failure();
         }
         tx.close();
+    }
+
+    private static LinkedList<Sense> getSensesForSampleSentence() throws Exception {
+        String[] words = {"the", "man", "hit", "building", "with", "hammer"};
+        LinkedList<Sense> senses = new LinkedList<>();
+
+        for (String word : words) {
+            senses.addAll(WIMGlobals.lexicon().word(word).listSenses());
+        }
+
+        return senses;
     }
 
     private static void saveRoot(String root) {
@@ -64,7 +85,7 @@ public class GraphLexiconSerializer {
         if (sense == null){
             return;
         }
-        HashMap<String, Object> params = new HashMap();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("properties", sense.getProperties());
         params.put("rootName", sense.word());
         params.put("conceptName", sense.concept());
@@ -74,7 +95,12 @@ public class GraphLexiconSerializer {
                 "create (s:Sense {properties}) create (s)-[:ISA]->(c), (s)-[:hasRoot]->(r)\n" +
                 "return s";
 
-        Node node = (Node) GraphUtils.runCypher(query, params).columnAs("s").next();
+
+        Iterator<Object> r = GraphUtils.runCypher(query, params).columnAs("s");
+        if (!r.hasNext()){
+            throw new RuntimeException("No result returned from \n" + GraphUtils.replaceParams(query, params));
+        }
+        Node node = (Node) r.next();
 
         HashMap<String, Node> variables = saveVariablesFromSense(sense);
         for (Meaning meaning : sense.listMeanings()) {
@@ -91,9 +117,9 @@ public class GraphLexiconSerializer {
     }
 
     private static void saveDependencySet(DependencySet set, HashMap<String, Node> variables, Node parent) {
-        HashMap<String, Object> params = new HashMap();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("parent", parent);
-        HashMap<String, Object> properties = new HashMap();
+        HashMap<String, Object> properties = new HashMap<>();
         properties.put("label", set.label);
         properties.put("optional", set.optional);
         params.put("properties", properties);
@@ -114,7 +140,7 @@ public class GraphLexiconSerializer {
 
     private static Node saveDependency(Dependency dependency, HashMap<String, Node> variables, Node parent) {
         HashMap<String, String> expectations = dependency.getExpectationsAsMap();
-        HashMap<String, Object> params = new HashMap();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("type", dependency.type);
         params.put("parent", parent);
         params.put("dependent", variables.get(dependency.dependent));
@@ -130,7 +156,7 @@ public class GraphLexiconSerializer {
     }
 
     private static Node saveMeaning(Meaning meaning, HashMap<String, Node> variables, Node parent) {
-        HashMap<String, Object> params = new HashMap();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("type", meaning.relation);
         params.put("parent", parent);
         params.put("domain", variables.get(meaning.wim));
@@ -143,10 +169,10 @@ public class GraphLexiconSerializer {
     }
 
     private static HashMap<String, Node> saveVariablesFromSense(Sense sense) {
-        HashMap<String, Node> nodes = new HashMap();
+        HashMap<String, Node> nodes = new HashMap<>();
 
         for (String variable : sense.listVariables()) {
-            HashMap<String, Object> params = new HashMap();
+            HashMap<String, Object> params = new HashMap<>();
             params.put("name", variable);
             params.put("uid", sense.getUid());
             params.put("variable", variable);
